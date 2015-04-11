@@ -1,7 +1,7 @@
 {
-	"id": "{FE324FCE-F38F-48C5-9760-6F013EA8A6F2}",
+	"id": "{C137C3B0-026B-4863-8648-1E59F29AD2FD}",
 	"author": "Michael Tröger",
-	"name": "MS35 RGB Library",
+	"name": "XBee ZigBee Library",
 	"url": "git.nall-chan.net",
 	"version": "0.1",
 	"build": 0,

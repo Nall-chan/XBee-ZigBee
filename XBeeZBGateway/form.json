@@ -1,0 +1,22 @@
+{
+    "elements":
+            [
+                {
+                    "type": "Label",
+                    "label": "Node Discovery:"
+                },
+                {
+                    "name": "NDInterval",
+                    "type": "IntervalBox",
+                    "caption": "seconds"
+                }
+            ],
+    "actions":
+            [
+                {
+                    "type": "Button",
+                    "label": "Node Discovery",
+                    "onClick": "XBee_NodeDiscovery($id);"
+                }
+            ]
+}
