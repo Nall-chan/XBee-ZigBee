@@ -287,7 +287,7 @@ class XBZBGateway extends IPSModule
 
 ################## DATAPOINT RECEIVE CHILD
 
-    protected function ForwardData($JSONString)
+    public function ForwardData($JSONString)
     {
         // Prüfen und aufteilen nach ReceiveDataFromSplitter und ReceiveDataFromDevcie
         $Data = json_decode($JSONString);

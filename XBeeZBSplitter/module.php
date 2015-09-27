@@ -34,7 +34,7 @@ class XBZBSplitter extends IPSModule {
      */
 
 ################## Datapoints
-    protected function ReceiveData($JSONString)
+    public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
         if ($Data->DataID == '{0C541DDF-CE0F-4113-A76F-B4836015212B}')

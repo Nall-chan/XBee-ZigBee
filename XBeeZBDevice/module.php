@@ -33,7 +33,7 @@ class XBZBDevice extends IPSModule {
     }
 
 ################## Datapoints
-    protected function ReceiveData($JSONString)
+    public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
         if ($Data->DataID == '{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}')
