@@ -28,7 +28,7 @@ class XBZBGateway extends IPSModule
 //       IPS_SetHidden($this->GetIDForIdent('WaitForResponse'), true);
 //       IPS_SetHidden($this->GetIDForIdent('Connected'), true);
 
-        $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval'), 'XBee_NodeDiscovery($_IPS[\'TARGET\'])');
+        $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval'), 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
         if ($this->CheckParents())
             $this->RequestNodeDiscovery();
     }

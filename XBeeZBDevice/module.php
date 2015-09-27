@@ -12,7 +12,7 @@ class XBZBDevice extends IPSModule {
     public function ApplyChanges() {
         //Never delete this line!
         parent::ApplyChanges();
-        $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval'), 'XBee_RequestState($_IPS[\'TARGET\'])');
+        $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval'), 'XBee_RequestState($_IPS[\'TARGET\']);');
 
     }
 
@@ -29,7 +29,7 @@ class XBZBDevice extends IPSModule {
      * Using the custom prefix this function will be callable from PHP and JSON-RPC through:
      */
 
-    public function SendSwitch($State) {
+    public function RequestState() {
     }
 
 ################## Datapoints
