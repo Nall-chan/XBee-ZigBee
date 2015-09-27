@@ -1,5 +1,6 @@
 <?
 
+# Todo: NodeList Array <> Object
 require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 class XBZBGateway extends IPSModule
@@ -230,23 +231,29 @@ class XBZBGateway extends IPSModule
             throw new Exception("NodeList not exists.");
 
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
-
-        $i = array_search($Node->NodeName, array_column($Nodes, 'NodeName'));
-        if ($i !== false)
+        if ($Nodes === NULL)
         {
-            // Name gefunden
-            if (($Nodes[$i]->NodeAddr16 == $Node->NodeAddr16) and ( $Nodes[$i]->NodeAddr64 == $Node->NodeAddr64))
-                return;
-            // Daten sind anders, also löschen.
-            unset($Nodes[$i]);
+            $Nodes = array();
         }
-        $i = array_search($Node->NodeAddr16, array_column($Nodes, 'NodeAddr16'));
-        if ($i !== false)
-            unset($Nodes[$i]);
-        $i = array_search($Node->NodeAddr64, array_column($Nodes, 'NodeAddr64'));
-        if ($i !== false)
-            unset($Nodes[$i]);
-        // Neu anlegen:
+        else
+        {
+            $i = array_search($Node->NodeName, array_column($Nodes, 'NodeName'));
+            if ($i !== false)
+            {
+                // Name gefunden
+                if (($Nodes[$i]['NodeAddr16'] == $Node->NodeAddr16) and ( $Nodes[$i]['NodeAddr64'] == $Node->NodeAddr64))
+                    return;
+                // Daten sind anders, also löschen.
+                unset($Nodes[$i]);
+            }
+            $i = array_search($Node->NodeAddr16, array_column($Nodes, 'NodeAddr16'));
+            if ($i !== false)
+                unset($Nodes[$i]);
+            $i = array_search($Node->NodeAddr64, array_column($Nodes, 'NodeAddr64'));
+            if ($i !== false)
+                unset($Nodes[$i]);
+            // Neu anlegen:
+        }
         array_push($Nodes, $Node);
         if ($this->lock('Nodes') === false)
             throw new Exception("NodeList is locked.");
@@ -260,8 +267,12 @@ class XBZBGateway extends IPSModule
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
+        if ($Nodes === NULL)
+            return false;
         $i = array_search($Addr16, array_column($Nodes, 'NodeAddr16'));
-        return $i;
+        if ($i === false)
+            return false;
+        return (object) $Nodes[$i];
     }
 
     private function GetNodeByAddr64($Addr64)
@@ -270,8 +281,12 @@ class XBZBGateway extends IPSModule
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
+        if ($Nodes === NULL)
+            return false;
         $i = array_search($Addr64, array_column($Nodes, 'NodeAddr64'));
-        return $i;
+        if ($i === false)
+            return false;
+        return (object) $Nodes[$i];
     }
 
 ################## PUBLIC
@@ -285,184 +300,57 @@ class XBZBGateway extends IPSModule
         $this->RequestNodeDiscovery();
     }
 
-################## DATAPOINT RECEIVE CHILD
+################## DATAPOINT RECEIVE FROM CHILD
 
     public function ForwardData($JSONString)
     {
-        // Prüfen und aufteilen nach ReceiveDataFromSplitter und ReceiveDataFromDevcie
+        // Prüfen und aufteilen nach ForwardDataFromSplitter und ForwardDataFromDevcie
         $Data = json_decode($JSONString);
         switch ($Data->DataID)
         {
             case "{5971FB22-3F96-45AE-916F-AE3AC8CA8782}": //API
                 $APIData = new TXB_API_Data();
                 $APIData->GetDataFromJSONObject($Data);
-                $this->ReceiveDataFromSplitter($APIData);
+                $this->ForwardDataFromSplitter($APIData);
                 break;
             case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
                 $ATData = new TXB_Command_Data();
                 $ATData->GetDataFromJSONObject($Data);
-                $this->ReceiveDataFromDevice($ATData);
+                $this->ForwardDataFromDevice($ATData);
                 break;
         }
     }
 
 ################## DATAPOINTS SPLITTER
 
-    private function ReceiveDataFromSplitter(TXB_API_Data $APIData)
+    private function ForwardDataFromSplitter(TXB_API_Data $APIData)
     {
-        /*
-          var i     : integer;
-          Frame : String;
-          x     : integer;
-          begin
-          i:=fNodeList.IndexOfNodeName(APIdata.NodeName);
-          if i = -1 then
-          begin
-          {$IFDEF DEBUG}    SendData('SendError','NodeName nicht bekannt.');{$ENDIF}
-          EIPSModuleObject.Create('Unknown NodeName');
-          result:=false;
-          end else begin
-          Frame:=chr(ord(APIdata.APICommand))+chr(APIdata.FrameID);
-          for x := 7 downto 0 do
-          begin
-          Frame:=Frame+chr(Int64Rec(fNodeList.Items[i].NodeAddr64).Bytes[x])
-          end;
-          Frame:=Frame+chr(WordRec(fNodeList.Items[i].NodeAddr16).Bytes[1]);
-          Frame:=Frame+chr(WordRec(fNodeList.Items[i].NodeAddr16).Bytes[0]);
-          Frame:=Frame+APIData.Data;
-          if SendToParent(Frame) then
-          begin
-          result:=true;
-          end else begin
-          result:=false;
-          end;
-          end;
-          end;
-         */
+        $Node = $this->GetNodeByName($APIData->NodeName);
+        if ($Node === false)
+            throw new Exception('Unknown NodeName');
+        $Frame = chr($APIData->APICommand) . chr($APIData->FrameID);
+        $Frame.=$Node->NodeAddr64 . $Node->NodeAddr16 . $APIData->Data;
+        $this->SendDataToParent($Frame);
     }
 
     private function SendDataToSplitter(TXB_API_Data $APIData)
     {
-        /*
-          var IfChild : IXBZBReceiveAPI;
-          Childs  : TInterfaceList;
-          IfTGUID : TGUID;
-          I       : Integer;
-          sendok  : boolean;
-          begin
-          Childs:=nil;
-          if fKernelRunlevel <> KR_READY then
-          begin
-          Childs.Free;
-          exit;
-          end;
-          sendok := false;
-          IfTGUID := IXBZBReceiveAPI;
-          try
-          //Childs Instance holen
-          if fKErnel.DataHandlerEx.HasInstanceChildren(fInstanceID) then
-          begin
-          Childs:=GetChildren();
-          end;
-          //Test ob Instance existiert
-          if (Childs=NIL) or (Childs.Count=0) then
-          begin
-          //nein->Melden
-          {$IFDEF DEBUG}      senddata('Warning','Kein Child verbunden');{$ENDIF}
-          end else begin
-          //test ob Interface existiert
-          for I := Childs.Count-1 downto -1 do
-          begin
-          if I=-1 then break;
-          if supports(Childs[I],IfTGUID,IfChild) then
-          begin
-          //existiert, kann senden
-          if (IfChild.ReceiveXBZBAPIData(APIData)) then sendok:=true;
-          end;
-          end;
-          if  not sendok then
-          begin
-          {$IFDEF DEBUG}        senddata('Warning','Kein Child mit NodeNamen verbunden:'+APIData.NodeName);{$ENDIF}
-          end;
-          end;
-          finally
-          childs.free;
-          end;
-
-         */
+        $Data = $APIData->ToJSONString('{0C541DDF-CE0F-4113-A76F-B4836015212B}');
+        IPS_SendDataToChildren($this->InstanceID, $Data);
     }
 
 ################## DATAPOINTS DEVICE
 
-    private function ReceiveDataFromDevice(TXB_Command_Data $ATData)
+    private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
-        /*
-          function TIPSXBZBGateway.SendXBZBCMDData(ATData: TXB_Command_Data):boolean; stdcall;
-          var     Frame : String;
-          begin
-          result:= false;
-          if fKernelRunlevel<>KR_READY then exit;
-          if not HasActiveParent() then
-          begin
-          raise EIPSModuleObject.Create('Instance has no active Parent Instance!');
-          exit;
-          end;
-          Frame:=chr(ord(XB_API_AT_Command))+chr(ATdata.FrameID)+XB_ATCommandToString(ATdata.ATCommand)+ATdata.data;
-          result := SendToParent(Frame);
-          end;
-         */
+        $Frame = chr(TXB_API_Command::XB_API_AT_Command) . chr($ATData->FrameID) . $ATData->ATCommand . $ATData->Data;
+        $this->SendDataToParent($Frame);
     }
 
     private function SendDataToDevice(TXB_Command_Data $ATData)
     {
-        /*
-          var IfChild   : IXBZBReceiveCMD;
-          Childs    : TInterfaceList;
-          IfTGUID   : TGUID;
-          I         : smallint;
-          sendok    : boolean;
-          begin
-          sendok:=false;
-          Childs:=nil;
-          if fKernelRunlevel <> KR_READY then
-          begin
-          Childs.Free;
-          exit;
-          end;
-          IfTGUID := IXBZBReceiveCMD;
-          try
-          //Childs Instance holen
-          if fKernel.DataHandlerEx.HasInstanceChildren(fInstanceID) then
-          begin
-          Childs:=GetChildren();
-          end;
-          //Test ob Instance existiert
-          if (Childs=NIL) or (Childs.Count=0) then
-          begin
-          //nein->Melden
-          {$IFDEF DEBUG}      senddata('Warning','Kein Child verbunden');{$ENDIF}
-          end else begin
-          //test ob Interface existiert
-          for I := Childs.Count-1 downto -1 do
-          begin
-          if I=-1 then break;
-          if supports(Childs[I],IfTGUID,IfChild) then
-          begin
-          //existiert, kann senden
-          IfChild.ReceiveXBZBCMDData(ATData);
-          sendok:=true;
-          end;
-          end;
-          if  not sendok then
-          begin
-          {$IFDEF DEBUG}        senddata('Warning','Kein Child vom Typ XB-Device am Gateway verbunden.');{$ENDIF}
-          end;
-          end;
-          finally
-          childs.free;
-          end;
-
-         */
+        $Data = $ATData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
+        IPS_SendDataToChildren($this->InstanceID, $Data);
     }
 
 ################## DATAPOINTS PARENT

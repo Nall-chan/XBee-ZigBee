@@ -31,15 +31,22 @@ class XBZBDevice extends IPSModule {
 
     public function RequestState() {
     }
+    public function ReadConfig() {
+    }
+    public function WriteBoolean(string $Pin,boolean $Value) {
+    }
+    public function WriteParameter(string $Parameter,string $Value) {
+    }
+    public function ReadParameter(string $Parameter) {
+    }
+    
 
 ################## Datapoints
     public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
-        if ($Data->DataID == '{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}')
-        { // Daten dekodieren
-            
-        }
+        if ($Data->DataID <> '{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}')
+            return false;        
     }
 
     protected function SendDataToParent($Data)

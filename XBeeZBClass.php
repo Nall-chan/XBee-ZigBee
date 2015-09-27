@@ -98,19 +98,19 @@ class TXB_AT_Command extends stdClass
 //    const XB_AT_DB = 0x4442; //'DB'
 //    const XB_AT_VSS = 0x2556; //"%V"
 
-/*
-    private $Command;
+    /*
+      private $Command;
 
-    public function __construct($XB_AT_Command)
-    {
-        $this->Command = $XB_AT_Command;
-    }
+      public function __construct($XB_AT_Command)
+      {
+      $this->Command = $XB_AT_Command;
+      }
 
-    public function GetString()
-    {
-        return pack("n", $this->Command);
-    }
-*/
+      public function GetString()
+      {
+      return pack("n", $this->Command);
+      }
+     */
     const XB_AT_ND = 'ND';
     const XB_AT_D0 = 'D0';
     const XB_AT_D1 = 'D1';
@@ -180,7 +180,7 @@ class TXB_AT_Command extends stdClass
     const XB_AT_RP = 'RP';
     const XB_AT_DO = 'DO';
     const XB_AT_IR = 'IR';
-    const XB_AT_IC = 'IC' ;
+    const XB_AT_IC = 'IC';
     const XB_AT_VV = 'V+';
     const XB_AT_VR = 'VR';
     const XB_AT_HV = 'HV';
@@ -210,13 +210,26 @@ class TXB_Command_Data extends stdClass
     public $Status = TXB_Command_Status;
     public $Data = string;
     public $FrameID = integer;
-    public function GetDataFromJSONObject ($Data)
+
+    public function GetDataFromJSONObject($Data)
     {
-        $this->ATCommand = $Data->ATCommand;
-        $this->Status = $Data->Status;
-        $this->Data = $Data->Data;
-        $this->FrameID = $Data->FrameID;
+        $this->ATCommand = utf8_decode($Data->ATCommand);
+        $this->Status = utf8_decode($Data->Status);
+        $this->Data = utf8_decode($Data->Data);
+        $this->FrameID = utf8_decode($Data->FrameID);
     }
+
+    public function ToJSONString($GUID)
+    {
+        $SendData = new stdClass;
+        $SendData->DataID = $GUID;
+        $SendData->ATCommand = utf8_encode($this->ATCommand);
+        $SendData->Status = utf8_encode($this->Status);
+        $SendData->Data = utf8_encode($this->Data);
+        $SendData->FrameID = utf8_encode($this->FrameID);
+        return json_decode($SendData);
+    }
+
 }
 
 // Trasmit Status Response
@@ -255,12 +268,12 @@ class TXB_Receive_Status extends stdClass
 }
 
 // API Frame Record
-    /**
-    * @property mixed $APICommand
-    * @property string $NodeName
-    * @property string $Data
-    * @property Byte $FrameID
-     */
+/**
+ * @property mixed $APICommand
+ * @property string $NodeName
+ * @property string $Data
+ * @property Byte $FrameID
+ */
 class TXB_API_Data extends stdClass
 {
 
@@ -271,13 +284,24 @@ class TXB_API_Data extends stdClass
 
 //  TxStatus   : TXB_Transmit_Status;
 //  RxStatus   : TXB_Receive_Status;
-    public function GetDataFromJSONObject ($Data)
+    public function GetDataFromJSONObject($Data)
     {
-        $this->APICommand = $Data->APICommand;
-        $this->NodeName = $Data->NodeName;
-        $this->Data = $Data->Data;
-        $this->FrameID = $Data->FrameID;
+        $this->APICommand = utf8_decode($Data->APICommand);
+        $this->NodeName = utf8_decode($Data->NodeName);
+        $this->Data = utf8_decode($Data->Data);
+        $this->FrameID = utf8_decode($Data->FrameID);
     }
+    public function ToJSONString($GUID)
+    {
+        $SendData = new stdClass;
+        $SendData->DataID = $GUID;
+        $SendData->APICommand = utf8_encode($this->APICommand);
+        $SendData->NodeName = utf8_encode($this->NodeName);
+        $SendData->Data = utf8_encode($this->Data);
+        $SendData->FrameID = utf8_encode($this->FrameID);
+        return json_decode($SendData);
+    }
+
 }
 
 class TXB_API_IO_Sample extends stdClass
@@ -324,9 +348,11 @@ class TXB_Modem_Status extends stdClass
 
 class TXB_Node extends stdClass
 {
+
     public $NodeAddr64;
     public $NodeAddr16;
     public $NodeName;
+
 }
 
 ?>
