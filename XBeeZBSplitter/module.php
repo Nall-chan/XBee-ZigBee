@@ -101,7 +101,7 @@ end;
     //--- IIPSSendString implementation
 //--- { Data Points }  // von String-Child
 
-    public function ForwardDataFromChild($Data)
+    private function ForwardDataFromChild($Data)
     {
         
         if ($this->HasActiveParent() === false)
@@ -153,7 +153,7 @@ end;
     
 //--- IXBZBSendCMD implementation
 //--- { Data Points } //vom XB-ZB Device
-    public function ForwardDataFromDevice(TXB_Command_Data $ATData)
+    private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
         /*
          * // Sendet Remote AT Commandos umgesetzt in API-Frames an den Coordinator (Gateway)
