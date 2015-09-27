@@ -585,7 +585,7 @@ class XBZBGateway extends IPSModule
         if ($instance['ConnectionID'] > 0)
         {
             $parent = IPS_GetInstance($instance['ConnectionID']);
-            if ($parent['InstanceStatus'] == IS_ACTIVE)
+            if ($parent['InstanceStatus'] == 102)
                 return true;
         }
         return false;
