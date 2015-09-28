@@ -362,9 +362,7 @@ class XBZBGateway extends IPSModule
 
 // Empfangs Lock setzen
         if (!$this->lock("ReceiveLock"))
-        {
             throw new Exception("ReceiveBuffer is locked");
-        }
 
 // Datenstream zusammenfügen
         $head = GetValueString($bufferID);

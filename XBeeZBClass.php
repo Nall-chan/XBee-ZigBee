@@ -309,6 +309,15 @@ class TXB_API_IO_Sample extends stdClass
 
     public $Status = TXB_Receive_Status;
     public $Sample = string;
+    
+    public function ToJSONString($GUID)
+    {
+        $SendData = new stdClass;
+        $SendData->DataID = $GUID;
+        $SendData->Status = utf8_encode($this->Status);
+        $SendData->Sample = utf8_encode($this->Sample);
+        return json_decode($SendData);
+    }
 
 }
 
