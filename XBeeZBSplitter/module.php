@@ -1,4 +1,5 @@
 <?
+require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 class XBZBSplitter extends IPSModule
 {
@@ -14,15 +15,8 @@ class XBZBSplitter extends IPSModule
     public function ApplyChanges()
     {
         parent::ApplyChanges();
-        $this->RegisterVariableString("BufferIN", "BufferIN", "", -5);
-        $this->RegisterVariableString("BufferOUT", "BufferOUT", "", -4);
         $this->RegisterVariableInteger("TransmitStatus", "TransmitStatus", "", -3);
         $this->RegisterVariableInteger("FrameID", "FrameID", "", -2);
-//        $this->RegisterVariableBoolean("WaitForResponse", "WaitForResponse", "", -2);
-//        $this->RegisterVariableBoolean("ReplyEvent", "ReplyEvent", "", -5);
-//        $this->RegisterVariableBoolean("Connected", "Connected", "", -1);
-        IPS_SetHidden($this->GetIDForIdent('BufferIN'), true);
-        IPS_SetHidden($this->GetIDForIdent('BufferOUT'), true);
         IPS_SetHidden($this->GetIDForIdent('TransmitStatus'), true);
         IPS_SetHidden($this->GetIDForIdent('FrameID'), true);
         if ($this->ReadPropertyString('NodeName') == '')
@@ -39,7 +33,6 @@ class XBZBSplitter extends IPSModule
     private function RequestSendData($Data)
     {
         $APIData = new TXB_API_Data;
-
         //FrameID festlegen.
         $FrameID = $this->GetIDForIdent('FrameID');
         $TransmitStatusID = $this->GetIDForIdent('TransmitStatus');
@@ -51,8 +44,6 @@ class XBZBSplitter extends IPSModule
         else
             $Frame++;
         SetValueInteger($FrameID, $Frame);
-
-
         if (!$this->lock('TransmitStatus'))
         {
             $this->unlock('RequestSendData');
@@ -60,8 +51,6 @@ class XBZBSplitter extends IPSModule
         }
         SetValueInteger($TransmitStatusID, 0xff);
         $this->unlock('TransmitStatus');
-
-
         $APIData->FrameID = $Frame;
         $APIData->APICommand = TXB_API_Command::XB_API_Transmit_Request;
         $APIData->Data = chr(0x00) . chr(0x00) . $Data;
@@ -253,7 +242,7 @@ class XBZBSplitter extends IPSModule
     {
         // API-Daten verpacken und dann versenden.
         $JSONString = $Data->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
-// Daten senden
+        // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;
     }
@@ -300,11 +289,6 @@ class XBZBSplitter extends IPSModule
             parent::SetStatus($InstanceStatus);
     }
 
-    protected function LogMessage($data, $cata)
-    {
-        
-    }
-
     protected function SetSummary($data)
     {
         IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
@@ -318,7 +302,6 @@ class XBZBSplitter extends IPSModule
         {
             if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
             {
-//                IPS_LogMessage((string)$this->InstanceID,"Lock:LMS_" . (string) $this->InstanceID . (string) $ident);
                 return true;
             }
             else
@@ -331,8 +314,6 @@ class XBZBSplitter extends IPSModule
 
     private function unlock($ident)
     {
-//                IPS_LogMessage((string)$this->InstanceID,"Unlock:LMS_" . (string) $this->InstanceID . (string) $ident);
-
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
     }
 

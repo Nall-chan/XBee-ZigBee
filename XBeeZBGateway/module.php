@@ -1,14 +1,10 @@
 <?
-
-# Todo: NodeList Array <> Object
 require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 class XBZBGateway extends IPSModule
 {
-
     public function Create()
     {
-
         parent::Create();
         $this->RequireParent("{6DC3D946-0D31-450F-A8C6-C42DB8D7D4F1}");
         $this->RegisterPropertyInteger("NDInterval", 60);
@@ -19,16 +15,8 @@ class XBZBGateway extends IPSModule
         parent::ApplyChanges();
         $this->RegisterVariableString("Nodes", "Nodes", "", -5);
         $this->RegisterVariableString("BufferIN", "BufferIN", "", -4);
-//        $this->RegisterVariableString("BufferOUT", "BufferOUT", "", -2);
-//        $this->RegisterVariableBoolean("WaitForResponse", "WaitForResponse", "", -1);
-//        $this->RegisterVariableBoolean("ReplyEvent", "ReplyEvent", "", -5);
-//        $this->RegisterVariableBoolean("Connected", "Connected", "", -3);
         IPS_SetHidden($this->GetIDForIdent('Nodes'), true);
         IPS_SetHidden($this->GetIDForIdent('BufferIN'), true);
-//        IPS_SetHidden($this->GetIDForIdent('BufferOUT'), true);
-//       IPS_SetHidden($this->GetIDForIdent('WaitForResponse'), true);
-//       IPS_SetHidden($this->GetIDForIdent('Connected'), true);
-
         $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval'), 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
         if ($this->CheckParents())
             $this->RequestNodeDiscovery();
@@ -55,7 +43,7 @@ class XBZBGateway extends IPSModule
 
     private function RequestNodeDiscovery()
     {
-//if fKernelRunlevel <> KR_READY then exit;
+        //if fKernelRunlevel <> KR_READY then exit;
         $this->SendDataToParent(chr(TXB_API_Command::XB_API_AT_Command) . chr(1) . TXB_AT_Command::XB_AT_ND);
         $this->SendDataToParent(chr(TXB_API_Command::XB_API_AT_Command) . chr(2) . TXB_AT_Command::XB_AT_NI);
     }
@@ -63,21 +51,21 @@ class XBZBGateway extends IPSModule
     private function DecodeData($Frame)
     {
         $checksum = ord($Frame[strlen($Frame) - 1]);
-//Checksum bilden
+        //Checksum bilden
         for ($x = 0; $x < strlen($Frame); $x++)
         {
             $checksum = checksum + ord($Frame[$x]);
         }
-//Auf Byte begrenzen
+        //Auf Byte begrenzen
         $checksum = $checksum and 0xff;
-//Checksum NOK?
+        //Checksum NOK?
         if ($checksum <> 0xff)
         {
             IPS_LogMessage('Receive - Checksum Error', bin2hex($Frame));
             return;
         }
-//API CmdID extrahieren
-//  senddata('Receive',data);
+        //API CmdID extrahieren
+        //  senddata('Receive',data);
         $APIData = new TXB_API_Data();
         $APIData->APICommand = ord($Frame[0]);
         $Frame = substr($Frame, 2, -1);
@@ -103,14 +91,14 @@ class XBZBGateway extends IPSModule
                                 $ATData->Data = substr($ATData->Data, 10);
                                 $end = strpos($ATData->Data, chr(0));
                                 $Node->NodeName = substr($ATData->Data, 0, $end);
-//                                                              SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
-                                //                            + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
+                                //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
+                                //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
                                 $this->AddOrReplaceNode($Node);
                             }
                         }
                         else
                         {
-//             senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
+                            //  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
                         }
                         break;
                     case TXB_AT_Command::XB_AT_NI:
@@ -121,11 +109,11 @@ class XBZBGateway extends IPSModule
                         }
                         else
                         {
-//                  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
+                            //  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
                         }
                         break;
                     default:
-//                  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',data);                        
+                        //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',data);                        
                         $this->SendDataToDevice($ATData);
                         break;
                 }
@@ -140,14 +128,14 @@ class XBZBGateway extends IPSModule
                 $Node = $this->GetNodeByAddr16(substr($Frame, 1, 2));
                 if ($Node === false) //unbekannter node
                 {
-                    //           senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
+                    // senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
                 }
                 else
                 {
                     $APIData->NodeName = $Node->NodeName;
                     $APIData->FrameID = ord($Frame[0]);
                     $APIData->Data = substr($Frame, 2);
-//          SendData('TX_Status('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    //  SendData('TX_Status('+inttohex(ord(APIData.APICommand),2)+')',data);
                     $this->SendDataToSplitter($APIData);
                 }
                 break;
@@ -157,7 +145,7 @@ class XBZBGateway extends IPSModule
                 $Node2 = $this->GetNodeByAddr16(substr($Frame, 8, 2));
                 if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
                 {
-                    //           senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
+                    //  senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
                 }
                 else
                 {
@@ -165,19 +153,18 @@ class XBZBGateway extends IPSModule
                     $APIData->FrameID = 0;
                     $APIData->Data = substr($Frame, 10);
                     $this->SendDataToSplitter($APIData);
-//                  SendData('Receive_Paket('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    //  SendData('Receive_Paket('+inttohex(ord(APIData.APICommand),2)+')',data);
                 }
                 break;
             case TXB_API_Command::XB_API_Node_Identification_Indicator:
-                //
                 $Node = new TXB_Node();
                 $Node->NodeAddr64 = substr($Frame, 0, 8);
                 $Node->NodeAddr16 = substr($Frame, 8, 2);
                 $Frame = substr($Frame, 22);
                 $end = strpos($Frame, chr(0));
                 $Node->NodeName = substr($Frame, 0, $end);
-//                  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
-//                  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
+                //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
+                //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
                 $this->AddOrReplaceNode($Node);
                 break;
             case TXB_API_Command::XB_API_Remote_AT_Command_Responde:
@@ -187,13 +174,13 @@ class XBZBGateway extends IPSModule
                 $Node2 = $this->GetNodeByAddr16(substr($Frame, 9, 2));
                 if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
                 {
-                    //                   senddata('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
+                    //  senddata('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
                 }
                 else
                 {
                     $APIData->NodeName = $Node1->NodeName;
                     $APIData->Data = substr($Frame, 11);
-//                  SendData('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    //  SendData('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+')',data);
                     $this->SendDataToSplitter($APIData);
                 }
                 break;
@@ -203,21 +190,20 @@ class XBZBGateway extends IPSModule
                 $Node2 = $this->GetNodeByAddr16(substr($Frame, 8, 2));
                 if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
                 {
-//                  senddata('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
+                    //  senddata('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
                 }
                 else
                 {
                     $APIData->NodeName = $Node1->NodeName;
                     $APIData->Data = substr($Frame, 10);
                     $APIData->FrameID = 0;
-//                   SendData('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+')',data);                            
+                    //  SendData('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+')',data);                            
                     $this->SendDataToSplitter($APIData);
                 }
 
                 break;
             default:
-//           senddata('Ungültiger API Frame('+inttohex(ord(APIData.APICommand),2)+')',data);
-
+                //  senddata('Ungültiger API Frame('+inttohex(ord(APIData.APICommand),2)+')',data);
                 break;
         }
     }
@@ -229,7 +215,6 @@ class XBZBGateway extends IPSModule
         $NodeVarID = $this->GetIDForIdent('Nodes');
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
-
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
         if ($Nodes === NULL)
         {
@@ -359,19 +344,17 @@ class XBZBGateway extends IPSModule
     {
         $data = json_decode($JSONString);
         $bufferID = $this->GetIDForIdent("BufferIN");
-
-// Empfangs Lock setzen
+        // Empfangs Lock setzen
         if (!$this->lock("ReceiveLock"))
             throw new Exception("ReceiveBuffer is locked");
 
-// Datenstream zusammenfügen
+        // Datenstream zusammenfügen
         $head = GetValueString($bufferID);
         SetValueString($bufferID, '');
-
-// Stream in einzelne Pakete schneiden
+        // Stream in einzelne Pakete schneiden
         $stream = $head . utf8_decode($data->Buffer);
         $start = strpos($stream, chr(0x7e));
-//Anfang suchen
+        //Anfang suchen
         if ($start === false)
         {
             IPS_LogMessage('XBeeZigBee Gateway', 'Frame without 0x7e');
@@ -382,7 +365,7 @@ class XBZBGateway extends IPSModule
             IPS_LogMessage('XBeeZigBee Gateway', 'Frame do not start with 0x7e');
             $stream = substr($stream, $start);
         }
-//Paket suchen
+        //Paket suchen
         if (strlen($stream) < 5)
         {
             IPS_LogMessage('XBeeZigBee Gateway', 'Frame to short');
@@ -392,46 +375,40 @@ class XBZBGateway extends IPSModule
             return;
         }
         $len = ord($stream[2]) * 256 + ord($stream[3]);
-
         if (strlen($stream) < $len + 4)
         {
             IPS_LogMessage('XBeeZigBee Gateway', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.');
-
             SetValueString($bufferID, $stream);
             $this->unlock("ReceiveLock");
             return;
         }
-
         $packet = substr($stream, 3, $len + 1);
-// Ende wieder in den Buffer werfen
+        // Ende wieder in den Buffer werfen
         $tail = substr($stream, $len + 4);
         SetValueString($bufferID, $tail);
         $this->unlock("ReceiveLock");
-
         $this->DecodeData($packet);
-// Ende war länger als 4 ? Dann nochmal Packet suchen.
+        // Ende war länger als 4 ? Dann nochmal Packet suchen.
         if (strlen($tail) > 4)
             $this->ReceiveData(json_encode(array('Buffer' => '')));
-
         return true;
     }
 
     protected function SendDataToParent($Data)
     {
-//Parent ok ?
+        //Parent ok ?
         if (!$this->HasActiveParent())
             throw new Exception("Instance has no active Parent.");
-
-// Frame bauen
-//Laenge bilden
+        // Frame bauen
+        //Laenge bilden
         $len = strlen($Data);
-//Startzeichen
+        //Startzeichen
         $frame = chr(0x7e);
-//Laenge
+        //Laenge
         $frame .= chr(floor($len / 256)) . chr($len % 256);
-//Daten
+        //Daten
         $frame.=$Data;
-//Checksum
+        //Checksum
         $check = 0;
         for ($x = 0; $x < $len; $x++)
         {
@@ -440,21 +417,19 @@ class XBZBGateway extends IPSModule
         $check = $check and 0xff;
         $check = 0xff - $check;
         $frame = $frame . chr($check);
-
-//Semaphore setzen
+        //Semaphore setzen
         if (!$this->lock("ToParent"))
         {
             throw new Exception("Can not send to Parent");
         }
-// Daten senden
+        // Daten senden
         try
         {
             IPS_SendDataToParent($this->InstanceID, json_encode(Array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($frame))));
         }
         catch (Exception $exc)
         {
-// Senden fehlgeschlagen
-
+        // Senden fehlgeschlagen
             $this->unlock("ToParent");
             throw new Exception($exc);
         }
@@ -482,8 +457,6 @@ class XBZBGateway extends IPSModule
         $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
         if ($id === false)
             $id = 0;
-
-
         if ($id > 0)
         {
             if (!IPS_EventExists($id))
@@ -495,7 +468,6 @@ class XBZBGateway extends IPSModule
                 $id = 0;
             }
         }
-
         if ($id == 0)
         {
             $id = IPS_CreateEvent(1);
@@ -508,13 +480,11 @@ class XBZBGateway extends IPSModule
         if ($Interval > 0)
         {
             IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, $Interval);
-
             IPS_SetEventActive($id, true);
         }
         else
         {
             IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, 1);
-
             IPS_SetEventActive($id, false);
         }
     }
@@ -537,9 +507,7 @@ class XBZBGateway extends IPSModule
             throw new Exception('Timer not present');
         if (!IPS_EventExists($id))
             throw new Exception('Timer not present');
-
         $Event = IPS_GetEvent($id);
-
         if ($Interval < 1)
         {
             if ($Event['EventActive'])
@@ -560,11 +528,6 @@ class XBZBGateway extends IPSModule
             parent::SetStatus($InstanceStatus);
     }
 
-    protected function LogMessage($data, $cata)
-    {
-        
-    }
-
     protected function SetSummary($data)
     {
         IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
@@ -578,7 +541,6 @@ class XBZBGateway extends IPSModule
         {
             if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
             {
-//                IPS_LogMessage((string)$this->InstanceID,"Lock:LMS_" . (string) $this->InstanceID . (string) $ident);
                 return true;
             }
             else
@@ -591,8 +553,6 @@ class XBZBGateway extends IPSModule
 
     private function unlock($ident)
     {
-//                IPS_LogMessage((string)$this->InstanceID,"Unlock:LMS_" . (string) $this->InstanceID . (string) $ident);
-
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
     }
 

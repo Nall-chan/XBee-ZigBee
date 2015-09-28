@@ -309,7 +309,11 @@ class TXB_API_IO_Sample extends stdClass
 
     public $Status = TXB_Receive_Status;
     public $Sample = string;
-    
+    public function GetDataFromJSONObject($Data)
+    {
+        $this->Status = utf8_decode($Data->Status);
+        $this->Sample = utf8_decode($Data->Sample);
+    }    
     public function ToJSONString($GUID)
     {
         $SendData = new stdClass;
