@@ -16,19 +16,20 @@ class XBZBSplitter extends IPSModule
         parent::ApplyChanges();
         $this->RegisterVariableString("BufferIN", "BufferIN", "", -5);
         $this->RegisterVariableString("BufferOUT", "BufferOUT", "", -4);
-        $this->RegisterVariableInteger("TransmitStatus", "TransmitStatus","",-3);
+        $this->RegisterVariableInteger("TransmitStatus", "TransmitStatus", "", -3);
+        $this->RegisterVariableInteger("FrameID", "FrameID", "", -2);
 //        $this->RegisterVariableBoolean("WaitForResponse", "WaitForResponse", "", -2);
 //        $this->RegisterVariableBoolean("ReplyEvent", "ReplyEvent", "", -5);
 //        $this->RegisterVariableBoolean("Connected", "Connected", "", -1);
         IPS_SetHidden($this->GetIDForIdent('BufferIN'), true);
         IPS_SetHidden($this->GetIDForIdent('BufferOUT'), true);
         IPS_SetHidden($this->GetIDForIdent('TransmitStatus'), true);
-//        IPS_SetHidden($this->GetIDForIdent('Connected'), true);
-        if ($this->ReadPropertyString('NodeName')=='')
-            $this->SetSummary (202);
+        IPS_SetHidden($this->GetIDForIdent('FrameID'), true);
+        if ($this->ReadPropertyString('NodeName') == '')
+            $this->SetSummary(202);
         else
-            $this->SetStatus (102);
-          $this->SetSummary($this->ReadPropertyString('NodeName'));
+            $this->SetStatus(102);
+        $this->SetSummary($this->ReadPropertyString('NodeName'));
     }
 
 ################## PRIVATE     
@@ -36,47 +37,61 @@ class XBZBSplitter extends IPSModule
 //------------------------------------------------------------------------------
 
     private function RequestSendData($Data)
-{
-    /*
-function TIPSXBZBSplitter.RequestSendData( Text: String): boolean;
-var data : TXB_API_Data;
-begin
-  //Transmit Request
-  result:= false;
-  try
-    fFrameIDLock.Enter;
-    if fFrameID = MAXBYTE then fFrameID:=1
-    else inc(fFrameID);
-  finally
-    fFrameIDLock.Leave;
-  end;
-  data.FrameID:=fFrameID;
-  fReadyToSend.ResetEvent();
-  data.APICommand:= XB_API_Transmit_Request;
-  data.Data:= chr($00)+chr($00)+Text;
-  if  SendToParent(Data) then// raise EIPSModuleObject.Create('Send Data Error')
-  begin // erfolgreich gesendet =>
-    if fDataReadyToReadReply.WaitFor(1000)=wrSignaled then   //warte auf Reply
-    begin
-      fDataReadyToReadReply.ResetEvent;
-      fReadyToSend.SetEvent();
-      if fTransmitStatus = XB_Transmit_OK then
-      begin
-{$IFDEF DEBUG}        Senddata('TX_Status','OK');{$ENDIF}
-        result:= true;
-      end else begin
-        Senddata('TX_Status','Error: '+ XB_Transmit_Status_to_String(fTransmitStatus));
-        raise EIPSModuleObject.Create(XB_Transmit_Status_to_String(fTransmitStatus));
-      end;
-    end else begin
-      Senddata('TX_Status','Timeout');
-      raise EIPSModuleObject.Create('Send Data Timeout')
-    end;
-  end;
-end;
-     */
-}
+    {
+        $APIData = new TXB_API_Data;
 
+        //FrameID festlegen.
+        $FrameID = $this->GetIDForIdent('FrameID');
+        $TransmitStatusID = $this->GetIDForIdent('TransmitStatus');
+        if (!$this->lock('RequestSendData'))
+            throw new Exception('RequestSendData is locked');
+        $Frame = GetValueInteger($FrameID);
+        if ($Frame == 255)
+            $Frame = 1;
+        else
+            $Frame++;
+        SetValueInteger($FrameID, $Frame);
+
+
+        if (!$this->lock('TransmitStatus'))
+        {
+            $this->unlock('RequestSendData');
+            throw new Exception('Receive Transmit Status is locked');
+        }
+        SetValueInteger($TransmitStatusID, 0xff);
+        $this->unlock('TransmitStatus');
+
+
+        $APIData->FrameID = $Frame;
+        $APIData->APICommand = TXB_API_Command::XB_API_Transmit_Request;
+        $APIData->Data = chr(0x00) . chr(0x00) . $Data;
+        try
+        {
+            $this->SendDataToParent($APIData);
+        }
+        catch (Exception $exc)
+        {
+            $this->unlock('RequestSendData');
+            throw new Exception($exc);
+        }
+        $TransmitStatus = $this->WaitForResponse();
+        if ($TransmitStatus === false)
+        {
+//          Senddata('TX_Status','Timeout');
+            $this->unlock('RequestSendData');
+            throw new Exception('Send Data Timeout');
+        }
+        if ($TransmitStatus === TXB_Transmit_Status::XB_Transmit_OK)
+        {
+//            Senddata('TX_Status','OK')
+            $this->unlock('RequestSendData');
+            return true;
+        }
+//        Senddata('TX_Status','Error: '+ XB_Transmit_Status_to_String(fTransmitStatus));
+        $this->unlock('RequestSendData');
+
+        throw new Exception('Error on Transmit:' . ord($TransmitStatus));
+    }
 
 ################## DATAPOINT RECEIVE FROM CHILD
 
@@ -98,12 +113,11 @@ end;
     }
 
 ################## DATAPOINTS 'String'-Child
-
     //--- IIPSSendString implementation
 //--- { Data Points }  // von String-Child
     private function ForwardDataFromChild($Data)
     {
-        
+
         if ($this->HasActiveParent() === false)
             throw new Exception('Instance has no active Parent Instance!');
         $Max = 66;
@@ -138,23 +152,22 @@ end;
                 if (strlen($Data) < $Max)
                     $Max = strlen($Data);
             }
-            if (!$Sendok)
+            if (!$SendOk)
                 throw new Exception('Error on forward Data');
         }
+        return true;
     }
-    
+
     private function SendDataToChild($Data)
     {
         $JSONString = json_encode(Array("DataID" => "{018EF6B5-AB94-40C6-AA53-46943E824ACF}", "Buffer" => utf8_encode($Data)));
-            IPS_SendDataToChildren($this->InstanceID, $JSONString);        
+        IPS_SendDataToChildren($this->InstanceID, $JSONString);
     }
-    
-################## DATAPOINTS DEVICE
 
-    
+################## DATAPOINTS DEVICE
 //--- IXBZBSendCMD implementation
 //--- { Data Points } //vom XB-ZB Device
- // Sendet Remote AT Commandos umgesetzt in API-Frames an den Coordinator (Gateway)    
+    // Sendet Remote AT Commandos umgesetzt in API-Frames an den Coordinator (Gateway)    
     private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
         if ($this->HasActiveParent() === false)
@@ -162,7 +175,7 @@ end;
         $APIData = new TXB_API_Data();
         $APIData->APICommand = TXB_API_Command::XB_API_Remote_AT_Command;
         $APIData->FrameID = $ATData->FrameID;
-        $APIData->Data = chr(0x02).$ATData->ATCommand.$ATData->Data;
+        $APIData->Data = chr(0x02) . $ATData->ATCommand . $ATData->Data;
         return $this->SendDataToParent($APIData);
     }
 
@@ -171,11 +184,8 @@ end;
         $Data = $ATorIOData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
         IPS_SendDataToChildren($this->InstanceID, $Data);
     }
-        
-    
-    
-################## Datapoints PARENT
 
+################## Datapoints PARENT
     //--- IXBZBSplitter implementation
     //--- { Data Points } //vom XB-ZB Gateway
     public function ReceiveData($JSONString)
@@ -183,7 +193,7 @@ end;
         $Data = json_decode($JSONString);
         // Nur API Daten annehmen.
         if ($Data->DataID <> '{0C541DDF-CE0F-4113-A76F-B4836015212B}')
-            return false;        
+            return false;
         $APIData = new TXB_API_Data();
         $APIData->GetDataFromJSONObject($Data);
         // Auf NodeNamen prüfen
@@ -192,28 +202,29 @@ end;
         switch ($APIData->APICommand)
         {
             case TXB_API_Command::XB_API_Transmit_Status:
-                $TransmitStatusID = $this->GetIDForIdent("TransmitStatus");                
+                $TransmitStatusID = $this->GetIDForIdent("TransmitStatus");
                 if (!$this->lock('Transmit_Status'))
                     throw new Exception('Receive Transmit Status is locked');
-                SetValueInteger($TransmitStatusID,ord($APIData->Data[1]));
+                SetValueInteger($TransmitStatusID, ord($APIData->Data[1]));
                 $this->unlock('Transmit_Status');
                 break;
             case TXB_API_Command::XB_API_Receive_Paket:
                 $Receive_Status = $APIData->Data[0];
-                if ((ord($Receive_Status) and (ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))) == ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))
+                if ((ord($Receive_Status) and ( ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))) == ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))
                 {
 //                  SendData('Receive_Paket(OK)',APIdata.data);
-                    $this->SendDataToChild(substr($APIData->Data,1));
-                } else
+                    $this->SendDataToChild(substr($APIData->Data, 1));
+                }
+                else
                 {
 //                SendData('ReceivePaket(Error:'+inttohex(ord(Receive_Status),1)+')',APIdata.data);
                 }
                 break;
             case TXB_API_Command::XB_API_Remote_AT_Command_Responde:
                 $ATData = new TXB_Command_Data();
-                $ATData->ATCommand = substr($APIData->Data,0,2);
+                $ATData->ATCommand = substr($APIData->Data, 0, 2);
                 $ATData->Status = $APIData->Data[2];
-                $ATData->Data = substr($APIData->Data,3);
+                $ATData->Data = substr($APIData->Data, 3);
 //        SendData('Remote_AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',ATData.Data);                
                 $this->SendDataToDevice($ATData);
                 break;
@@ -222,16 +233,16 @@ end;
                 $IOSample->Sample = $APIData->Data;
                 $this->SendDataToDevice($IOSample);
                 /*
-        SendData('IO_Data_Sample_Rx('+inttohex(ord(APIData.APICommand),2)+')',APIdata.data);
-//        APIData.Data:=XB_ATCommandToString(XB_AT_IS)+chr(0)+APIdata.data;
-        SendToIODevice(APIdata);
-                 
+                  SendData('IO_Data_Sample_Rx('+inttohex(ord(APIData.APICommand),2)+')',APIdata.data);
+                  //        APIData.Data:=XB_ATCommandToString(XB_AT_IS)+chr(0)+APIdata.data;
+                  SendToIODevice(APIdata);
+
                  */
                 break;
             default:
                 /*
-        SendData('unhandle('+inttohex(ord(APIData.APICommand),2)+')',APIdata.Data);
-                 
+                  SendData('unhandle('+inttohex(ord(APIData.APICommand),2)+')',APIdata.Data);
+
                  */
                 break;
         }
@@ -241,13 +252,34 @@ end;
     protected function SendDataToParent($Data)
     {
         // API-Daten verpacken und dann versenden.
-        $JSONString = $Data->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');        
+        $JSONString = $Data->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
 // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;
     }
 
 ################## DUMMYS / WOARKAROUNDS - protected
+
+    private function WaitForResponse()
+    {
+        $TransmitStatusID = $this->GetIDForIdent('TransmitStatus');
+        for ($i = 0; $i < 500; $i++)
+        {
+            if (GetValueInteger($TransmitStatusID) == 0xff)
+                IPS_Sleep(10);
+            else
+            {
+                if ($this->lock('TransmitStatus'))
+                {
+                    $ret = GetValueInteger($TransmitStatusID);
+                    $this->unlock('TransmitStatus');
+                    return $ret;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
 
     protected function HasActiveParent()
     {
