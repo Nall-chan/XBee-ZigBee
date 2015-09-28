@@ -157,7 +157,7 @@ class XBZBDevice extends IPSModule
         parent::ApplyChanges();
         $this->RegisterVariableString("ReplyATData", "ReplyATData", "", -3);
         $this->RegisterVariableInteger("FrameID", "FrameID", "", -2);
-        IPS_SetHidden($this->GetIDForIdent('TransmitStatus'), true);
+        IPS_SetHidden($this->GetIDForIdent('ReplyATData'), true);
         IPS_SetHidden($this->GetIDForIdent('FrameID'), true);
 
         // if fKernelRunlevel = KR_READY then
