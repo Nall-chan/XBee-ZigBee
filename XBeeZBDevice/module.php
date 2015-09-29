@@ -4,9 +4,9 @@ require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 class XBZBDevice extends IPSModule
 {
-   private $DPin_Name = array('D0','D1','D2','D3','D4','D5','D6','D7','','','P0','P1','P2');
-   private $APin_Name =  array('AD0','AD1','AD2','AD3','','','','VSS');
 
+    private $DPin_Name = array('D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', '', '', 'P0', 'P1', 'P2');
+    private $APin_Name = array('AD0', 'AD1', 'AD2', 'AD3', '', '', '', 'VSS');
     private $AT_WriteCommand = array(
         TXB_AT_Command::XB_AT_D0,
         TXB_AT_Command::XB_AT_D1,
@@ -181,39 +181,13 @@ class XBZBDevice extends IPSModule
 ################## PRIVATE     
 ################## ActionHandler
 
-    public function ActionHandler($StatusVariableIdent, $Value)
+    public function RequestAction($Ident, $Value)
     {
-        
+        if (is_bool($Value) === false)
+            throw new Exception('Wrong Datatype for ' . $Ident);
+        $this->WriteBoolean($Ident, (bool) $Value);
     }
-    
-    private function ActionHandlerDPin($StatusVariableIdent, $Value)
-    {
-        /*
-procedure TIPSXBZBDevice.ActionHandlerDPin(StatusVariable: String; Value: Variant);
-var IPSVarID: word;
-//    cVariable : TIPSVariable;
-begin
-  if StatusVariable =emptyStr then exit;
-  try
-    IPSVarID := GetStatusVariableID(StatusVariable);
-  except
-    IPSVarID := 0;
-  end;
-  if IPSVarID = 0 then exit;
-  if  not HasActiveParent then
-  begin
-    raise EIPSModuleObject.Create('Instance has no active Parent Instance!');
-    exit;
-  end;
-  if not VarIsType(Value,varBoolean) then
-  begin
-    raise EIPSModuleObject.Create('Wrong Datatype for '+ IntToStr(IPSVarID));
-    exit;
-  end;
-  WriteBoolean(StatusVariable,Variants.VarAsType(Value,varBoolean));
-end;
-*/
-}
+
 ################## PUBLIC
     /**
      * This function will be available automatically after the module is imported with the module control.
@@ -222,137 +196,76 @@ end;
 
     public function RequestState()
     {
+        if (!$this->HasActiveParent())
+            throw new Exception('Instance has no active Parent Instance!');
+
         $this->RequestPinState();
     }
 
     public function ReadConfig()
     {
+        if (!$this->HasActiveParent())
+            throw new Exception('Instance has no active Parent Instance!');
+
         $this->ReadPinConfig();
     }
 
     public function WriteBoolean(string $Pin, boolean $Value)
     {
-        /*
-        procedure TIPSXBZBDevice.WriteBoolean(Pin:String; Value: Boolean); stdcall;
-var IPSVarID       : word;
-    ValueStr       : byte;
-    cVariable      : TIPSVariable;
-    ATdata         : TXB_Command_Data;
-begin
-  if Pin =emptyStr then
-  begin
-    raise EIPSModuleObject.Create('Pin is not Set!');
-    exit;
-  end;
-  try
-    IPSVarID := GetStatusVariableID(Pin);
-  except
-    IPSVarID := 0;
-  end;
-  if IPSVarID = 0 then
-  begin
-    raise EIPSModuleObject.Create('Pin not exists! Try WriteParameter.');
-    exit;
-  end;
-  if  not HasActiveParent then
-  begin
-    raise EIPSModuleObject.Create('Instance has no active Parent Instance!');
-    exit;
-  end;
-  if IPSVarID<> 0 then
-     begin
-       cVariable :=fKernel.VariableManager.GetVariable(IPSVarID);
-       if cVariable.VariableValue.ValueType <> vtBoolean then
-       begin
-         raise EIPSModuleObject.Create('Wrong Datatype for '+ IntToStr(IPSVarID));
-       end else begin
-         if Value then ValueStr:=$05
-           else ValueStr:=$04;
-         ATData.ATCommand:=XB_StringToATCommand(Pin);
-         ATdata.Data:= chr(ValueStr);
-         if SendCommand(ATdata).Status <> XB_Command_OK then
-           raise EIPSModuleObject.Create('Error on Send Command '+ IntToStr(IPSVarID))
-           else if GetProperty('EmulateStatus') = true then fKernel.VariableManager.WriteVariableBoolean(IPSVarID,Value);
-       end;
-       cVariable.free;
-     end;
-   end;
-
-         */
+        if ($Pin == '')
+            throw new Exception('Pin is not Set!');
+        if (!in_array($Pin, $this->DPin_Name))
+            throw new Exception('Pin not exists!');
+        $VarID = $this->GetIDForIdent($Pin);
+        if ($VarID === false)
+            throw new Exception('Pin not exists! Try WriteParameter.');
+        if (IPS_GetVariable($VarID)['VariableType'] !== 0)
+            throw new Exception('Wrong Datatype for ' . $VarID);
+        if ($Value === true)
+            $ValueStr = 0x05;
+        else
+            $ValueStr = 0x04;
+        $ATData = new TXB_Command_Data();
+        $ATData->ATCommand = $Pin;
+        $ATData->Data = chr($ValueStr);
+        if (!$this->HasActiveParent())
+            throw new Exception('Instance has no active Parent Instance!');
+        /*        $ResponseATData = $this->SendCommand($ATData);
+          if ($ResponseATData->Status <> TXB_Command_Status::XB_Command_OK)
+          throw new Exception('Error on Send Command ' . $VarID); */
+        $this->SendCommand($ATData);
+        if ($this->ReadPropertyBoolean('EmulateStatus'))
+            SetValue($VarID, $Value);
+        return true;
     }
 
     public function WriteParameter(string $Parameter, string $Value)
     {
-/*
- procedure TIPSXBZBDevice.WriteParameter(Parameter: String; Value: String); stdcall;
-var ATData : TXB_Command_Data;
-    ATCMD  : TXB_AT_Command;
-//    I      : integer;
-    Valid  : boolean;
-begin
-  Valid:=false;
-  if Value = emptyStr then
-  begin
-    raise EIPSModuleObject.Create('Value is empty!');
-    exit;
-  end;
-  for ATCMD in AT_WriteCommand do
-  begin
-    if Parameter = XB_ATCommandToString(ATCMD) then
-    begin
-      Valid:=true;
-      break;
-    end;
-  end;
-  if  Valid then
-  begin
-    ATData.ATCommand:=ATCMD;
-    ATData.Data:=Value;
-    SendCommand(ATData);
-  end else begin
-    raise EIPSModuleObject.Create('Unknown Parameter: '+ Parameter);
-  end;
-end;
-
- */        
+        if ($Value == "")
+            throw new Exception('Value is empty!');
+        if (!in_array($Parameter, $this->AT_WriteCommand))
+            throw new Exception('Unknown Parameter: ' . $Parameter);
+        $ATData = new TXB_Command_Data();
+        $ATData->ATCommand = $Parameter;
+        $ATData->Data = $Value;
+        if (!$this->HasActiveParent())
+            throw new Exception('Instance has no active Parent Instance!');
+        /*        $ResponseATData = $this->SendCommand($ATData);
+          if ($ResponseATData->Status <> TXB_Command_Status::XB_Command_OK)
+          throw new Exception('Error on Send Command ' . $Parameter); */
+        $this->SendCommand($ATData);
+        return true;
     }
 
     public function ReadParameter(string $Parameter)
     {
-/*
-function TIPSXBZBDevice.ReadParameter(Parameter: String):String; stdcall;
-var ATData : TXB_Command_Data;
-    ATCMD  : TXB_AT_Command;
-//    I      : integer;
-    Valid  : boolean;
-begin
-  Valid:=false;
-  for ATCMD in AT_ReadCommand do
-  begin
-    if Parameter = XB_ATCommandToString(ATCMD) then
-    begin
-      Valid:=true;
-      break;
-    end;
-  end;
-  if Valid then
-  begin
-    ATData.ATCommand:=ATCMD;
-    ATData.Status:=XB_Command_Tx_Failure;
-    ATData.Data:='';
-    ATData := SendCommand(ATData);
-    if ATData.Status = XB_Command_OK then
-    begin // Ergebnis lesen und zurückgeben; Fehlermeldung wurde schon vorher erzeugt schon
-      Result:=ATData.Data;
-    end else begin
-      raise EIPSModuleObject.Create('Error on Read Parameter ('+Parameter+'): '+ XB_Command_Status_To_String(ATData.Status));
-    end;
-  end else begin
-    raise EIPSModuleObject.Create('Unknown Parameter: '+ Parameter)
- end;
-end;
-
- */        
+        if (!in_array($Parameter, $this->AT_ReadCommand))
+            throw new Exception('Unknown Parameter: ' . $Parameter);
+        $ATData = new TXB_Command_Data();
+        $ATData->ATCommand = $Parameter;
+        $ATData->Data = '';
+        $ResponseATData = $this->SendCommand($ATData);
+        return $ResponseATData->Data;
     }
 
 ################## Datapoints
@@ -373,7 +286,7 @@ end;
         {
             $IOSample = new TXB_API_IO_Sample();
             $IOSample->GetDataFromJSONObject($Data);
-            $this->ReceiveIOSample($IOSample);
+            $this->DecodeIOSample($IOSample);
             return true;
         }
         return false;
@@ -381,251 +294,205 @@ end;
 
     private function ReceiveCMDData(TXB_Command_Data $ATData)
     {
-        /*
-        var  IOSample       : TXB_API_IO_Sample;
-     VarID          : TIPSID;
-begin
-  try
-    fReplyATDataLock.Enter;
-    fReplyATData:= ATData;
-  finally
-    fReplyATDataLock.Leave;
-  end;
-  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',ATData.data);
-  fDataReadyToReadReply.SetEvent();
-  if  fReplyATData.Status = XB_Command_OK then
-  begin
-    case ATData.ATCommand of
-      XB_AT_D0,
-      XB_AT_D1,
-      XB_AT_D2,
-      XB_AT_D3,
-      XB_AT_D4,
-      XB_AT_D5,
-      XB_AT_D6,
-      XB_AT_D7,
-      XB_AT_P0,
-      XB_AT_P1,
-      XB_AT_P2:
-      begin
-        // Neuen Wert darstellen und Variable anlegen und Schaltbar machen wenn Value 4 oder 5 sonst nicht schaltbar
-        if Length(ATData.data) = 1 then
-        begin
-          case ord(ATData.data[1]) of
-            0,
-            1:
-            begin
-              try
-                VarID := GetStatusVariableID(XB_ATCommandToString(ATData.ATCommand));
-              except
-                VarID := 0;
-              end;
-              if VarID <> 0 then
-              begin
-                fKernel.VariableManagerEx.SetVariableAction(VarID, 0);
-                fKernel.VariableManagerEx.SetVariableProfile(VarID,'');
-              end;
-            end;
-            2:
-            begin
-              GetOrCreateAPinVariable('A'+XB_ATCommandToString(ATData.ATCommand));
-              try
-                VarID := GetStatusVariableID(XB_ATCommandToString(ATData.ATCommand));
-              except
-                VarID := 0;
-              end;
-              if VarID <> 0 then
-              begin
-                fKernel.VariableManagerEx.SetVariableAction(VarID, 0);
-                fKernel.VariableManagerEx.SetVariableProfile(VarID,'');
-              end;
-            end;
-            3:
-            begin
-              VarID := GetOrCreateDPinVariable(XB_ATCommandToString(ATData.ATCommand));
-              fKernel.VariableManagerEx.SetVariableAction(VarID, 0);
-              fKernel.VariableManagerEx.SetVariableProfile(VarID,'');
-            end;
-            4:
-            begin
-              VarID := GetOrCreateDPinVariable(XB_ATCommandToString(ATData.ATCommand),ActionHandlerDPin);
-              fKernel.VariableManagerEx.SetVariableProfile(VarID,'~Switch');
-              fKernel.VariableManagerEx.SetVariableAction(VarID, fInstanceID);
-              fKernel.VariableManager.WriteVariableBoolean(VarID,false);
-            end;
-            5:
-            begin
-              VarID := GetOrCreateDPinVariable(XB_ATCommandToString(ATData.ATCommand),ActionHandlerDPin);
-              fKernel.VariableManagerEx.SetVariableProfile(VarID,'~Switch');
-              fKernel.VariableManagerEx.SetVariableAction(VarID, fInstanceID);
-              fKernel.VariableManager.WriteVariableBoolean(VarID,true);
-            end;
-          end;
-        end;
-      end;
-      XB_AT_IS:
-      begin
-        if not fDelayTimerActive then
-        begin
-          IOSample.Status:=XB_Receive_Packet_Acknowledged;
-          IOSample.Sample:= ATData.Data;
-          DecodeIOSample(IOSample);
-        end;
-      end;
-    end;
-  end;
-end;
+        $ReplyATDataID = $this->GetIDForIdent('ReplyATData');
+        $ReplyATData = $ATData->ToJSONString('');
 
-         */
-    }
-    private function ReceiveIOSample(TXB_API_IO_Sample $IOSample)
-    {
-        /*
-           senddata('Receive_IO_Sample(92)',Sample);
-  IOSample.Status:=TXB_Receive_Status(ord(Sample[1]));
-  delete(Sample,1,1); // Receive Status raus
-  IOSample.Sample:= Sample;
-  DecodeIOSample(IOSample);
+        if (!$this->lock('ReplyATData'))
+            throw new Exception('ReplyATData is locked');
+//         SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',ATData.data);        
+        SetValueString($ReplyATDataID, $ReplyATData);
+        $this->unlock('ReplyATData');
+        if ($ATData->Status <> TXB_Command_Status::XB_Command_OK)
+            return;
 
-         */
+        switch ($ATData->ATCommand)
+        {
+            case TXB_AT_Command::XB_AT_D0:
+            case TXB_AT_Command::XB_AT_D1:
+            case TXB_AT_Command::XB_AT_D2:
+            case TXB_AT_Command::XB_AT_D3:
+            case TXB_AT_Command::XB_AT_D4:
+            case TXB_AT_Command::XB_AT_D5:
+            case TXB_AT_Command::XB_AT_D6:
+            case TXB_AT_Command::XB_AT_D7:
+            case TXB_AT_Command::XB_AT_P0:
+            case TXB_AT_Command::XB_AT_P1:
+            case TXB_AT_Command::XB_AT_P2:
+                // Neuen Wert darstellen und Variable anlegen und Schaltbar machen wenn Value 4 oder 5 sonst nicht schaltbar
+                if (strlen($ATData->Data) <> 1)
+                    return;
+                switch ($ATData->Data)
+                {
+                    case 0:
+                    case 1:
+                        $VarID = $this->GetIDForIdent($ATData->ATCommand);
+                        if ($VarID <> 0)
+                        {
+                            $this->DisableAction($ATData->ATCommand);
+                            IPS_SetVariableCustomProfile($VarID, '');
+                        }
+                        break;
+                    case 2:
+                        $VarID = $this->GetOrCreateAPinVariable('A' . $ATData->ATCommand);
+                        if ($VarID <> 0)
+                        {
+                            $this->DisableAction($ATData->ATCommand);
+                            IPS_SetVariableCustomProfile($VarID, '');
+                        }
+                        break;
+                    case 3:
+                        $VarID = $this->GetOrCreateDPinVariable($ATData->ATCommand);
+                        $this->DisableAction($ATData->ATCommand);
+                        IPS_SetVariableCustomProfile($VarID, '');
+                        break;
+                    case 4:
+                        $VarID = $this->GetOrCreateDPinVariable($ATData->ATCommand, ActionHandlerDPin);
+                        IPS_SetVariableCustomProfile($VarID, '~Switch');
+                        $this->EnableAction($ATData->ATCommand);
+                        SetValueBoolean($VarID, false);
+                        break;
+                    case 5:
+                        $VarID = $this->GetOrCreateDPinVariable($ATData->ATCommand, ActionHandlerDPin);
+                        IPS_SetVariableCustomProfile($VarID, '~Switch');
+                        $this->EnableAction($ATData->ATCommand);
+                        SetValueBoolean($VarID, true);
+                        break;
+                }
+                break;
+            case TXB_AT_Command::XB_AT_IS:
+//                if not fDelayTimerActive then
+                $IOSample = new TXB_API_IO_Sample();
+                $IOSample->Status = TXB_Receive_Status::XB_Receive_Packet_Acknowledged;
+                $IOSample->Sample = $ATData->Data;
+                $this->DecodeIOSample($IOSample);
+                break;
+        }
     }
-    
+
     private function DecodeIOSample($IOSample)
     {
-     /*
-procedure TIPSXBZBDevice.DecodeIOSample(IOSample: TXB_API_IO_Sample);
-var ActiveDPins : word;
-    ActiveAPins : byte;
-    Pins        : word;
-    i           : integer;
-    Bit         : integer;
-    ID          : word;
-    PinAValue   : word;
-begin
-  delete(IOSample.Sample,1,1); // Number Sampley raus da immer 1
-  ActiveDPins := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
-  ActiveAPins := ord(IOSample.Sample[3]);
-  delete(IOSample.Sample,1,3);
-  if ActiveDPins <> 0 then  //D Pins aktiv
-  begin
-    Pins := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
-    delete(IOSample.Sample,1,2);
-    for I:=high(DPin_Name) downto low(DPin_Name) do
-    begin
-      if DPin_Name[i] = emptyStr then continue;
-      Bit:=trunc(Power(2,ord(i)));
-      if ActiveDPins and Bit = Bit then
-      begin
-{$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-        ID:=GetOrCreateDPinVariable(DPin_Name[i]);
-        if Pins and Bit = Bit then
-        begin
-{$IFDEF DEBUG}          SendData(DPin_Name[i],'true - Bit:'+inttostr(ord(i)));{$ENDIF}
-            fKernel.VariableManager.WriteVariableBoolean(ID,true);
-        end else begin
-{$IFDEF DEBUG}          SendData(DPin_Name[i],'false - Bit:'+inttostr(ord(i)));{$ENDIF}
-            fKernel.VariableManager.WriteVariableBoolean(ID,false);
-        end;
-      end;
-    end;
-  end;
-  if ActiveAPins <> 0 then  //A Pins aktiv
-  begin
-    for I:=low(APin_Name) to high(APin_Name) do
-    begin
-      if APin_Name[i] = emptyStr then continue;
-      Bit:=trunc(Power(2,ord(i)));
-      if ActiveAPins and Bit = Bit then
-      begin
-{$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-        PinAValue := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
-        delete(IOSample.Sample,1,2);
-        if APin_Name[i] = 'VSS' then
-        begin
+        /*
+          procedure TIPSXBZBDevice.DecodeIOSample(IOSample: TXB_API_IO_Sample);
+          var ActiveDPins : word;
+          ActiveAPins : byte;
+          Pins        : word;
+          i           : integer;
+          Bit         : integer;
+          ID          : word;
+          PinAValue   : word;
+          begin
+          delete(IOSample.Sample,1,1); // Number Sampley raus da immer 1
+          ActiveDPins := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
+          ActiveAPins := ord(IOSample.Sample[3]);
+          delete(IOSample.Sample,1,3);
+          if ActiveDPins <> 0 then  //D Pins aktiv
+          begin
+          Pins := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
+          delete(IOSample.Sample,1,2);
+          for I:=high(DPin_Name) downto low(DPin_Name) do
+          begin
+          if DPin_Name[i] = emptyStr then continue;
+          Bit:=trunc(Power(2,ord(i)));
+          if ActiveDPins and Bit = Bit then
+          begin
+          {$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
+          ID:=GetOrCreateDPinVariable(DPin_Name[i]);
+          if Pins and Bit = Bit then
+          begin
+          {$IFDEF DEBUG}          SendData(DPin_Name[i],'true - Bit:'+inttostr(ord(i)));{$ENDIF}
+          fKernel.VariableManager.WriteVariableBoolean(ID,true);
+          end else begin
+          {$IFDEF DEBUG}          SendData(DPin_Name[i],'false - Bit:'+inttostr(ord(i)));{$ENDIF}
+          fKernel.VariableManager.WriteVariableBoolean(ID,false);
+          end;
+          end;
+          end;
+          end;
+          if ActiveAPins <> 0 then  //A Pins aktiv
+          begin
+          for I:=low(APin_Name) to high(APin_Name) do
+          begin
+          if APin_Name[i] = emptyStr then continue;
+          Bit:=trunc(Power(2,ord(i)));
+          if ActiveAPins and Bit = Bit then
+          begin
+          {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
+          PinAValue := TwoByteToWord(ord(IOSample.Sample[2]),ord(IOSample.Sample[1]));
+          delete(IOSample.Sample,1,2);
+          if APin_Name[i] = 'VSS' then
+          begin
           ID:=GetOrCreateAPinVariable('VSS',vtFloat,'~Volt');
           PinAValue := trunc(PinAValue * 1.171875);
-              fKernel.VariableManager.WriteVariableFloat(ID,PinAValue/1000);
-        end else begin
+          fKernel.VariableManager.WriteVariableFloat(ID,PinAValue/1000);
+          end else begin
           ID:=GetOrCreateAPinVariable(APin_Name[i]);
           PinAValue := trunc(PinAValue * 1.171875);
-              fKernel.VariableManager.WriteVariableInteger(ID,PinAValue);
-        end;
-      end;
-    end;
-  end;
+          fKernel.VariableManager.WriteVariableInteger(ID,PinAValue);
+          end;
+          end;
+          end;
+          end;
 
-      */   
+         */
     }
-private function     ReadPinConfig()
-{
-    /*
 
-    procedure TIPSXBZBDevice.ReadPinConfig();
-var ATData  : TXB_Command_Data;
-    I     : integer;
-begin
-  for I:=high(DPin_Name) downto low(DPin_Name) do
-  begin
-    if DPin_Name[i] = EmptyStr then continue;
-    ATData.ATCommand:= XB_StringToATCommand(DPin_Name[i]);
-    SendCommand(ATData);
-  end;
-end;
-     * 
-     */
-    
-}
+    private function ReadPinConfig()
+    {
+        $ATData = new TXB_Command_Data();
+        $ATData->Data = '';
+        foreach ($this->DPin_Name as $Pin)
+        {
+            $ATData->ATCommand = $Pin;
+            $this->SendCommand($ATData);
+        }
+    }
+
 //------------------------------------------------------------------------------
-private function RequestPinState()
-{
-    /*
-procedure TIPSXBZBDevice.RequestPinState();
-var ATData  : TXB_Command_Data;
-begin
-  ATData.ATCommand:= XB_AT_IS;
-  SendCommand(ATData);
-end;
-*/
-    
-}
-private function SendCommand(TXB_Command_Data $ATData)
-{
-    /*
-    function TIPSXBZBDevice.SendCommand(ATData: TXB_Command_Data): TXB_Command_Data;
-begin
-  result.Status:= XB_Command_Error;
-  try
-    fFrameIDLock.Enter;
-    if fFrameID = MAXBYTE then fFrameID:=1
-    else inc(fFrameID);
-  finally
-      fFrameIDLock.Leave;
-  end;
-  ATData.FrameID:=fFrameID;
-  ATData.Status:=XB_Command_OK;
-  if SendToParent(ATdata) then //raise EIPSModuleObject.Create('Error on Send Command. Node unknown ?')
-  begin
-    if fDataReadyToReadReply.WaitFor(1000)=wrSignaled then   //warte auf Reply
-    begin
-      Result:=fReplyATData;
-      fDataReadyToReadReply.ResetEvent;
-      if Result.Status = XB_Command_OK then
-      begin
-{$IFDEF DEBUG}        Senddata('AT_Command_Status','OK');{$ENDIF}
-      end else begin
-        Senddata('AT_Command_Status','Error: '+ XB_Command_Status_To_String(fReplyATData.Status));
-        raise EIPSModuleObject.Create(XB_Command_Status_To_String(fReplyATData.Status));
-      end;
-    end else begin
-      Senddata('AT_Command_Status','Timeout');
-      raise EIPSModuleObject.Create('Send Data Timeout')
-    end;
-  end;
-end;
-     */
-}
+    private function RequestPinState()
+    {
+        $ATData = new TXB_Command_Data();
+        $ATData->ATCommand = TXB_AT_Command::XB_AT_IS;
+        $this->SendCommand($ATData);
+    }
 
-protected function SendDataToParent($Data)
+    private function SendCommand(TXB_Command_Data $ATData)
+    {
+        /*
+          function TIPSXBZBDevice.SendCommand(ATData: TXB_Command_Data): TXB_Command_Data;
+          begin
+          result.Status:= XB_Command_Error;
+          try
+          fFrameIDLock.Enter;
+          if fFrameID = MAXBYTE then fFrameID:=1
+          else inc(fFrameID);
+          finally
+          fFrameIDLock.Leave;
+          end;
+          ATData.FrameID:=fFrameID;
+          ATData.Status:=XB_Command_OK;
+          if SendToParent(ATdata) then //raise EIPSModuleObject.Create('Error on Send Command. Node unknown ?')
+          begin
+          if fDataReadyToReadReply.WaitFor(1000)=wrSignaled then   //warte auf Reply
+          begin
+          Result:=fReplyATData;
+          fDataReadyToReadReply.ResetEvent;
+          if Result.Status = XB_Command_OK then
+          begin
+          {$IFDEF DEBUG}        Senddata('AT_Command_Status','OK');{$ENDIF}
+          end else begin
+          Senddata('AT_Command_Status','Error: '+ XB_Command_Status_To_String(fReplyATData.Status));
+          raise EIPSModuleObject.Create(XB_Command_Status_To_String(fReplyATData.Status));
+          end;
+          end else begin
+          Senddata('AT_Command_Status','Timeout');
+          raise EIPSModuleObject.Create('Send Data Timeout')
+          end;
+          end;
+          end;
+         */
+    }
+
+    protected function SendDataToParent($Data)
     {
 //Semaphore setzen
         if (!$this->HasActiveParent())
@@ -766,7 +633,6 @@ protected function SendDataToParent($Data)
         {
             if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
             {
-//                IPS_LogMessage((string)$this->InstanceID,"Lock:LMS_" . (string) $this->InstanceID . (string) $ident);
                 return true;
             }
             else
@@ -779,8 +645,6 @@ protected function SendDataToParent($Data)
 
     private function unlock($ident)
     {
-//                IPS_LogMessage((string)$this->InstanceID,"Unlock:LMS_" . (string) $this->InstanceID . (string) $ident);
-
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
     }
 

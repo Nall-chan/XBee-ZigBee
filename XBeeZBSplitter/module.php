@@ -219,7 +219,8 @@ class XBZBSplitter extends IPSModule
                 break;
             case TXB_API_Command::XB_API_IO_Data_Sample_Rx:
                 $IOSample = new TXB_API_IO_Sample();
-                $IOSample->Sample = $APIData->Data;
+                $IOSample->Status =$APIData->Data[0];
+                $IOSample->Sample = substr($APIData->Data,1);
                 $this->SendDataToDevice($IOSample);
                 /*
                   SendData('IO_Data_Sample_Rx('+inttohex(ord(APIData.APICommand),2)+')',APIdata.data);
