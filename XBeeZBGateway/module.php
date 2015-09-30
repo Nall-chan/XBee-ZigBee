@@ -96,6 +96,7 @@ class XBZBGateway extends IPSModule
                                 $Node->NodeName = substr($ATData->Data, 0, $end);
                                 //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
+                            IPS_LogMessage('AT_Command::XB_AT_ND',print_r($Node,1));                                
                                 $this->AddOrReplaceNode($Node);
                             }
                         }
@@ -168,7 +169,9 @@ class XBZBGateway extends IPSModule
                 $Node->NodeName = substr($Frame, 0, $end);
                 //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
+                IPS_LogMessage('Node_Identification_Indicator',print_r($Node,1));
                 $this->AddOrReplaceNode($Node);
+                
                 break;
             case TXB_API_Command::XB_API_Remote_AT_Command_Responde:
                 //FERTIG        
