@@ -255,7 +255,7 @@ class XBZBGateway extends IPSModule
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if ($Nodes === NULL)
+        if (!is_array($Nodes))
             return false;
         $i = array_search($Addr16, array_column($Nodes, 'NodeAddr16'));
         if ($i === false)
@@ -269,7 +269,7 @@ class XBZBGateway extends IPSModule
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if ($Nodes === NULL)
+        if (!is_array($Nodes))
             return false;
         $i = array_search($Addr64, array_column($Nodes, 'NodeAddr64'));
         if ($i === false)
