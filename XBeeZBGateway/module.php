@@ -50,9 +50,11 @@ class XBZBGateway extends IPSModule
 
     private function DecodeData($Frame)
     {
-        $checksum = ord($Frame[strlen($Frame) - 1]);
+//        $checksum = ord($Frame[strlen($Frame) - 1]);
         //Checksum bilden
-        for ($x = 0; $x < strlen($Frame)-1; $x++)
+            IPS_LogMessage('Receive - Checksum Error: '.ord($Frame[strlen($Frame) - 1]), bin2hex($Frame));
+        
+        for ($x = 0; $x < strlen($Frame); $x++)
         {
             $checksum = $checksum + ord($Frame[$x]);
         }
@@ -385,6 +387,7 @@ class XBZBGateway extends IPSModule
         $packet = substr($stream, 3, $len + 1);
         // Ende wieder in den Buffer werfen
         $tail = substr($stream, $len + 4);
+        if ($tail===false) $tail='';
         SetValueString($bufferID, $tail);
         $this->unlock("ReceiveLock");
         $this->DecodeData($packet);
