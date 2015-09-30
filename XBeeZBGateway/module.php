@@ -168,7 +168,7 @@ class XBZBGateway extends IPSModule
                 $Node = new TXB_Node();
                 $Node->NodeAddr64 = substr($Frame, 0, 8);
                 $Node->NodeAddr16 = substr($Frame, 8, 2);
-                $Frame = substr($Frame, 22);
+                $Frame = substr($Frame, 21);
                 $end = strpos($Frame, chr(0));
                 $Node->NodeName = substr($Frame, 0, $end);
                 //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
