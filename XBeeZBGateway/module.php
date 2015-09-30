@@ -71,10 +71,14 @@ class XBZBGateway extends IPSModule
         //  senddata('Receive',data);
         $APIData = new TXB_API_Data();
         $APIData->APICommand = ord($Frame[0]);
-        $Frame = substr($Frame, 2, -1);
+        $Frame = substr($Frame, 1, -1);
+                            IPS_LogMessage('XB_API_Command',$APIData->APICommand);                                
+
         switch ($APIData->APICommand)
         {
             case TXB_API_Command::XB_API_AT_Command_Responde:
+                            IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
+                
                 // FERTIG
                 $ATData = new TXB_Command_Data();
                 $ATData->FrameID = ord($Frame[0]);
