@@ -378,12 +378,12 @@ class XBZBDevice extends IPSModule
                 if ($Pin_Name == '')
                     continue;
                 $Bit = pow(2, $Index);
-                if (($ActiveDPins and $Bit) == $Bit)
+                if (($ActiveDPins & $Bit) == $Bit)
                 {
 //                        {$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $VarID = $this->RegisterVariableBoolean($DPin_Name, $DPin_Name);
 
-                    if (($PinValue and $Bit) == $Bit)
+                    if (($PinValue & $Bit) == $Bit)
                     {
 //                            {$IFDEF DEBUG}          SendData(DPin_Name[i],'true - Bit:'+inttostr(ord(i)));{$ENDIF}
                         SetValueBoolean($VarID, true);
@@ -403,7 +403,7 @@ class XBZBDevice extends IPSModule
                 if ($Pin_Name == "")
                     continue;
                 $Bit = pow(2, $Index);
-                if (($ActiveAPins and $Bit) == $Bit)
+                if (($ActiveAPins & $Bit) == $Bit)
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $PinAValue = unpack("N", substr($IOSample->Sample, 4 + $Index, 2))[1];

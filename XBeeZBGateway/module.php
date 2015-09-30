@@ -60,7 +60,7 @@ class XBZBGateway extends IPSModule
             $checksum = $checksum + ord($Frame[$x]);
         }
         //Auf Byte begrenzen
-        $checksum = $checksum and 0xff;
+        $checksum = $checksum & 0xff;
         //Checksum NOK?
         if ($checksum <> 0xff)
         {
@@ -418,7 +418,7 @@ class XBZBGateway extends IPSModule
         {
             $check = $check + ord($Data[$x]);
         }
-        $check = $check and 0xff;
+        $check = $check & 0xff;
         $check = 0xff - $check;
         $frame = $frame . chr($check);
         //Semaphore setzen
