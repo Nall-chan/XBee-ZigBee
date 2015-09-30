@@ -50,11 +50,12 @@ class XBZBGateway extends IPSModule
 
     private function DecodeData($Frame)
     {
-//        $checksum = ord($Frame[strlen($Frame) - 1]);
+        $checksum = ord($Frame[strlen($Frame) - 1]);
         //Checksum bilden
-            IPS_LogMessage('Receive - Checksum Error: '.ord($Frame[strlen($Frame) - 1]), bin2hex($Frame));
-        
-        for ($x = 0; $x < strlen($Frame); $x++)
+            IPS_LogMessage('Receive - Checksum must '.$checksum, bin2hex($Frame));
+//             88 01 4e 44 00 ff 48 00 13 a2 00 40 79 c2 45 4d 53 33 35 5f 31 00 00 00 02 00 c1 05 10 1e 9a
+//    7E 00 1E 88 01 4E 44 00 FF 48 00 13 A2 00 40 79 C2 45 4D 53 33 35 5F 31 00 00 00 02 00 C1 05 10 1E 9A 
+        for ($x = 0; $x < (strlen($Frame)-1); $x++)
         {
             $checksum = $checksum + ord($Frame[$x]);
         }
@@ -63,7 +64,7 @@ class XBZBGateway extends IPSModule
         //Checksum NOK?
         if ($checksum <> 0xff)
         {
-            IPS_LogMessage('Receive - Checksum Error', bin2hex($Frame));
+            IPS_LogMessage('Receive - Checksum Error: '.$checksum, bin2hex($Frame));
             return;
         }
         //API CmdID extrahieren
