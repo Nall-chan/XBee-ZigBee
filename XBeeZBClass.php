@@ -206,10 +206,10 @@ class TXB_Command_Status extends stdClass
 class TXB_Command_Data extends stdClass
 {
 
-    public $ATCommand = TXB_AT_Command;
-    public $Status = TXB_Command_Status;
-    public $Data = string;
-    public $FrameID = integer;
+    public $ATCommand;
+    public $Status;
+    public $Data;
+    public $FrameID;
 
     public function GetDataFromJSONObject($Data)
     {
@@ -277,10 +277,10 @@ class TXB_Receive_Status extends stdClass
 class TXB_API_Data extends stdClass
 {
 
-    public $APICommand = TXB_API_Command;
-    public $NodeName = string;
-    public $Data = string;
-    public $FrameID = Byte;
+    public $APICommand;
+    public $NodeName;
+    public $Data;
+    public $FrameID;
 
 //  TxStatus   : TXB_Transmit_Status;
 //  RxStatus   : TXB_Receive_Status;
@@ -307,8 +307,8 @@ class TXB_API_Data extends stdClass
 class TXB_API_IO_Sample extends stdClass
 {
 
-    public $Status = TXB_Receive_Status;
-    public $Sample = string;
+    public $Status;
+    public $Sample;
     public function GetDataFromJSONObject($Data)
     {
         $this->Status = utf8_decode($Data->Status);
