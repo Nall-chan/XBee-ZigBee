@@ -374,7 +374,7 @@ class XBZBGateway extends IPSModule
             $this->unlock("ReceiveLock");
             return;
         }
-        $len = ord($stream[2]) * 256 + ord($stream[3]);
+        $len = ord($stream[1]) * 256 + ord($stream[2]);
         if (strlen($stream) < $len + 4)
         {
             IPS_LogMessage('XBeeZigBee Gateway', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.');
