@@ -54,7 +54,7 @@ class XBZBGateway extends IPSModule
         //Checksum bilden
         for ($x = 0; $x < strlen($Frame); $x++)
         {
-            $checksum = checksum + ord($Frame[$x]);
+            $checksum = $checksum + ord($Frame[$x]);
         }
         //Auf Byte begrenzen
         $checksum = $checksum and 0xff;
