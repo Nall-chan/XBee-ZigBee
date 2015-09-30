@@ -227,7 +227,7 @@ class TXB_Command_Data extends stdClass
         $SendData->Status = utf8_encode($this->Status);
         $SendData->Data = utf8_encode($this->Data);
         $SendData->FrameID = utf8_encode($this->FrameID);
-        return json_decode($SendData);
+        return json_encode($SendData);
     }
 
 }
@@ -299,7 +299,7 @@ class TXB_API_Data extends stdClass
         $SendData->NodeName = utf8_encode($this->NodeName);
         $SendData->Data = utf8_encode($this->Data);
         $SendData->FrameID = utf8_encode($this->FrameID);
-        return json_decode($SendData);
+        return json_encode($SendData);
     }
 
 }
@@ -320,7 +320,7 @@ class TXB_API_IO_Sample extends stdClass
         $SendData->DataID = $GUID;
         $SendData->Status = utf8_encode($this->Status);
         $SendData->Sample = utf8_encode($this->Sample);
-        return json_decode($SendData);
+        return json_encode($SendData);
     }
 
 }
