@@ -70,7 +70,7 @@ class XBZBSplitter extends IPSModule
             $this->unlock('RequestSendData');
             throw new Exception('Send Data Timeout');
         }
-        if ($TransmitStatus === TXB_Transmit_Status::XB_Transmit_OK)
+        if ($TransmitStatus == TXB_Transmit_Status::XB_Transmit_OK)
         {
 //            Senddata('TX_Status','OK')
             $this->unlock('RequestSendData');

@@ -489,7 +489,7 @@ class XBZBDevice extends IPSModule
             $this->unlock('RequestSendData');
             throw new Exception('Send Data Timeout');
         }
-        if ($ReplayATData->Status === TXB_Command_Status::XB_Command_OK)
+        if ($ReplayATData->Status == TXB_Command_Status::XB_Command_OK)
         {
 //            Senddata('TX_Status','OK')
             $this->unlock('RequestSendData');
