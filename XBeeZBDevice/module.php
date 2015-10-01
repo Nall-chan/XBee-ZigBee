@@ -216,7 +216,7 @@ class XBZBDevice extends IPSModule
             throw new Exception('Pin is not Set!');
         if (!in_array($Pin, $this->DPin_Name))
             throw new Exception('Pin not exists!');
-        $VarID = $this->GetIDForIdent($Pin);
+        $VarID = @$this->GetIDForIdent($Pin);
         if ($VarID === false)
             throw new Exception('Pin not exists! Try WriteParameter.');
         if (IPS_GetVariable($VarID)['VariableType'] !== 0)
@@ -325,7 +325,7 @@ class XBZBDevice extends IPSModule
                 {
                     case 0:
                     case 1:
-                        $VarID = $this->GetIDForIdent($ATData->ATCommand);
+                        $VarID = @$this->GetIDForIdent($ATData->ATCommand);
                         if ($VarID <> 0)
                         {
                             $this->DisableAction($ATData->ATCommand);
