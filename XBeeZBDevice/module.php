@@ -402,7 +402,8 @@ class XBZBDevice extends IPSModule
         }
         if ($ActiveAPins <> 0)
         {
-            foreach ($this->APin_Name as $Index => $Pin_Name)
+            $i=0;
+            foreach ($this->APin_Name as $Pin_Name)
             {
                 if ($Pin_Name == "")
                     continue;
@@ -410,7 +411,7 @@ class XBZBDevice extends IPSModule
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-                    $PinAValue = unpack("n", substr($IOSample->Sample, 4 + $Index, 2))[1];
+                    $PinAValue = unpack("n", substr($IOSample->Sample, 6 + $i, 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
                     if ($Pin_Name == 'VSS')
                     {
@@ -422,6 +423,7 @@ class XBZBDevice extends IPSModule
                         $VarID = $this->RegisterVariableInteger($Pin_Name, $Pin_Name);
                         SetValueInteger($VarID, $PinAValue);
                     }
+                    $i++;
                 }
             }
         }
