@@ -380,5 +380,15 @@ class TXB_Node extends stdClass
     }
     
 }
+class TXB_NodeFromGeneric extends TXB_Node
+{
 
+    public function __construct($object)
+    {
+        $this->NodeAddr16 =         $object->NodeAddr16;
+        $this->NodeAddr64 =         $object->NodeAddr64;
+        $this->NodeName =         $object->NodeName;
+        
+    }
+    
 ?>

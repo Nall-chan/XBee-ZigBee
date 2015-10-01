@@ -269,7 +269,9 @@ class XBZBGateway extends IPSModule
         $i = array_search($Addr16, array_column($Nodes, 'NodeAddr16'));
         if ($i === false)
             return false;
-        return (object) $Nodes[$i];
+        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
+        $Node->utf8_decode();
+        return $Node;
     }
 
     private function GetNodeByAddr64($Addr64)
@@ -284,7 +286,9 @@ class XBZBGateway extends IPSModule
         $i = array_search($Addr64, array_column($Nodes, 'NodeAddr64'));
         if ($i === false)
             return false;
-        return (object) $Nodes[$i];
+        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
+        $Node->utf8_decode();
+        return $Node;
     }
 
     private function GetNodeByName($NodeName)
@@ -299,7 +303,9 @@ class XBZBGateway extends IPSModule
         $i = array_search($NodeName, array_column($Nodes, 'NodeName'));
         if ($i === false)
             return false;
-        return (object) $Nodes[$i];
+        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
+        $Node->utf8_decode();
+        return $Node;
         
     }
 ################## PUBLIC
