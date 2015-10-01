@@ -433,6 +433,8 @@ class XBZBDevice extends IPSModule
         $ATData->Data = '';
         foreach ($this->DPin_Name as $Pin)
         {
+            if ($Pin== '') continue;
+            
             $ATData->ATCommand = $Pin;
             $this->SendCommand($ATData);
         }
