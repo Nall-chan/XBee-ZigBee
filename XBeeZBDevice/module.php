@@ -321,7 +321,7 @@ class XBZBDevice extends IPSModule
                 // Neuen Wert darstellen und Variable anlegen und Schaltbar machen wenn Value 4 oder 5 sonst nicht schaltbar
                 if (strlen($ATData->Data) <> 1)
                     return;
-                switch ($ATData->Data)
+                switch (ord($ATData->Data))
                 {
                     case 0:
                     case 1:
