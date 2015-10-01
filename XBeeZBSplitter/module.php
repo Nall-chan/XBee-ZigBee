@@ -207,7 +207,7 @@ class XBZBSplitter extends IPSModule
                 break;
             case TXB_API_Command::XB_API_Receive_Paket:
                 $Receive_Status = $APIData->Data[0];
-                if ((ord($Receive_Status) & ( ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))) == ord(TXB_Receive_Status::XB_Receive_Packet_Acknowledged))
+                if ((ord($Receive_Status) & ( TXB_Receive_Status::XB_Receive_Packet_Acknowledged)) == TXB_Receive_Status::XB_Receive_Packet_Acknowledged)
                 {
 //                  SendData('Receive_Paket(OK)',APIdata.data);
                     $this->SendDataToChild(substr($APIData->Data, 1));
