@@ -304,6 +304,8 @@ class XBZBGateway extends IPSModule
     {
         // Prüfen und aufteilen nach ForwardDataFromSplitter und ForwardDataFromDevcie
         $Data = json_decode($JSONString);
+        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
+        
         switch ($Data->DataID)
         {
             case "{5971FB22-3F96-45AE-916F-AE3AC8CA8782}": //API
@@ -323,6 +325,8 @@ class XBZBGateway extends IPSModule
 
     private function ForwardDataFromSplitter(TXB_API_Data $APIData)
     {
+        IPS_LogMessage('ForwardDataFromSplitter:'.$this->InstanceID,  print_r($APIData,1));
+
         $Node = $this->GetNodeByName($APIData->NodeName);
         if ($Node === false)
             throw new Exception('Unknown NodeName');
@@ -333,6 +337,8 @@ class XBZBGateway extends IPSModule
 
     private function SendDataToSplitter(TXB_API_Data $APIData)
     {
+        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,  print_r($APIData,1));
+        
         $Data = $APIData->ToJSONString('{0C541DDF-CE0F-4113-A76F-B4836015212B}');
         IPS_SendDataToChildren($this->InstanceID, $Data);
     }
@@ -341,12 +347,15 @@ class XBZBGateway extends IPSModule
 
     private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
+        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
+        
         $Frame = chr(TXB_API_Command::XB_API_AT_Command) . chr($ATData->FrameID) . $ATData->ATCommand . $ATData->Data;
         $this->SendDataToParent($Frame);
     }
 
     private function SendDataToDevice(TXB_Command_Data $ATData)
     {
+        IPS_LogMessage('SendDataToDevice:'.$this->InstanceID,  print_r($ATData,1));
         $Data = $ATData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
         IPS_SendDataToChildren($this->InstanceID, $Data);
     }
@@ -356,7 +365,7 @@ class XBZBGateway extends IPSModule
     public function ReceiveData($JSONString)
     {
         $data = json_decode($JSONString);
-        IPS_LogMessage('ReceiveData:'.$this->InstanceID,  print_r($data,1));
+        IPS_LogMessage('ReceiveDataFromSerialPort:'.$this->InstanceID,  print_r($data,1));
         
         $bufferID = $this->GetIDForIdent("BufferIN");
         // Empfangs Lock setzen
@@ -412,7 +421,7 @@ class XBZBGateway extends IPSModule
 
     protected function SendDataToParent($Data)
     {
-        IPS_LogMessage('SendDataToParten:'.$this->InstanceID,$Data);
+        IPS_LogMessage('SendDataToSerialPort:'.$this->InstanceID,$Data);
         
         //Parent ok ?
         if (!$this->HasActiveParent())

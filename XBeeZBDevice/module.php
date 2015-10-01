@@ -269,12 +269,13 @@ class XBZBDevice extends IPSModule
     public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
-        IPS_LogMessage('ReceiveData:'.$this->InstanceID,  print_r($Data,1));
         
         if ($Data->DataID <> '{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}')
             return false;
         if (property_exists($Data, 'ATCommand'))
         {
+           IPS_LogMessage('ReceiveCMDData:'.$this->InstanceID,  print_r($Data,1));
+
             $ATData = new TXB_Command_Data();
             $ATData->GetDataFromJSONObject($Data);
             $this->ReceiveCMDData($ATData);
@@ -282,6 +283,7 @@ class XBZBDevice extends IPSModule
         }
         if (property_exists($Data, 'Sample'))
         {
+            IPS_LogMessage('ReceiveIOSample:'.$this->InstanceID,  print_r($Data,1));
             $IOSample = new TXB_API_IO_Sample();
             $IOSample->GetDataFromJSONObject($Data);
             $this->DecodeIOSample($IOSample);
@@ -502,7 +504,7 @@ class XBZBDevice extends IPSModule
     {
         // API-Daten verpacken und dann versenden.
         $JSONString = $Data->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
-        IPS_LogMessage('SendDataToParten:'.$this->InstanceID,$JSONString);
+        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,$JSONString);
         // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;
