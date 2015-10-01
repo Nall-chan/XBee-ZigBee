@@ -181,6 +181,8 @@ class XBZBSplitter extends IPSModule
     {
         $Data = json_decode($JSONString);
         // Nur API Daten annehmen.
+        IPS_LogMessage('ReceiveData:'.$this->InstanceID,  print_r($Data,1));
+        
         if ($Data->DataID <> '{0C541DDF-CE0F-4113-A76F-B4836015212B}')
             return false;
         $APIData = new TXB_API_Data();
@@ -243,6 +245,7 @@ class XBZBSplitter extends IPSModule
     {
         // API-Daten verpacken und dann versenden.
         $JSONString = $Data->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
+        IPS_LogMessage('SendDataToParten:'.$this->InstanceID,$JSONString);
         // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;

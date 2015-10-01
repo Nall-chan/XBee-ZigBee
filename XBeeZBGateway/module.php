@@ -356,6 +356,8 @@ class XBZBGateway extends IPSModule
     public function ReceiveData($JSONString)
     {
         $data = json_decode($JSONString);
+        IPS_LogMessage('ReceiveData:'.$this->InstanceID,  print_r($data,1));
+        
         $bufferID = $this->GetIDForIdent("BufferIN");
         // Empfangs Lock setzen
         if (!$this->lock("ReceiveLock"))
@@ -410,6 +412,8 @@ class XBZBGateway extends IPSModule
 
     protected function SendDataToParent($Data)
     {
+        IPS_LogMessage('SendDataToParten:'.$this->InstanceID,$Data);
+        
         //Parent ok ?
         if (!$this->HasActiveParent())
             throw new Exception("Instance has no active Parent.");
