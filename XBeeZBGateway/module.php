@@ -72,19 +72,19 @@ class XBZBGateway extends IPSModule
         $APIData = new TXB_API_Data();
         $APIData->APICommand = ord($Frame[0]);
         $Frame = substr($Frame, 1, -1);
-                            IPS_LogMessage('XB_API_Command',$APIData->APICommand);                                
+        IPS_LogMessage('XB_API_Command',$APIData->APICommand);                                
 
         switch ($APIData->APICommand)
         {
             case TXB_API_Command::XB_API_AT_Command_Responde:
-                            IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
-                
+                IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
                 // FERTIG
                 $ATData = new TXB_Command_Data();
                 $ATData->FrameID = ord($Frame[0]);
                 $ATData->ATCommand = substr($Frame, 1, 2);
                 $ATData->Status = ord($Frame[3]);
                 $ATData->Data = substr($Frame, 4);
+                IPS_LogMessage('XB_Command_Data',print_r($ATData,1));                                
                 switch ($ATData->ATCommand)
                 {
                     case TXB_AT_Command::XB_AT_ND:
@@ -225,6 +225,7 @@ class XBZBGateway extends IPSModule
         $NodeVarID = $this->GetIDForIdent('Nodes');
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
+        $Node->utf8_encode();
         $Nodes = json_decode(GetValueString($NodeVarID), 1);
         if (!is_array($Nodes))
         {
@@ -258,6 +259,7 @@ class XBZBGateway extends IPSModule
 
     private function GetNodeByAddr16($Addr16)
     {
+        $Addr16= utf8_encode($Addr16);
         $NodeVarID = $this->GetIDForIdent('Nodes');
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");
@@ -272,6 +274,7 @@ class XBZBGateway extends IPSModule
 
     private function GetNodeByAddr64($Addr64)
     {
+        $Addr64= utf8_encode($Addr64);
         $NodeVarID = $this->GetIDForIdent('Nodes');
         if ($NodeVarID === false)
             throw new Exception("NodeList not exists.");

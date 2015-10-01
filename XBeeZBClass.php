@@ -366,6 +366,19 @@ class TXB_Node extends stdClass
     public $NodeAddr16;
     public $NodeName;
 
+    public function utf8_encode()
+    {
+        $this->NodeAddr16 =         utf8_encode($this->NodeAddr16);
+        $this->NodeAddr64 =         utf8_encode($this->NodeAddr64);
+        $this->NodeName =         utf8_encode($this->NodeName);
+    }
+    public function utf8_decode()
+    {
+        $this->NodeAddr16 =         utf8_decode($this->NodeAddr16);
+        $this->NodeAddr64 =         utf8_decode($this->NodeAddr64);
+        $this->NodeName =         utf8_decode($this->NodeName);
+    }
+    
 }
 
 ?>
