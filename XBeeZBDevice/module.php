@@ -420,7 +420,7 @@ class XBZBDevice extends IPSModule
                     else
                     {
                         $VarID = $this->RegisterVariableInteger($Pin_Name, $Pin_Name);
-                        SetValueFloat($VarID, $PinAValue);
+                        SetValueInteger($VarID, $PinAValue);
                     }
                 }
             }
