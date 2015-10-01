@@ -153,6 +153,7 @@ class XBZBSplitter extends IPSModule
     private function SendDataToChild($Data)
     {
         $JSONString = json_encode(Array("DataID" => "{018EF6B5-AB94-40C6-AA53-46943E824ACF}", "Buffer" => utf8_encode($Data)));
+        IPS_LogMessage('SendDataToChild:'.$this->InstanceID,$JSONString);
         IPS_SendDataToChildren($this->InstanceID, $JSONString);
     }
 
