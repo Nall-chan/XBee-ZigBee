@@ -287,6 +287,21 @@ class XBZBGateway extends IPSModule
         return (object) $Nodes[$i];
     }
 
+    private function GetNodeByName($NodeName)
+    {
+        $NodeName = utf8_encode($NodeName);
+        $NodeVarID = $this->GetIDForIdent('Nodes');
+        if ($NodeVarID === false)
+            throw new Exception("NodeList not exists.");
+        $Nodes = json_decode(GetValueString($NodeVarID), 1);
+        if (!is_array($Nodes))
+            return false;
+        $i = array_search($NodeName, array_column($Nodes, 'NodeName'));
+        if ($i === false)
+            return false;
+        return (object) $Nodes[$i];
+        
+    }
 ################## PUBLIC
     /**
      * This function will be available automatically after the module is imported with the module control.
