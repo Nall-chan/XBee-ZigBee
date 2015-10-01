@@ -385,7 +385,7 @@ class XBZBDevice extends IPSModule
                 if (($ActiveDPins & $Bit) == $Bit)
                 {
 //                        {$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-                    $VarID = $this->RegisterVariableBoolean($DPin_Name, $DPin_Name);
+                    $VarID = $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
 
                     if (($PinValue & $Bit) == $Bit)
                     {
