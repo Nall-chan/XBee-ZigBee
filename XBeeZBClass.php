@@ -390,5 +390,5 @@ class TXB_NodeFromGeneric extends TXB_Node
         $this->NodeName =         $object->NodeName;
         
     }
-    
+}  
 ?>
