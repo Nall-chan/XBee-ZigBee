@@ -410,7 +410,7 @@ class XBZBDevice extends IPSModule
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-                    $PinAValue = unpack("N", substr($IOSample->Sample, 4 + $Index, 2))[1];
+                    $PinAValue = unpack("n", substr($IOSample->Sample, 4 + $Index, 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
                     if ($Pin_Name == 'VSS')
                     {
