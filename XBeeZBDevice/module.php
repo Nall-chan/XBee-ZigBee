@@ -481,7 +481,7 @@ class XBZBDevice extends IPSModule
         }
         $ReplayATData = $this->WaitForResponse();
 
-        IPS_LogMessage('ReplayATData:'.$this->InstanceID,print_r($ReplayATData,1));
+//        IPS_LogMessage('ReplayATData:'.$this->InstanceID,print_r($ReplayATData,1));
 
         if ($ReplayATData === false)
         {
@@ -530,7 +530,7 @@ class XBZBDevice extends IPSModule
                     $JSON = json_decode($ret);
                     $ATData = new TXB_Command_Data();
                     $ATData->GetDataFromJSONObject($JSON);
-                    return $ret;
+                    return $ATData;
                 }
                 return false;
             }
