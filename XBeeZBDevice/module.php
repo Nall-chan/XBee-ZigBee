@@ -406,11 +406,11 @@ class XBZBDevice extends IPSModule
         if ($ActiveAPins <> 0)
         {
             $i=0;
-            foreach ($this->APin_Name as $Pin_Name)
+            foreach ($this->APin_Name as $Index => $Pin_Name)
             {
                 if ($Pin_Name == "")
                     continue;;
-                $Bit = pow(2, $i);
+                $Bit = pow(2, $Index);
                 IPS_LogMessage('Pin_Name_AIT',  decbin($ActiveAPins));                                
                 IPS_LogMessage('Pin_Name_BIT',  decbin($Bit));                
                 IPS_LogMessage('Pin_Name',$Pin_Name);                                
