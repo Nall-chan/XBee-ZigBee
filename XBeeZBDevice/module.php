@@ -275,7 +275,7 @@ class XBZBDevice extends IPSModule
             return false;
         if (property_exists($Data, 'ATCommand'))
         {
-           IPS_LogMessage('ReceiveCMDData:'.$this->InstanceID,  print_r($Data,1));
+//           IPS_LogMessage('ReceiveCMDData:'.$this->InstanceID,  print_r($Data,1));
 
             $ATData = new TXB_Command_Data();
             $ATData->GetDataFromJSONObject($Data);
@@ -284,7 +284,7 @@ class XBZBDevice extends IPSModule
         }
         if (property_exists($Data, 'Sample'))
         {
-            IPS_LogMessage('ReceiveIOSample:'.$this->InstanceID,  print_r($Data,1));
+//            IPS_LogMessage('ReceiveIOSample:'.$this->InstanceID,  print_r($Data,1));
             $IOSample = new TXB_API_IO_Sample();
             $IOSample->GetDataFromJSONObject($Data);
             $this->DecodeIOSample($IOSample);
@@ -411,18 +411,12 @@ class XBZBDevice extends IPSModule
                 if ($Pin_Name == "")
                     continue;;
                 $Bit = pow(2, $Index);
-//                IPS_LogMessage('Pin_Name_AIT',  decbin($ActiveAPins));                                
-//                IPS_LogMessage('Pin_Name_BIT',  decbin($Bit));                
-//                IPS_LogMessage('Pin_Name',$Pin_Name);                                
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $PinAValue = 0;
                     $PinAValue = unpack("n", substr($IOSample->Sample, 6 + ($i*2), 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
-                    IPS_LogMessage('Pin_Name',$Pin_Name);
-                    IPS_LogMessage('Pin_Index',$Index.' - '.$i);
-                    IPS_LogMessage('Pin_Value',  bin2hex(substr($IOSample->Sample, 6 + ($i*2), 2)));
                     
                     if ($Pin_Name == 'VSS')
                     {
