@@ -52,9 +52,7 @@ class XBZBGateway extends IPSModule
     {
         $checksum = ord($Frame[strlen($Frame) - 1]);
         //Checksum bilden
-            IPS_LogMessage('Receive - Checksum must '.$checksum, bin2hex($Frame));
-//             88 01 4e 44 00 ff 48 00 13 a2 00 40 79 c2 45 4d 53 33 35 5f 31 00 00 00 02 00 c1 05 10 1e 9a
-//    7E 00 1E 88 01 4E 44 00 FF 48 00 13 A2 00 40 79 C2 45 4D 53 33 35 5F 31 00 00 00 02 00 C1 05 10 1E 9A 
+//            IPS_LogMessage('Receive - Checksum must '.$checksum, bin2hex($Frame));
         for ($x = 0; $x < (strlen($Frame)-1); $x++)
         {
             $checksum = $checksum + ord($Frame[$x]);
@@ -77,14 +75,14 @@ class XBZBGateway extends IPSModule
         switch ($APIData->APICommand)
         {
             case TXB_API_Command::XB_API_AT_Command_Responde:
-                IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
+//                IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
                 // FERTIG
                 $ATData = new TXB_Command_Data();
                 $ATData->FrameID = ord($Frame[0]);
                 $ATData->ATCommand = substr($Frame, 1, 2);
                 $ATData->Status = ord($Frame[3]);
                 $ATData->Data = substr($Frame, 4);
-                IPS_LogMessage('XB_Command_Data',print_r($ATData,1));                                
+//                IPS_LogMessage('XB_Command_Data',print_r($ATData,1));                                
                 switch ($ATData->ATCommand)
                 {
                     case TXB_AT_Command::XB_AT_ND:
@@ -100,7 +98,7 @@ class XBZBGateway extends IPSModule
                                 $Node->NodeName = substr($ATData->Data, 0, $end);
                                 //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
-                            IPS_LogMessage('AT_Command::XB_AT_ND',print_r($Node,1));                                
+//                            IPS_LogMessage('AT_Command::XB_AT_ND',print_r($Node,1));                                
                                 $this->AddOrReplaceNode($Node);
                             }
                         }
@@ -325,7 +323,7 @@ class XBZBGateway extends IPSModule
     {
         // Prüfen und aufteilen nach ForwardDataFromSplitter und ForwardDataFromDevcie
         $Data = json_decode($JSONString);
-        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
+//        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
         
         switch ($Data->DataID)
         {
@@ -346,7 +344,7 @@ class XBZBGateway extends IPSModule
 
     private function ForwardDataFromSplitter(TXB_API_Data $APIData)
     {
-        IPS_LogMessage('ForwardDataFromSplitter:'.$this->InstanceID,  print_r($APIData,1));
+//        IPS_LogMessage('ForwardDataFromSplitter:'.$this->InstanceID,  print_r($APIData,1));
 
         $Node = $this->GetNodeByName($APIData->NodeName);
         if ($Node === false)
@@ -358,7 +356,7 @@ class XBZBGateway extends IPSModule
 
     private function SendDataToSplitter(TXB_API_Data $APIData)
     {
-        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,  print_r($APIData,1));
+//        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,  print_r($APIData,1));
         
         $Data = $APIData->ToJSONString('{0C541DDF-CE0F-4113-A76F-B4836015212B}');
         IPS_SendDataToChildren($this->InstanceID, $Data);
@@ -368,7 +366,7 @@ class XBZBGateway extends IPSModule
 
     private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
-        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
+//        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
         
         $Frame = chr(TXB_API_Command::XB_API_AT_Command) . chr($ATData->FrameID) . $ATData->ATCommand . $ATData->Data;
         $this->SendDataToParent($Frame);
@@ -376,7 +374,7 @@ class XBZBGateway extends IPSModule
 
     private function SendDataToDevice(TXB_Command_Data $ATData)
     {
-        IPS_LogMessage('SendDataToDevice:'.$this->InstanceID,  print_r($ATData,1));
+//        IPS_LogMessage('SendDataToDevice:'.$this->InstanceID,  print_r($ATData,1));
         $Data = $ATData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
         IPS_SendDataToChildren($this->InstanceID, $Data);
     }
@@ -386,7 +384,7 @@ class XBZBGateway extends IPSModule
     public function ReceiveData($JSONString)
     {
         $data = json_decode($JSONString);
-        IPS_LogMessage('ReceiveDataFromSerialPort:'.$this->InstanceID,  print_r($data,1));
+//        IPS_LogMessage('ReceiveDataFromSerialPort:'.$this->InstanceID,  print_r($data,1));
         
         $bufferID = $this->GetIDForIdent("BufferIN");
         // Empfangs Lock setzen
@@ -402,18 +400,18 @@ class XBZBGateway extends IPSModule
         //Anfang suchen
         if ($start === false)
         {
-            IPS_LogMessage('XBeeZigBee Gateway', 'Frame without 0x7e');
+//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame without 0x7e');
             $stream = '';
         }
         elseif ($start > 0)
         {
-            IPS_LogMessage('XBeeZigBee Gateway', 'Frame do not start with 0x7e');
+//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame do not start with 0x7e');
             $stream = substr($stream, $start);
         }
         //Paket suchen
         if (strlen($stream) < 5)
         {
-            IPS_LogMessage('XBeeZigBee Gateway', 'Frame to short');
+//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame to short');
 
             SetValueString($bufferID, $stream);
             $this->unlock("ReceiveLock");
@@ -422,7 +420,7 @@ class XBZBGateway extends IPSModule
         $len = ord($stream[1]) * 256 + ord($stream[2]);
         if (strlen($stream) < $len + 4)
         {
-            IPS_LogMessage('XBeeZigBee Gateway', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.');
+//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.');
             SetValueString($bufferID, $stream);
             $this->unlock("ReceiveLock");
             return;
@@ -442,7 +440,7 @@ class XBZBGateway extends IPSModule
 
     protected function SendDataToParent($Data)
     {
-        IPS_LogMessage('SendDataToSerialPort:'.$this->InstanceID,$Data);
+//        IPS_LogMessage('SendDataToSerialPort:'.$this->InstanceID,$Data);
         
         //Parent ok ?
         if (!$this->HasActiveParent())
@@ -489,7 +487,7 @@ class XBZBGateway extends IPSModule
 
     protected function HasActiveParent()
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
+//        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
         $instance = IPS_GetInstance($this->InstanceID);
         if ($instance['ConnectionID'] > 0)
         {
@@ -578,7 +576,7 @@ class XBZBGateway extends IPSModule
 
     protected function SetSummary($data)
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
+//        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
     }
 
 ################## SEMAPHOREN Helper  - private  

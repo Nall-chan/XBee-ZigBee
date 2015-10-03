@@ -88,7 +88,7 @@ class XBZBSplitter extends IPSModule
     {
         // Prüfen und aufteilen nach ForwardDataFromChild und ForwardDataFromDevcie
         $Data = json_decode($JSONString);
-        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
+//        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
 
         switch ($Data->DataID)
         {
@@ -108,7 +108,7 @@ class XBZBSplitter extends IPSModule
 //--- { Data Points }  // von String-Child
     private function ForwardDataFromChild($Data)
     {
-        IPS_LogMessage('ForwardDataFromChild:'.$this->InstanceID,  print_r($Data,1));
+//        IPS_LogMessage('ForwardDataFromChild:'.$this->InstanceID,  print_r($Data,1));
 
         if ($this->HasActiveParent() === false)
             throw new Exception('Instance has no active Parent Instance!');
@@ -153,7 +153,7 @@ class XBZBSplitter extends IPSModule
     private function SendDataToChild($Data)
     {
         $JSONString = json_encode(Array("DataID" => "{018EF6B5-AB94-40C6-AA53-46943E824ACF}", "Buffer" => utf8_encode($Data)));
-        IPS_LogMessage('SendDataToChild:'.$this->InstanceID,$JSONString);
+//        IPS_LogMessage('SendDataToChild:'.$this->InstanceID,$JSONString);
         IPS_SendDataToChildren($this->InstanceID, $JSONString);
     }
 
@@ -163,7 +163,7 @@ class XBZBSplitter extends IPSModule
     // Sendet Remote AT Commandos umgesetzt in API-Frames an den Coordinator (Gateway)    
     private function ForwardDataFromDevice(TXB_Command_Data $ATData)
     {
-        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
+//        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
         
         if ($this->HasActiveParent() === false)
             throw new Exception('Instance has no active Parent Instance!');
@@ -187,7 +187,7 @@ class XBZBSplitter extends IPSModule
     {
         $Data = json_decode($JSONString);
         // Nur API Daten annehmen.
-        IPS_LogMessage('ReceiveDataFromGateway:'.$this->InstanceID,  print_r($Data,1));
+//        IPS_LogMessage('ReceiveDataFromGateway:'.$this->InstanceID,  print_r($Data,1));
         
         if ($Data->DataID <> '{0C541DDF-CE0F-4113-A76F-B4836015212B}')
             return false;
@@ -252,7 +252,7 @@ class XBZBSplitter extends IPSModule
         // API-Daten verpacken und dann versenden.
         $Data->NodeName=$this->ReadPropertyString('NodeName');
         $JSONString = $Data->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
-        IPS_LogMessage('SendDataToGateway:'.$this->InstanceID,$JSONString);
+//        IPS_LogMessage('SendDataToGateway:'.$this->InstanceID,$JSONString);
         // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;
@@ -283,7 +283,7 @@ class XBZBSplitter extends IPSModule
 
     protected function HasActiveParent()
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
+//        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
         $instance = IPS_GetInstance($this->InstanceID);
         if ($instance['ConnectionID'] > 0)
         {
@@ -302,7 +302,7 @@ class XBZBSplitter extends IPSModule
 
     protected function SetSummary($data)
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
+//        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
     }
 
 ################## SEMAPHOREN Helper  - private  

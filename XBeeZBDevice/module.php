@@ -164,6 +164,7 @@ class XBZBDevice extends IPSModule
 
 
         $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval'), 'XBee_RequestState($_IPS[\'TARGET\']);');
+//                                IDENT                 INTERVAL                                FUNKTION
         $this->ReadPinConfig();
         $this->RequestPinState();
 
@@ -407,7 +408,7 @@ class XBZBDevice extends IPSModule
             {
                 if ($Pin_Name == "")
                     continue;
-                $Bit = pow(2, $Index);
+                $Bit = pow(2, $i);
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
@@ -509,7 +510,7 @@ class XBZBDevice extends IPSModule
     {
         // API-Daten verpacken und dann versenden.
         $JSONString = $Data->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
-        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,$JSONString);
+//        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,$JSONString);
         // Daten senden
         IPS_SendDataToParent($this->InstanceID, $JSONString);
         return true;
@@ -544,7 +545,7 @@ class XBZBDevice extends IPSModule
 
     protected function HasActiveParent()
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
+//        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
         $instance = IPS_GetInstance($this->InstanceID);
         if ($instance['ConnectionID'] > 0)
         {
@@ -645,7 +646,7 @@ class XBZBDevice extends IPSModule
 
     protected function SetSummary($data)
     {
-        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
+//        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
     }
 
 ################## SEMAPHOREN Helper  - private  
