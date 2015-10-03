@@ -386,7 +386,9 @@ class XBZBDevice extends IPSModule
                 if (($ActiveDPins & $Bit) == $Bit)
                 {
 //                        {$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
-                    $VarID = $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
+                    $VarID = @$this->GetIDForIdent($Pin_Name);
+                    if ($VarID === false)
+                        $VarID = $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
 
                     if (($PinValue & $Bit) == $Bit)
                     {
@@ -416,12 +418,16 @@ class XBZBDevice extends IPSModule
                     $PinAValue = $PinAValue * 1.171875;
                     if ($Pin_Name == 'VSS')
                     {
-                        $VarID = $this->RegisterVariableFloat('VSS', 'VSS', '~Volt');
+                        $VarID = @$this->GetIDForIdent($Pin_Name);
+                        if ($VarID === false)
+                            $VarID = $this->RegisterVariableFloat('VSS', 'VSS', '~Volt');
                         SetValueFloat($VarID, $PinAValue / 1000);
                     }
                     else
                     {
-                        $VarID = $this->RegisterVariableInteger($Pin_Name, $Pin_Name);
+                        $VarID = @$this->GetIDForIdent($Pin_Name);
+                        if ($VarID === false)
+                            $VarID = $this->RegisterVariableInteger($Pin_Name, $Pin_Name);
                         SetValueInteger($VarID, $PinAValue);
                     }
                     $i++;
