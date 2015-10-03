@@ -418,11 +418,11 @@ class XBZBDevice extends IPSModule
                 {
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $PinAValue = 0;
-                    $PinAValue = unpack("n", substr($IOSample->Sample, 6 + $i, 2))[1];
+                    $PinAValue = unpack("n", substr($IOSample->Sample, 6 + ($i*2), 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
                     IPS_LogMessage('Pin_Name',$Pin_Name);
                     IPS_LogMessage('Pin_Index',$Index.' - '.$i);
-                    IPS_LogMessage('Pin_Value',  bin2hex(substr($IOSample->Sample, 6 + $i, 2)));
+                    IPS_LogMessage('Pin_Value',  bin2hex(substr($IOSample->Sample, 6 + ($i*2), 2)));
                     
                     if ($Pin_Name == 'VSS')
                     {
