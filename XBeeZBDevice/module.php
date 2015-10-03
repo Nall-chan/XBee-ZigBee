@@ -416,6 +416,7 @@ class XBZBDevice extends IPSModule
 //                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $PinAValue = unpack("n", substr($IOSample->Sample, 6 + $i, 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
+                    IPS_LogMessage('Pin_Name',$Pin_Name);
                     if ($Pin_Name == 'VSS')
                     {
                         $VarID = @$this->GetIDForIdent($Pin_Name);
