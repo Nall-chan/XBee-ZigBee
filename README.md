@@ -12,9 +12,9 @@ Implementierung der XBee-ZigBee Serie2.
 4. [Hardware-Installation](#4-hardware--installation)
 5. [Einrichten der Gateway & Splitter Instanzen in IPS](#5-einrichten-der-gateway--splitter-instanzen-in-ips)
 6. [Einrichten der Analog / Digital IOs in IPS](#6-einrichten-der-analog--digital-ios-in-ips)
-7. [Funktionsreferenz](#7-funktionsreferenz) 
-8. [Parameter / Modul-Infos](#8-parameter-modul-infos) 
-9. [Tips & Tricks](#9-tips-tricks) 
+7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz) 
+8. [Parameter / Modul-Infos](#8-parameter--modul-infos) 
+9. [Tips & Tricks](#9-tips--tricks) 
 10. [Anhang](#10-anhang)
 
 ## 1. Funktionsumfang
@@ -35,7 +35,7 @@ Implementierung der XBee-ZigBee Serie2.
  - RS232 / auf 3,3V Adapter (-Platine) oder USB-Seriell-Wandler mit 3,3V für den Coordinator (oder jede andere Form der seriellen Datenanbindung mit 3,3V)
 
  
-## 3. Installation & Konfiguration
+## 3. Software-Installation
 
 **IPS 3.1 bis 3.4:**  
    Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
@@ -48,7 +48,7 @@ Implementierung der XBee-ZigBee Serie2.
    `git://github.com/Nall-chan/IPSXBeeZigBee.git`  
 
 
-## 4. Hardware-Installation & Einrichtung
+## 4. Hardware-Installation
 
   Installieren der Software XTCU von Digi um die Geräte einzurichten zu können.  
   Auf einen XBee die Firmware des Coordinator laden und Parametrieren von mindestens folgenden Parameter (Der Rest kann auf den Defaultwerten bleiben) :  
