@@ -8,13 +8,13 @@ Implementierung der XBee-ZigBee Serie2.
 
 1. [Funktionsumfang](#1-funktionsumfang) 
 2. [Voraussetzungen](#2-voraussetzungen)
-3. [Software-Installation](#3-software-installation)
-4. [Hardware-Installation](#4-hardware-installation)
-5. [Einrichten der Gateway & Splitter Instanzen in IPS](#5-einrichten-der-gateway-splitter-instanzen-in-ips)
-6. [Einrichten der Analog / Digital IOs in IPS](#6-einrichten-der-analog-digital-ios-in-ips)
-7. [Funktionsreferenz](#4-funktionsreferenz) 
-8. [Parameter / Modul-Infos](#4-parameter-modul-infos) 
-9. [Tips & Tricks](#4-tips-tricks) 
+3. [Software-Installation](#3-software--installation)
+4. [Hardware-Installation](#4-hardware--installation)
+5. [Einrichten der Gateway & Splitter Instanzen in IPS](#5-einrichten-der-gateway--splitter-instanzen-in-ips)
+6. [Einrichten der Analog / Digital IOs in IPS](#6-einrichten-der-analog--digital-ios-in-ips)
+7. [Funktionsreferenz](#7-funktionsreferenz) 
+8. [Parameter / Modul-Infos](#8-parameter-modul-infos) 
+9. [Tips & Tricks](#9-tips-tricks) 
 10. [Anhang](#10-anhang)
 
 ## 1. Funktionsumfang
@@ -38,7 +38,7 @@ Implementierung der XBee-ZigBee Serie2.
 ## 3. Installation & Konfiguration
 
 **IPS 3.1 bis 3.4:**  
-   Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE.zip)  
+   Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
    Die enthaltende Datei MS35.dll in das /modules Verzeichnis von IPS kopieren.  
    Ist der Ordner Modules nicht vorhanden, so ist er anzulegen.  
    IPS-Dienst neustarten.
@@ -185,19 +185,19 @@ GUIDs der Instanzen (z.B. wenn Instanz per PHP angelegt werden soll):
 Eigenschaften des Gateways für Get/SetProperty-Befehle:  
 
 | Eigenschaft | Typ     | Standardwert | Funktion                            |
-| :---------: | :-----: |              | :---------------------------------: |
+| :---------: | :-----: | :----------: | :---------------------------------: |
 | NDInterval  | integer | 60           | Zyklischer Node Discovery (0 = aus) |
 
 Eigenschaften des Splitters für Get/SetProperty-Befehle:  
 
 | Eigenschaft | Typ    | Standardwert | Funktion                 |
-| :---------: | :----: |              | :----------------------: |
+| :---------: | :----: | :----------: | :----------------------: |
 | NodeName    | string |              | Node Identifier des XBee |
 
 Eigenschaften des Devices für Get/SetProperty-Befehle:  
 
 | Eigenschaft   | Typ     | Standardwert | Funktion                                                           |
-| :-----------: | :-----: |              | :----------------------------------------------------------------: |
+| :-----------: | :-----: | :----------: | :----------------------------------------------------------------: |
 | Interval      | integer | 0            | Zeit in sek. für zyklische Pin abfrage                             |
 | EmulateStatus | boolean | false        | Beim schalten eines PIN wird die Statusvariable sofort nachgeführt |
 
