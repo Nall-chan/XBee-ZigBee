@@ -130,8 +130,12 @@ XBEE_NodeDiscovery(integer $InstanzeID);
 ```
  Sendet einen NodeDiscovery in das ZigBee-Netzwerks.  
 
+---
+
  **XBee-ZB Splitter:**  
  (Keine PHP Funktionen)
+
+---
 
  **XBee-ZB Device:**  
 
@@ -140,10 +144,14 @@ boolean XBEE_RequestState(integer $InstanzeID);
 ```
 Ließt den Status der IOs. Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis TRUE, andernfalls FALSE.  
 
+---
+
 ```php
 boolean XBEE_ReadConfig(integer $InstanzeID);
 ```
 Ließt die Konfiguration der IOs. Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis TRUE, andernfalls FALSE.   
+
+---
 
 ```php
 boolean XBEE_WriteBoolean(integer $InstanzeID, string $Pin, boolean $Value);
@@ -153,6 +161,9 @@ Beispiel:
 ```php
 XBEE_WriteBoolean(123456, 'D4', true);  // Setzt Ausgage D4
 ```
+
+---
+  
 ```php
 boolean XBEE_WriteParameter(integer $InstanzeID, string $Parameter, string $Value);
 ```
@@ -162,6 +173,8 @@ Beispiele:
 XBEE_WriteParameter(123456, 'NI', 'MS35_5');  // Setzt den NodeIdent auf MS35_5
 XBEE_WriteParameter(123456, 'IR', chr(0x27).chr(0x10));  // Legt 10 sek. als Intervall für das periodische Sampling des Node fest.
 ```
+
+---
 
 ```php
 string XBEE_ReadParameter(integer $InstanzeID, string $Parameter);
