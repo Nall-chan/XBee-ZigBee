@@ -52,23 +52,49 @@ Implementierung der XBee-ZigBee Serie2.
 
   Installieren der Software XTCU von Digi um die Geräte einzurichten zu können.  
   Auf einen XBee die Firmware des Coordinator laden und Parametrieren von mindestens folgenden Parameter (Der Rest kann auf den Defaultwerten bleiben) :  
+   ![](Doku/firmware1.png)  
 
-  - ID	:	PAN ID
-  - ZS	:	0x2
+  - ID	(PAN ID)                :   eigene beliebige PAN ID eintragen
+  - ZS	(ZigBee Stack Profile)  :   0x2
+
+   ![](Doku/konfig1.png)  
+
+ Eventuell die Einstellungen der seriellen Schnittstelle anpassen auf die örtlichen Gegebenheiten.
+
+  - BD	(Baud Rate) :   je nach Bedarf (ist nur für die IPS-Einrichtung relevant, nicht für die Endgeräte)
+  - NB	(Parity)    :   0x0 (default)
+  - SB	(Stop Bits) :   0x0 (default)
+  - D7	(DIO7)      :   0x0 (disable)
+  - D6	(DIO6)      :   0x0 (disable)
+   ![](Doku/konfig2.png)  
 
  Auf den/die anderen XBee wird eine Router AT / EndDevice AT Firmware aufgespielt.  
  Details zur Verwendungen von Routern und EndDevices sind auf der Herstellerwebseite nach zu lesen.  
  Als grobe Orientierung: Bei großen Strecken zwischen EndDevice und Coordinator einen Router dazwischen einsetzen. Bei Endgeräten welche stromsparend aufgebaut werden müssen, immer ein EndDevice einsetzen.  
+   ![](Doku/firmware2.png)  
+
  Parametrieren von mindestens folgenden Parameter:  
 
-  - ID	:	(identisch zum Coordinator)
-  - ZS	:	0x2
-  - JN	:	Enabled [0x1]
-  - NI	:	Name des Node
-  - BD	:	Baudrate je nach Applikation
+  - ID	(PAN ID)                :   eigene beliebige PAN ID aus dem Coordinator
+  - ZS	(ZigBee Stack Profile)  :   0x2
+  - JN	(Join Notification)     :   0x1 (Enabled)
+   ![](Doku/konfig3.png)  
+  - NI	(Node Identifier)       :   Name des Node für die Identifizierung in IPS
+   ![](Doku/konfig4.png)  
+  - BD	(Baud Rate)             :   je nach Bedarf des jeweiligen Endgerätes an dem XBee (muss nicht identisch sein mit dem Coordinator)
+  - NB	(Parity)                :   je nach Bedarf des jeweiligen Endgerätes
+  - SB	(Stop Bits)             :   je nach Bedarf des jeweiligen Endgerätes
+  - RO  (Packetization Timeout) :   0x0
+  - D7	(DIO7)                  :   je nach Bedarf des jeweiligen Endgerätes
+  - D6	(DIO6)                  :   je nach Bedarf des jeweiligen Endgerätes
+   ![](Doku/konfig5.png)  
 
-   ![](Doku/firmware1.png)  
-   ![](Doku/firmware2.png)  
+ Sind alle Geräte konfiguriert, so kann in XCTU die funktion des Netzwerkes überprüft werden.  
+ Hierzu den sich mit den Coordinator per seriellen Anschluß verbinden und eine Netzwerksuche starten.  
+ Die EndDevices bzw. Router werden dann gesucht und können zum konfigurieren hinzugefügt werden.  
+   ![](Doku/suche.png)  
+ Somit ist auch eine (spätere) Remote-Konfiguration der Module möglich, ohne diese wieder auszubauen und direkt per seriellen Anschluß zu parametrieren.  
+   ![](Doku/find.png)  
 
 ## 5. Einrichten der Gateway & Splitter Instanzen in IPS
 
@@ -76,9 +102,11 @@ Unter Instanz hinzufügen (Splitter) wählen und ein XBee ZigBee Splitter hinzuf
 Es wird automatisch ein XBee ZigBee Gateway und ein SerialPort angelegt.
 Zuerst den SerialPort Konfigurieren , dabei die Eingestellten Parameter (Baudrate) des Coordinator eintragen. Defaultwert ist 9600. In der Splitter Instanz den Node-ID des entfernten XBee eintragen. Sind diese Parameter eingestellt und übernommen, kann im Debug-Fenster der Gateway-Instanz das Debuging aktivieren werden. Wird jetzt im Testcenter der Instanz (unter Einstellungen) ein Node Discovery ausgelöst, sollten die entfernten XBee im Debug entsprechende Ausgaben erzeugen.
 (AT_Command_Responde(ND) : <NI>  <Adresse> <HW-Adresse>)
-
-Nun kann mit dem anlegen eigener Instanzen an den XBee-ZigBee Splitter fortgefahren werden.
    ![](Doku/debug.png)  
+
+Nun kann mit dem anlegen eigener Instanzen an den XBee-ZigBee Splitter fortgefahren werden.  
+Hier ist der jeweilige NI (Node Identifier) einzutragen.
+
 
 ## 6. Einrichten der Analog / Digital IOs in IPS
 
