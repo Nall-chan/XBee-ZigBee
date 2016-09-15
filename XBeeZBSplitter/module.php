@@ -66,20 +66,20 @@ class XBZBSplitter extends IPSModule
         $TransmitStatus = $this->WaitForResponse();
         if ($TransmitStatus === false)
         {
-//          Senddata('TX_Status','Timeout');
+          $this->SendDebug('TX_Status','Timeout',0);
             $this->unlock('RequestSendData');
             throw new Exception('Send Data Timeout');
         }
         if ($TransmitStatus == TXB_Transmit_Status::XB_Transmit_OK)
         {
-//            Senddata('TX_Status','OK')
+            $this->SendDebug('TX_Status','OK',0);
             $this->unlock('RequestSendData');
             return true;
         }
-//        Senddata('TX_Status','Error: '+ XB_Transmit_Status_to_String(fTransmitStatus));
+        $this->SendDebug('TX_Status','Error: '. TXB_Transmit_Status::ToString($TransmitStatus),0);
         $this->unlock('RequestSendData');
 
-        throw new Exception('Error on Transmit:' . ord($TransmitStatus));
+        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($TransmitStatus));
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -117,12 +117,13 @@ class XBZBSplitter extends IPSModule
         {
             try
             {
+                $this->SendDebug('Forward', $Data,1);
                 $this->RequestSendData($Data);
             }
             catch (Exception $ex)
             {
-                unset($ex);
-                throw new Exception('Error on forward Data');
+                trigger_error($ex->getMessage(),$ex->getCode());
+                return false;
             }
         }
         else
@@ -132,11 +133,12 @@ class XBZBSplitter extends IPSModule
             {
                 try
                 {
+                    $this->SendDebug('Forward', substr($Data, 0, $Max),1);
                     $this->RequestSendData(substr($Data, 0, $Max));
                 }
-                catch (Exception $exc)
+                catch (Exception $ex)
                 {
-                    unset($exc);
+                    trigger_error($ex->getMessage(),$ex->getCode());
                     $SendOk = FALSE;
                 }
 
@@ -145,7 +147,7 @@ class XBZBSplitter extends IPSModule
                     $Max = strlen($Data);
             }
             if (!$SendOk)
-                throw new Exception('Error on forward Data');
+                return false;
         }
         return true;
     }
@@ -209,12 +211,12 @@ class XBZBSplitter extends IPSModule
                 $Receive_Status = $APIData->Data[0];
                 if ((ord($Receive_Status) & ( TXB_Receive_Status::XB_Receive_Packet_Acknowledged)) == TXB_Receive_Status::XB_Receive_Packet_Acknowledged)
                 {
-//                  SendData('Receive_Paket(OK)',APIdata.data);
+                  $this->SendDebug('Receive_Paket(OK)',substr($APIData->Data, 1),1);
                     $this->SendDataToChild(substr($APIData->Data, 1));
                 }
                 else
                 {
-//                SendData('ReceivePaket(Error:'+inttohex(ord(Receive_Status),1)+')',APIdata.data);
+                $this->SendDebug('ReceivePaket(Error:'.  bin2hex ($Receive_Status).')',substr($APIData->Data, 1),1);
                 }
                 break;
             case TXB_API_Command::XB_API_Remote_AT_Command_Responde:
@@ -222,20 +224,16 @@ class XBZBSplitter extends IPSModule
                 $ATData->ATCommand = substr($APIData->Data, 0, 2);
                 $ATData->Status = $APIData->Data[2];
                 $ATData->Data = substr($APIData->Data, 3);
-//        SendData('Remote_AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',ATData.Data);                
+                $this->SendDebug('Remote_AT_Command_Responde('.$ATData->ATCommand.')',$ATData->Data,1);                
                 $this->SendDataToDevice($ATData);
                 break;
             case TXB_API_Command::XB_API_IO_Data_Sample_Rx:
                 $IOSample = new TXB_API_IO_Sample();
                 $IOSample->Status =$APIData->Data[0];
                 $IOSample->Sample = substr($APIData->Data,1);
+                  $this->SendDebug('IO_Data_Sample_Rx('.$APIData->APICommand.')',$APIData->Data,1);
                 $this->SendDataToDevice($IOSample);
-                /*
-                  SendData('IO_Data_Sample_Rx('+inttohex(ord(APIData.APICommand),2)+')',APIdata.data);
-                  //        APIData.Data:=XB_ATCommandToString(XB_AT_IS)+chr(0)+APIdata.data;
-                  SendToIODevice(APIdata);
-
-                 */
+                
                 break;
             default:
                 /*

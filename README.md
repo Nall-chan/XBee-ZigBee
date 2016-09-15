@@ -77,16 +77,16 @@ Implementierung der XBee-ZigBee Serie2.
 
   - ID	(PAN ID)                :   eigene beliebige PAN ID aus dem Coordinator
   - ZS	(ZigBee Stack Profile)  :   0x2
-  - JN	(Join Notification)     :   0x1 (Enabled)
+  - JN	(Join Notification)     :   0x1 (Enabled)  
    ![](Doku/konfig3.png)  
-  - NI	(Node Identifier)       :   Name des Node für die Identifizierung in IPS
+  - NI	(Node Identifier)       :   Name des Node für die Identifizierung in IPS  
    ![](Doku/konfig4.png)  
   - BD	(Baud Rate)             :   je nach Bedarf des jeweiligen Endgerätes an dem XBee (muss nicht identisch sein mit dem Coordinator)
   - NB	(Parity)                :   je nach Bedarf des jeweiligen Endgerätes
   - SB	(Stop Bits)             :   je nach Bedarf des jeweiligen Endgerätes
   - RO  (Packetization Timeout) :   0x0
   - D7	(DIO7)                  :   je nach Bedarf des jeweiligen Endgerätes
-  - D6	(DIO6)                  :   je nach Bedarf des jeweiligen Endgerätes
+  - D6	(DIO6)                  :   je nach Bedarf des jeweiligen Endgerätes  
    ![](Doku/konfig5.png)  
 
  Sind alle Geräte konfiguriert, so kann in XCTU die funktion des Netzwerkes überprüft werden.  
