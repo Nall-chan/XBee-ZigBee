@@ -398,41 +398,41 @@ class TXB_Transmit_Status extends stdClass
     const XB_Transmit_Data_payload_too_large = 0x74;
     const XB_Transmit_Indirect_message_unrequested = 0x75;
 
-    static function ToString(int $Code)
+    public static function ToString(int $Code)
     {
         switch ($Code)
         {
-            case static::XB_Transmit_ACK_Fail:
+            case self::XB_Transmit_ACK_Fail:
                 return 'Transmit_ACK_Fail';
-            case static::XB_Transmit_CCA_Fail:
+            case self::XB_Transmit_CCA_Fail:
                 return 'Transmit_CCA_Fail';
-            case static:: XB_Transmit_Invalid_Endpoint:
+            case self:: XB_Transmit_Invalid_Endpoint:
                 return 'Transmit_Invalid_Endpoint';
-            case static:: XB_Transmit_Network_ACK_Fail:
+            case self:: XB_Transmit_Network_ACK_Fail:
                 return 'Transmit_Network_ACK_Fail';
-            case static:: XB_Transmit_Not_Joined_to_Network:
+            case self:: XB_Transmit_Not_Joined_to_Network:
                 return 'Transmit_Not_Joined_to_Network';
-            case static:: XB_Transmit_Self_addressed:
+            case self:: XB_Transmit_Self_addressed:
                 return 'Transmit_Self_addressed';
-            case static:: XB_Transmit_Address_Not_Found:
+            case self:: XB_Transmit_Address_Not_Found:
                 return 'Transmit_Address_Not_Found';
-            case static:: XB_Transmit_Route_Not_Found:
+            case self:: XB_Transmit_Route_Not_Found:
                 return 'Transmit_Route_Not_Found';
-            case static:: XB_Transmit_Broadcast_Fail:
+            case self:: XB_Transmit_Broadcast_Fail:
                 return 'Transmit_Broadcast_Fail';
-            case static:: XB_Transmit_Invalid_binding_table_index:
+            case self:: XB_Transmit_Invalid_binding_table_index:
                 return 'Transmit_Invalid_binding_table_index';
-            case static:: XB_Transmit_Resource_error:
+            case self:: XB_Transmit_Resource_error:
                 return 'Transmit_Resource_error';
-            case static:: XB_Transmit_broadcast_with_APS:
+            case self:: XB_Transmit_broadcast_with_APS:
                 return 'Transmit_broadcast_with_APS';
-            case static:: XB_Transmit_unicast_with_APS:
+            case self:: XB_Transmit_unicast_with_APS:
                 return 'Transmit_unicast_with_APS';
-            case static:: XB_Transmit_Resource_error_2:
+            case self:: XB_Transmit_Resource_error_2:
                 return 'Transmit_Resource_error_2';
-            case static:: XB_Transmit_Data_payload_too_large:
+            case self:: XB_Transmit_Data_payload_too_large:
                 return 'Transmit_Data_payload_too_large';
-            case static:: XB_Transmit_Indirect_message_unrequested:
+            case self:: XB_Transmit_Indirect_message_unrequested:
                 return 'Transmit_Indirect_message_unrequested';
         }
     }

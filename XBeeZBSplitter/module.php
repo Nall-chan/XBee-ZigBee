@@ -79,7 +79,7 @@ class XBZBSplitter extends IPSModule
         $this->SendDebug('TX_Status','Error: '. TXB_Transmit_Status::ToString($TransmitStatus),0);
         $this->unlock('RequestSendData');
 
-        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($TransmitStatus));
+        //throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($TransmitStatus));
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -122,7 +122,7 @@ class XBZBSplitter extends IPSModule
             }
             catch (Exception $ex)
             {
-                trigger_error($ex->getMessage(),$ex->getCode());
+                trigger_error($ex->getMessage(),E_USER_NOTICE());
                 return false;
             }
         }
@@ -138,7 +138,7 @@ class XBZBSplitter extends IPSModule
                 }
                 catch (Exception $ex)
                 {
-                    trigger_error($ex->getMessage(),$ex->getCode());
+                    trigger_error($ex->getMessage(),E_USER_NOTICE());
                     $SendOk = FALSE;
                 }
 
