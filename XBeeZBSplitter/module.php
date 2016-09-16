@@ -3,7 +3,6 @@ require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 class XBZBSplitter extends IPSModule
 {
-
     public function Create()
     {
 
@@ -70,7 +69,7 @@ class XBZBSplitter extends IPSModule
             $this->unlock('RequestSendData');
             throw new Exception('Send Data Timeout');
         }
-        if ($TransmitStatus == TXB_Transmit_Status::XB_Transmit_OK)
+        if ($TransmitStatus ==  TXB_Transmit_Status::XB_Transmit_OK)
         {
             $this->SendDebug('TX_Status','OK',0);
             $this->unlock('RequestSendData');
@@ -79,7 +78,7 @@ class XBZBSplitter extends IPSModule
         $this->SendDebug('TX_Status','Error: '. TXB_Transmit_Status::ToString($TransmitStatus),0);
         $this->unlock('RequestSendData');
 
-        //throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($TransmitStatus));
+        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($TransmitStatus));
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -204,6 +203,7 @@ class XBZBSplitter extends IPSModule
                 $TransmitStatusID = $this->GetIDForIdent("TransmitStatus");
                 if (!$this->lock('Transmit_Status'))
                     throw new Exception('Receive Transmit Status is locked');
+                $this->SendDebug('TX_Status_Received(8B)',$APIData->Data,1);                
                 SetValueInteger($TransmitStatusID, ord($APIData->Data[1]));
                 $this->unlock('Transmit_Status');
                 break;

@@ -402,6 +402,8 @@ class TXB_Transmit_Status extends stdClass
     {
         switch ($Code)
         {
+            case self::XB_Transmit_OK:
+                return 'XB_Transmit_OK';            
             case self::XB_Transmit_ACK_Fail:
                 return 'Transmit_ACK_Fail';
             case self::XB_Transmit_CCA_Fail:
@@ -434,6 +436,8 @@ class TXB_Transmit_Status extends stdClass
                 return 'Transmit_Data_payload_too_large';
             case self:: XB_Transmit_Indirect_message_unrequested:
                 return 'Transmit_Indirect_message_unrequested';
+            default:
+                return bin2hex(chr($Code));
         }
     }
 

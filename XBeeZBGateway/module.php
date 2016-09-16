@@ -52,7 +52,7 @@ class XBZBGateway extends IPSModule
     {
         $checksum = ord($Frame[strlen($Frame) - 1]);
         //Checksum bilden
-//            IPS_LogMessage('Receive - Checksum must '.$checksum, bin2hex($Frame));
+//            $this->SendDebug('Receive - Checksum must '.$checksum, bin2hex($Frame));
         for ($x = 0; $x < (strlen($Frame)-1); $x++)
         {
             $checksum = $checksum + ord($Frame[$x]);
@@ -62,7 +62,7 @@ class XBZBGateway extends IPSModule
         //Checksum NOK?
         if ($checksum <> 0xff)
         {
-            IPS_LogMessage('Receive - Checksum Error: '.$checksum, bin2hex($Frame));
+            $this->SendDebug('Receive - Checksum Error ('.$checksum.')', $Frame,1);
             return;
         }
         //API CmdID extrahieren
@@ -70,7 +70,7 @@ class XBZBGateway extends IPSModule
         $APIData = new TXB_API_Data();
         $APIData->APICommand = ord($Frame[0]);
         $Frame = substr($Frame, 1, -1);
-        IPS_LogMessage('XB_API_Command',$APIData->APICommand);                                
+        $this->SendDebug('XB_API_Command',  chr($APIData->APICommand),1);                                
 
         switch ($APIData->APICommand)
         {
@@ -82,7 +82,8 @@ class XBZBGateway extends IPSModule
                 $ATData->ATCommand = substr($Frame, 1, 2);
                 $ATData->Status = ord($Frame[3]);
                 $ATData->Data = substr($Frame, 4);
-//                IPS_LogMessage('XB_Command_Data',print_r($ATData,1));                                
+                $this->SendDebug('XB_API_AT_Command_Responde (08)',$Frame,1);                                
+               $this->SendDebug('AT_Command_Responde('.$ATData->ATCommand.')',$ATData->Data,1);                                
                 switch ($ATData->ATCommand)
                 {
                     case TXB_AT_Command::XB_AT_ND:
@@ -98,13 +99,14 @@ class XBZBGateway extends IPSModule
                                 $Node->NodeName = substr($ATData->Data, 0, $end);
                                 //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
-//                            IPS_LogMessage('AT_Command::XB_AT_ND',print_r($Node,1));                                
+                                $this->SendDebug('AT_Command_Responde::XB_AT_ND',$Node->NodeName,0);                                
                                 $this->AddOrReplaceNode($Node);
                             }
                         }
                         else
                         {
                             //  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
+                            
                         }
                         break;
                     case TXB_AT_Command::XB_AT_NI:
@@ -127,7 +129,7 @@ class XBZBGateway extends IPSModule
             case TXB_API_Command::XB_API_Modem_Status:
                 //FERTIG
                 //senddata('Modem_Status('+inttohex(ord(APIData.APICommand),2)+')',XB_ModemStatusToString(TXB_Modem_Status(ord(data[1]))));
-                IPS_LogMessage('XBee ModemStatus(' . bin2hex(ord($APIData->APICommand)) . ')', $Frame[1]);
+                $this->SendDebug('XB_API_Modem_Status(' . bin2hex(chr($APIData->APICommand)) . ')', $Frame[1],1);
                 break;
             case TXB_API_Command::XB_API_Transmit_Status:
                 //FERTIG
@@ -140,8 +142,8 @@ class XBZBGateway extends IPSModule
                 {
                     $APIData->NodeName = $Node->NodeName;
                     $APIData->FrameID = ord($Frame[0]);
-                    $APIData->Data = substr($Frame, 2);
-                    //  SendData('TX_Status('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    $APIData->Data = substr($Frame, 3);
+                    $this->SendDebug('XB_API_Transmit_Status('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
                     $this->SendDataToSplitter($APIData);
                 }
                 break;
@@ -158,6 +160,7 @@ class XBZBGateway extends IPSModule
                     $APIData->NodeName = $Node1->NodeName;
                     $APIData->FrameID = 0;
                     $APIData->Data = substr($Frame, 10);
+                    $this->SendDebug('XB_API_Receive_Paket('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
                     $this->SendDataToSplitter($APIData);
                     //  SendData('Receive_Paket('+inttohex(ord(APIData.APICommand),2)+')',data);
                 }
@@ -169,9 +172,10 @@ class XBZBGateway extends IPSModule
                 $Frame = substr($Frame, 21);
                 $end = strpos($Frame, chr(0));
                 $Node->NodeName = substr($Frame, 0, $end);
+                $this->SendDebug('XB_API_Node_Identification_Indicator('.bin2hex(chr($APIData->APICommand)).')',$Node->NodeName,1);
                 //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
-                IPS_LogMessage('Node_Identification_Indicator',print_r($Node,1));
+                //IPS_LogMessage('Node_Identification_Indicator',print_r($Node,1));
                 $this->AddOrReplaceNode($Node);
                 
                 break;
@@ -189,6 +193,7 @@ class XBZBGateway extends IPSModule
                     $APIData->NodeName = $Node1->NodeName;
                     $APIData->Data = substr($Frame, 11);
                     //  SendData('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    $this->SendDebug('XB_API_Remote_AT_Command_Responde('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
                     $this->SendDataToSplitter($APIData);
                 }
                 break;
@@ -206,12 +211,14 @@ class XBZBGateway extends IPSModule
                     $APIData->Data = substr($Frame, 10);
                     $APIData->FrameID = 0;
                     //  SendData('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+')',data);                            
+                    $this->SendDebug('XB_API_IO_Data_Sample_Rx('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
                     $this->SendDataToSplitter($APIData);
                 }
 
                 break;
             default:
                 //  senddata('Ungültiger API Frame('+inttohex(ord(APIData.APICommand),2)+')',data);
+                    $this->SendDebug('Ungültiger API Frame('.bin2hex(chr($APIData->APICommand)).')',$Frame,1);
                 break;
         }
     }
