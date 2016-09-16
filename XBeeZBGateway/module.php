@@ -172,7 +172,7 @@ class XBZBGateway extends IPSModule
                 $Frame = substr($Frame, 21);
                 $end = strpos($Frame, chr(0));
                 $Node->NodeName = substr($Frame, 0, $end);
-                $this->SendDebug('XB_API_Node_Identification_Indicator('.bin2hex(chr($APIData->APICommand)).')',$Node->NodeName,1);
+                $this->SendDebug('XB_API_Node_Identification_Indicator('.bin2hex(chr($APIData->APICommand)).')',$Node->NodeName,0);
                 //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
                 //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
                 //IPS_LogMessage('Node_Identification_Indicator',print_r($Node,1));
