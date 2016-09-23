@@ -146,7 +146,7 @@ class XBZBDevice extends IPSModule
     public function Create()
     {
         parent::Create();
-        $this->RequireParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
+        $this->ConnectParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
         $this->RegisterPropertyBoolean("EmulateStatus", false);
         $this->RegisterPropertyInteger("Interval", 0);
     }

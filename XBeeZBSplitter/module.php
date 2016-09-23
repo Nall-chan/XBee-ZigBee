@@ -7,7 +7,7 @@ class XBZBSplitter extends IPSModule
     {
 
         parent::Create();
-        $this->RequireParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
+        $this->ConnectParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
         $this->RegisterPropertyString("NodeName", "");
     }
 
