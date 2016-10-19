@@ -121,7 +121,7 @@ class XBZBSplitter extends IPSModule
             }
             catch (Exception $ex)
             {
-                trigger_error($ex->getMessage(),E_USER_NOTICE());
+                trigger_error($ex->getMessage(),E_USER_NOTICE);
                 return false;
             }
         }
@@ -137,7 +137,7 @@ class XBZBSplitter extends IPSModule
                 }
                 catch (Exception $ex)
                 {
-                    trigger_error($ex->getMessage(),E_USER_NOTICE());
+                    trigger_error($ex->getMessage(),E_USER_NOTICE);
                     $SendOk = FALSE;
                 }
 
