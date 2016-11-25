@@ -1,29 +1,131 @@
 <?
+
+/*
+ * @addtogroup xbeezigbee
+ * @{
+ *
+ * @package       XBeeZigBee
+ * @file          module.php
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ *
+ */
+
 require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
+/**
+ * XBZBGateway ist die Klasse für einen Coordinator XBee.
+ * Erweitert ipsmodule 
+ *
+ * @package       XBeeZigBee
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ * @example <b>Ohne</b>
+ * @property string $Buffer Receive Buffer.
+ * @property TXB_API_DataList $TransmitBuffer Liste mit allen Daten im SendQueue für den Coordinator (ohne Nodes!).
+ * @property TXB_NodeList $NodeList Liste mit allen bekannten Nodes.
+ */
 class XBZBGateway extends IPSModule
 {
+
+    use DebugHelper,
+        Semaphore,
+        InstanceStatus;
+
+    /**
+     * Wert einer Eigenschaft aus den InstanceBuffer lesen.
+     * 
+     * @access public
+     * @param string $name Propertyname
+     * @return mixed Value of Name
+     */
+    public function __get($name)
+    {
+        return unserialize($this->GetBuffer($name));
+    }
+
+    /**
+     * Wert einer Eigenschaft in den InstanceBuffer schreiben.
+     * 
+     * @access public
+     * @param string $name Propertyname
+     * @param mixed Value of Name
+     */
+    public function __set($name, $value)
+    {
+        $this->SetBuffer($name, serialize($value));
+    }
+
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function Create()
     {
         parent::Create();
         $this->RequireParent("{6DC3D946-0D31-450F-A8C6-C42DB8D7D4F1}");
         $this->RegisterPropertyInteger("NDInterval", 60);
+        $this->Buffer = "";
+        $this->TransmitBuffer = new TXB_API_DataList();
+        $this->NodeList = new TXB_NodeList();
     }
 
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function ApplyChanges()
     {
         parent::ApplyChanges();
-        $this->RegisterVariableString("Nodes", "Nodes", "", -5);
-        $this->RegisterVariableString("BufferIN", "BufferIN", "", -4);
-        IPS_SetHidden($this->GetIDForIdent('Nodes'), true);
-        IPS_SetHidden($this->GetIDForIdent('BufferIN'), true);
-        $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval'), 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
+        if (IPS_GetKernelRunlevel() != KR_READY)
+            return;
+        $this->UnregisterVariable("Nodes");
+        $this->UnregisterVariable("BufferIN");
+        $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval')*1000, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
         if ($this->CheckParents())
+        {
+            try
+            {
+                $this->RequestNodeIdentifier();
+                $this->RequestNodeDiscovery();
+            }
+            catch (Exception $exc)
+            {
+                trigger_error($exc, E_USER_NOTICE);
+                return false;
+            }
+        }
+    }
+
+    ################## PUBLIC
+
+    public function NodeDiscovery()
+    {
+        try
+        {
             $this->RequestNodeDiscovery();
+        }
+        catch (Exception $exc)
+        {
+            IPS_LogMessage($this->InstanceID, 'Error in NodeDiscovery. Maybe no Node present.');
+            trigger_error($exc, E_USER_NOTICE);
+            return false;
+        }
+        return true;
     }
 
 ################## PRIVATE     
 
+    /** Prüft auf falschen Parent und trennt dann die Verbindung.
+     * 
+     * @return boolean True wenn Parent Aktiv, sonst false.
+     */
     private function CheckParents()
     {
         $result = $this->HasActiveParent();
@@ -41,287 +143,170 @@ class XBZBGateway extends IPSModule
         return $result;
     }
 
-    private function RequestNodeDiscovery()
+    /** Leseanfrage des eigenen Identifier.
+     * 
+     * @throws Exception
+     */
+    private function RequestNodeIdentifier()
     {
-        //if fKernelRunlevel <> KR_READY then exit;
-        $this->SendDataToParent(chr(TXB_API_Command::XB_API_AT_Command) . chr(1) . TXB_AT_Command::XB_AT_ND);
-        $this->SendDataToParent(chr(TXB_API_Command::XB_API_AT_Command) . chr(2) . TXB_AT_Command::XB_AT_NI);
+        $APIData = new TXB_API_Data(TXB_API_Commands::AT_Command, TXB_AT_Commands::AT_NI);
+        $APIResponse = $this->Send($APIData);
+        if (is_null($APIResponse))
+            return false;
+        return $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIResponse));
     }
 
-    private function DecodeData($Frame)
+    /** Startet ein Discovery
+     * 
+     * @throws Exception
+     */
+    private function RequestNodeDiscovery()
     {
-        $checksum = ord($Frame[strlen($Frame) - 1]);
-        //Checksum bilden
-//            $this->SendDebug('Receive - Checksum must '.$checksum, bin2hex($Frame));
-        for ($x = 0; $x < (strlen($Frame)-1); $x++)
+        $APIData = new TXB_API_Data(TXB_API_Commands::AT_Command, TXB_AT_Commands::AT_ND);
+        $APIResponse = $this->Send($APIData);
+        if (is_null($APIResponse))
+            return false;
+        return $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIResponse));
+    }
+
+    private function ProcessAPIData(TXB_API_Data $APIData)
+    {
+        if ($APIData->Checksum === false)
         {
-            $checksum = $checksum + ord($Frame[$x]);
-        }
-        //Auf Byte begrenzen
-        $checksum = $checksum & 0xff;
-        //Checksum NOK?
-        if ($checksum <> 0xff)
-        {
-            $this->SendDebug('Receive - Checksum Error ('.$checksum.')', $Frame,1);
+            $this->SendDebug('Receive Checksum Error', $APIData, 0);
             return;
         }
-        //API CmdID extrahieren
-        //  senddata('Receive',data);
-        $APIData = new TXB_API_Data();
-        $APIData->APICommand = ord($Frame[0]);
-        $Frame = substr($Frame, 1, -1);
-        $this->SendDebug('XB_API_Command',  chr($APIData->APICommand),1);                                
+        $this->SendDebug('ProcessAPIData', $APIData, 0);
 
         switch ($APIData->APICommand)
         {
-            case TXB_API_Command::XB_API_AT_Command_Responde:
-//                IPS_LogMessage('XB_API_AT_Command_Responde',print_r($APIData,1));                                
-                // FERTIG
-                $ATData = new TXB_Command_Data();
-                $ATData->FrameID = ord($Frame[0]);
-                $ATData->ATCommand = substr($Frame, 1, 2);
-                $ATData->Status = ord($Frame[3]);
-                $ATData->Data = substr($Frame, 4);
-                $this->SendDebug('XB_API_AT_Command_Responde (08)',$Frame,1);                                
-               $this->SendDebug('AT_Command_Responde('.$ATData->ATCommand.')',$ATData->Data,1);                                
-                switch ($ATData->ATCommand)
-                {
-                    case TXB_AT_Command::XB_AT_ND:
-                        if ($ATData->Status == TXB_Command_Status::XB_Command_OK)
-                        {
-                            if ($ATData->Data <> '')
-                            {
-                                $Node = new TXB_Node();
-                                $Node->NodeAddr16 = substr($ATData->Data, 0, 2);
-                                $Node->NodeAddr64 = substr($ATData->Data, 2, 8);
-                                $ATData->Data = substr($ATData->Data, 10);
-                                $end = strpos($ATData->Data, chr(0));
-                                $Node->NodeName = substr($ATData->Data, 0, $end);
-                                //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
-                                //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
-                                $this->SendDebug('AT_Command_Responde::XB_AT_ND',$Node->NodeName,0);                                
-                                $this->AddOrReplaceNode($Node);
-                            }
-                        }
-                        else
-                        {
-                            //  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
-                            
-                        }
-                        break;
-                    case TXB_AT_Command::XB_AT_NI:
-                        if ($ATData->Status == TXB_Command_Status::XB_Command_OK)
-                        {
-                            $end = strpos($ATData->Data, chr(0));
-                            $this->SetSummary(substr($ATData->Data, 0, $end));
-                        }
-                        else
-                        {
-                            //  senddata('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')','Error: '+XB_Command_Status_To_String(ATData.Status));
-                        }
-                        break;
-                    default:
-                        //  SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',data);                        
-                        $this->SendDataToDevice($ATData);
-                        break;
-                }
+            case TXB_API_Commands::AT_Command_Responde:
+                if ($this->UpdateTransmitBuffer($APIData) === false)
+                    $this->ProcessAT_Command_Responde($APIResponse);
                 break;
-            case TXB_API_Command::XB_API_Modem_Status:
-                //FERTIG
-                //senddata('Modem_Status('+inttohex(ord(APIData.APICommand),2)+')',XB_ModemStatusToString(TXB_Modem_Status(ord(data[1]))));
-                $this->SendDebug('XB_API_Modem_Status(' . bin2hex(chr($APIData->APICommand)) . ')', $Frame[1],1);
+            case TXB_API_Commands::Modem_Status:
+                $this->SendDebug('API_Modem_Status: ', $APIData->Data, 1);
+                $this->SetState('ModemStatus', $APIData->Data);
                 break;
-            case TXB_API_Command::XB_API_Transmit_Status:
-                //FERTIG
-                $Node = $this->GetNodeByAddr16(substr($Frame, 1, 2));
-                if ($Node === false) //unbekannter node
-                {
-                    // senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
-                }
+            case TXB_API_Commands::Transmit_Status:
+                $NodeAddr16 = $APIData->ExtractNodeAddr16();
+                $NodeList = $this->NodeList;
+                $Node = $NodeList->GetByNodeAddr16($NodeAddr16);
+                if ($Node === false)
+                    $this->SendDebug('unkown NodeAddr16', $NodeAddr16, 1);
                 else
                 {
                     $APIData->NodeName = $Node->NodeName;
-                    $APIData->FrameID = ord($Frame[0]);
-                    $APIData->Data = substr($Frame, 3);
-                    $this->SendDebug('XB_API_Transmit_Status('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
-                    $this->SendDataToSplitter($APIData);
+                    $this->SendDebug('Transmit_Status: ', $APIData->Data, 1);
+                    $this->UpdateTransmitBuffer($APIData);
                 }
                 break;
-            case TXB_API_Command::XB_API_Receive_Paket:
-                //FERTIG
-                $Node1 = $this->GetNodeByAddr64(substr($Frame, 0, 8));
-                $Node2 = $this->GetNodeByAddr16(substr($Frame, 8, 2));
-                if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
-                {
-                    //  senddata('TX_Status('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
-                }
-                else
-                {
-                    $APIData->NodeName = $Node1->NodeName;
-                    $APIData->FrameID = 0;
-                    $APIData->Data = substr($Frame, 10);
-                    $this->SendDebug('XB_API_Receive_Paket('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
-                    $this->SendDataToSplitter($APIData);
-                    //  SendData('Receive_Paket('+inttohex(ord(APIData.APICommand),2)+')',data);
-                }
-                break;
-            case TXB_API_Command::XB_API_Node_Identification_Indicator:
+            case TXB_API_Commands::Node_Identification_Indicator:
                 $Node = new TXB_Node();
-                $Node->NodeAddr64 = substr($Frame, 0, 8);
-                $Node->NodeAddr16 = substr($Frame, 8, 2);
-                $Frame = substr($Frame, 21);
-                $end = strpos($Frame, chr(0));
-                $Node->NodeName = substr($Frame, 0, $end);
-                $this->SendDebug('XB_API_Node_Identification_Indicator('.bin2hex(chr($APIData->APICommand)).')',$Node->NodeName,0);
-                //  SendData('Node_Identification_Indicator('+inttohex(ord(APIData.APICommand),2)+')',Node.NodeName+' ' + inttohex(Node.NodeAddr16,4) + ' '
-                //  + inttohex(Int64Rec(Node.NodeAddr64).Hi,8) + inttohex(Int64Rec(Node.NodeAddr64).Lo,8));
-                //IPS_LogMessage('Node_Identification_Indicator',print_r($Node,1));
-                $this->AddOrReplaceNode($Node);
-                
+                $Node->NodeAddr64 = $APIData->ExtractNodeAddr64();
+                $Node->NodeAddr16 = $APIData->ExtractNodeAddr16();
+                $APIData->Data = substr($APIData->Data, 11); // Bytes wegwerfen....
+                $Node->NodeName = $APIData->ExtractString();
+                $this->SendDebug('Node_Identification_Indicator: Addr64', $Node->NodeAddr64, 1);
+                $this->SendDebug('Node_Identification_Indicator: Addr16', $Node->NodeAddr16, 1);
+                $this->SendDebug('Node_Identification_Indicator: Name', $Node->NodeName, 0);
+                if ($this->lock('NodeList') === false)
+                    throw new Exception("NodeList is locked.");
+                $NodeList = $this->NodeList;
+                $NodeList->Update($Node);
+                $this->NodeList = $NodeList;
+                $this->unlock('NodeList');
+                $APIData->NodeName = $Node->NodeName;
+                $this->SendDataToSplitter($APIData);
                 break;
-            case TXB_API_Command::XB_API_Remote_AT_Command_Responde:
-                //FERTIG        
-                $APIData->FrameID = $Frame[0];
-                $Node1 = $this->GetNodeByAddr64(substr($Frame, 1, 8));
-                $Node2 = $this->GetNodeByAddr16(substr($Frame, 9, 2));
-                if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
+            case TXB_API_Commands::Receive_Paket:
+            case TXB_API_Commands::IO_Data_Sample_Rx:
+            case TXB_API_Commands::Remote_AT_Command_Responde:
+                $NodeAddr64 = $APIData->ExtractNodeAddr64();
+                $NodeAddr16 = $APIData->ExtractNodeAddr16();
+                $NodeList = $this->NodeList;
+                $Node1 = $NodeList->GetByNodeAddr64($NodeAddr64);
+                $Node2 = $NodeList->GetByNodeAddr16($NodeAddr16);
+                if (($Node1 === false) or ( $Node2 === false) or ( $Node1->NodeName <> $Node2->NodeName)) //unbekannter node
                 {
-                    //  senddata('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
+                    if ($Node1 === false)
+                        $this->SendDebug('unkown NodeAddr64', $NodeAddr64, 1);
+                    if ($Node2 === false)
+                        $this->SendDebug('unkown NodeAddr16', $NodeAddr16, 1);
+                    if ($Node1->NodeName <> $Node2->NodeName)
+                    {
+                        $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr64, 1);
+                        $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr16, 1);
+                    }
                 }
                 else
                 {
                     $APIData->NodeName = $Node1->NodeName;
-                    $APIData->Data = substr($Frame, 11);
-                    //  SendData('Remote_AT_Command_Responde('+inttohex(ord(APIData.APICommand),2)+')',data);
-                    $this->SendDebug('XB_API_Remote_AT_Command_Responde('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
-                    $this->SendDataToSplitter($APIData);
+                    $this->SendDebug(TXB_API_Commands::ToString($APIData->APICommand), $APIData->Data, 1);
+                    if ($APIData->APICommand == TXB_API_Commands::Remote_AT_Command_Responde)
+                        $this->UpdateTransmitBuffer($APIData);
+                    else
+                        $this->SendDataToSplitter($APIData);
                 }
-                break;
-            case TXB_API_Command::XB_API_IO_Data_Sample_Rx:
-                // FERTIG
-                $Node1 = $this->GetNodeByAddr64(substr($Frame, 0, 8));
-                $Node2 = $this->GetNodeByAddr16(substr($Frame, 8, 2));
-                if (($Node1 === false) or ( $Node2 === false) or ( $Node1 <> $Node2)) //unbekannter node
-                {
-                    //  senddata('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+') unknow Node',data);
-                }
-                else
-                {
-                    $APIData->NodeName = $Node1->NodeName;
-                    $APIData->Data = substr($Frame, 10);
-                    $APIData->FrameID = 0;
-                    //  SendData('Receive_IO_Sample('+inttohex(ord(APIData.APICommand),2)+')',data);                            
-                    $this->SendDebug('XB_API_IO_Data_Sample_Rx('.bin2hex(chr($APIData->APICommand)).')',$APIData->Data,1);
-                    $this->SendDataToSplitter($APIData);
-                }
-
                 break;
             default:
-                //  senddata('Ungültiger API Frame('+inttohex(ord(APIData.APICommand),2)+')',data);
-                    $this->SendDebug('Ungültiger API Frame('.bin2hex(chr($APIData->APICommand)).')',$Frame,1);
+                $this->SendDebug('Ungültiger API Frame(' . bin2hex(chr($APIData->APICommand)) . ')', $APIData->Data, 1);
                 break;
         }
     }
 
-################## NODE-Management
-
-    private function AddOrReplaceNode(TXB_Node $Node)
+    private function ProcessAT_Command_Responde(TXB_CMD_Data $CMDData)
     {
-        $NodeVarID = $this->GetIDForIdent('Nodes');
-        if ($NodeVarID === false)
-            throw new Exception("NodeList not exists.");
-        $Node->utf8_encode();
-        $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if (!is_array($Nodes))
+        $this->SendDebug('AT_Command_Responde:', $CMDData, 0);
+
+        if ($CMDData->Status != TXB_AT_Command_Status::OK)
         {
-            $Nodes = array();
+            $this->SendDebug('AT_Command_Responde: Status ERROR', TXB_AT_Command_Status::ToString($CMDData->Status), 0);
+            return false;
         }
+        switch ($CMDData->ATCommand)
+        {
+            case TXB_AT_Commands::AT_ND:
+                $Node = new TXB_Node();
+                $Node->NodeAddr16 = $CMDData->ExtractNodeAddr16();
+                $Node->NodeAddr64 = $CMDData->ExtractNodeAddr64();
+                $CMDData->Data = substr($CMDData->Data, 10); // Bytes wegwerfen....
+                $Node->NodeName = $CMDData->ExtractString();
+                $this->SendDebug('AT_Command_Responde::XB_AT_ND', $Node->NodeName, 0);
+                $this->SendDebug('Command_Responde_ND: Addr64', $Node->NodeAddr64, 1);
+                $this->SendDebug('Command_Responde_ND: Addr16', $Node->NodeAddr16, 1);
+                $this->SendDebug('Command_Responde_ND: Name', $Node->NodeName, 0);
+                if ($this->lock('NodeList') === false)
+                    throw new Exception("NodeList is locked.");
+                $NodeList = $this->NodeList;
+                $NodeList->Update($Node);
+                $this->NodeList = $NodeList;
+                $this->unlock('NodeList');
+                return true;
+            case TXB_AT_Command::XB_AT_NI:
+                $this->SetSummary($CMDData->ExtractString());
+                return true;
+        }
+        return false;
+    }
+
+    private function UpdateTransmitBuffer(TXB_API_Data $APIData)
+    {
+        if (!$this->lock('TransmitBuffer'))
+        {
+            trigger_error('TransmitBuffer is locked', E_USER_NOTICE);
+            return false;
+        }
+        $TransmitBuffer = $this->TransmitBuffer;
+        if ($TransmitBuffer->Update($APIData))
+            $this->TransmitBuffer = $TransmitBuffer;
         else
         {
-            $i = array_search($Node->NodeName, array_column($Nodes, 'NodeName'));
-            if ($i !== false)
-            {
-                // Name gefunden
-                if (($Nodes[$i]['NodeAddr16'] == $Node->NodeAddr16) and ( $Nodes[$i]['NodeAddr64'] == $Node->NodeAddr64))
-                    return;
-                // Daten sind anders, also löschen.
-                unset($Nodes[$i]);
-            }
-            $i = array_search($Node->NodeAddr16, array_column($Nodes, 'NodeAddr16'));
-            if ($i !== false)
-                unset($Nodes[$i]);
-            $i = array_search($Node->NodeAddr64, array_column($Nodes, 'NodeAddr64'));
-            if ($i !== false)
-                unset($Nodes[$i]);
-            // Neu anlegen:
+            $this->SendDebug('WARN', 'Frame not found in TransmitBuffer', 0);
+            return false;
         }
-        array_push($Nodes, $Node);
-        if ($this->lock('Nodes') === false)
-            throw new Exception("NodeList is locked.");
-        SetValueString($NodeVarID, json_encode(array_values($Nodes)));
-        $this->unlock('Nodes');
-    }
-
-    private function GetNodeByAddr16($Addr16)
-    {
-        $Addr16= utf8_encode($Addr16);
-        $NodeVarID = $this->GetIDForIdent('Nodes');
-        if ($NodeVarID === false)
-            throw new Exception("NodeList not exists.");
-        $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if (!is_array($Nodes))
-            return false;
-        $i = array_search($Addr16, array_column($Nodes, 'NodeAddr16'));
-        if ($i === false)
-            return false;
-        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
-        $Node->utf8_decode();
-        return $Node;
-    }
-
-    private function GetNodeByAddr64($Addr64)
-    {
-        $Addr64= utf8_encode($Addr64);
-        $NodeVarID = $this->GetIDForIdent('Nodes');
-        if ($NodeVarID === false)
-            throw new Exception("NodeList not exists.");
-        $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if (!is_array($Nodes))
-            return false;
-        $i = array_search($Addr64, array_column($Nodes, 'NodeAddr64'));
-        if ($i === false)
-            return false;
-        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
-        $Node->utf8_decode();
-        return $Node;
-    }
-
-    private function GetNodeByName($NodeName)
-    {
-        $NodeName = utf8_encode($NodeName);
-        $NodeVarID = $this->GetIDForIdent('Nodes');
-        if ($NodeVarID === false)
-            throw new Exception("NodeList not exists.");
-        $Nodes = json_decode(GetValueString($NodeVarID), 1);
-        if (!is_array($Nodes))
-            return false;
-        $i = array_search($NodeName, array_column($Nodes, 'NodeName'));
-        if ($i === false)
-            return false;
-        $Node = new TXB_NodeFromGeneric((object) $Nodes[$i]);
-        $Node->utf8_decode();
-        return $Node;
-        
-    }
-################## PUBLIC
-    /**
-     * This function will be available automatically after the module is imported with the module control.
-     * Using the custom prefix this function will be callable from PHP and JSON-RPC through:
-     */
-
-    public function NodeDiscovery()
-    {
-        $this->RequestNodeDiscovery();
+        $this->unlock('TransmitBuffer');
+        return true;
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -331,284 +316,207 @@ class XBZBGateway extends IPSModule
         // Prüfen und aufteilen nach ForwardDataFromSplitter und ForwardDataFromDevcie
         $Data = json_decode($JSONString);
 //        IPS_LogMessage('ForwardDataFrom???:'.$this->InstanceID,  print_r($Data,1));
-        
-        switch ($Data->DataID)
+//        switch ($Data->DataID)
+//        {
+//            case "{5971FB22-3F96-45AE-916F-AE3AC8CA8782}": //Splitter ankommend
+//                $APIData = new TXB_API_Data();
+//                $APIData->GetDataFromJSONObject($Data);
+//                $this->ForwardDataFromSplitter($APIData);
+//                break;
+//            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //Device ankommend
+//                $ATData = new TXB_Command_Data();
+//                $ATData->GetDataFromJSONObject($Data);
+//                $this->ForwardDataFromDevice($ATData);
+//                break;
+//        }
+        $APIData = new TXB_API_Data($Data);
+        $NodeList = $this->NodeList;
+        $Node = $NodeList->GetByNodeName($APIData->NodeName);
+        if ($Node === false)
         {
-            case "{5971FB22-3F96-45AE-916F-AE3AC8CA8782}": //API
-                $APIData = new TXB_API_Data();
-                $APIData->GetDataFromJSONObject($Data);
-                $this->ForwardDataFromSplitter($APIData);
-                break;
-            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
-                $ATData = new TXB_Command_Data();
-                $ATData->GetDataFromJSONObject($Data);
-                $this->ForwardDataFromDevice($ATData);
-                break;
+            $this->SendDebug('unkown NodeName', $APIData->NodeName, 0);
+            throw new Exception('Unknown NodeName');
         }
+        $APIResponse = $this->Send($APIData, $Node);
+        return serialize($APIResponse);
     }
 
 ################## DATAPOINTS SPLITTER
 
-    private function ForwardDataFromSplitter(TXB_API_Data $APIData)
+    /** fertig
+     * 
+     * @param TXB_API_Data $APIData
+     * @throws Exception
+     */
+    /*private function ForwardDataFromSplitter(TXB_API_Data $APIData)
     {
-//        IPS_LogMessage('ForwardDataFromSplitter:'.$this->InstanceID,  print_r($APIData,1));
-
-        $Node = $this->GetNodeByName($APIData->NodeName);
+        $NodeList = $this->NodeList;
+        $Node = $NodeList->GetByNodeName($APIData->NodeName);
         if ($Node === false)
+        {
+            $this->SendDebug('unkown NodeName', $APIData->NodeName, 0);
             throw new Exception('Unknown NodeName');
-        $Frame = chr($APIData->APICommand) . chr($APIData->FrameID);
-        $Frame.=$Node->NodeAddr64 . $Node->NodeAddr16 . $APIData->Data;
-        $this->SendDataToParent($Frame);
-    }
+        }
+        $APIResponse = $this->Send($APIData, $Node);
+        return serialize($APIResponse);
+    }*/
 
+    /** fertig
+     * 
+     * @param TXB_API_Data $APIData
+     */
     private function SendDataToSplitter(TXB_API_Data $APIData)
     {
-//        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,  print_r($APIData,1));
-        
         $Data = $APIData->ToJSONString('{0C541DDF-CE0F-4113-A76F-B4836015212B}');
-        IPS_SendDataToChildren($this->InstanceID, $Data);
+        $this->SendDataToChildren($Data);
     }
 
 ################## DATAPOINTS DEVICE
 
-    private function ForwardDataFromDevice(TXB_Command_Data $ATData)
-    {
-//        IPS_LogMessage('ForwardDataFromDevice:'.$this->InstanceID,  print_r($ATData,1));
-        
-        $Frame = chr(TXB_API_Command::XB_API_AT_Command) . chr($ATData->FrameID) . $ATData->ATCommand . $ATData->Data;
-        $this->SendDataToParent($Frame);
-    }
-
-    private function SendDataToDevice(TXB_Command_Data $ATData)
-    {
-//        IPS_LogMessage('SendDataToDevice:'.$this->InstanceID,  print_r($ATData,1));
-        $Data = $ATData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
-        IPS_SendDataToChildren($this->InstanceID, $Data);
-    }
+    /** fertig
+     * 
+     * @param TXB_API_Data $APIData
+     */
+    /*
+      private function SendDataToDevice(TXB_API_Data $APIData)
+      {
+      $JSONString = $APIData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
+      $this->SendDataToChildren($JSONString);
+      } */
 
 ################## DATAPOINTS PARENT
 
     public function ReceiveData($JSONString)
     {
         $data = json_decode($JSONString);
-//        IPS_LogMessage('ReceiveDataFromSerialPort:'.$this->InstanceID,  print_r($data,1));
-        
-        $bufferID = $this->GetIDForIdent("BufferIN");
         // Empfangs Lock setzen
         if (!$this->lock("ReceiveLock"))
             throw new Exception("ReceiveBuffer is locked");
 
         // Datenstream zusammenfügen
-        $head = GetValueString($bufferID);
-        SetValueString($bufferID, '');
+        $head = $this->Buffer;
         // Stream in einzelne Pakete schneiden
         $stream = $head . utf8_decode($data->Buffer);
         $start = strpos($stream, chr(0x7e));
         //Anfang suchen
         if ($start === false)
         {
-//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame without 0x7e');
+            $this->SendDebug('Frame without 0x7e', $stream, 1);
             $stream = '';
         }
         elseif ($start > 0)
         {
-//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame do not start with 0x7e');
+            $this->SendDebug('Frame do not start with 0x7e', $stream, 1);
             $stream = substr($stream, $start);
         }
         //Paket suchen
         if (strlen($stream) < 5)
         {
-//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame to short');
-
-            SetValueString($bufferID, $stream);
+            $this->SendDebug('Frame to short', $stream, 1);
+            $this->Buffer = $stream;
             $this->unlock("ReceiveLock");
             return;
         }
         $len = ord($stream[1]) * 256 + ord($stream[2]);
         if (strlen($stream) < $len + 4)
         {
-//            IPS_LogMessage('XBeeZigBee Gateway', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.');
-            SetValueString($bufferID, $stream);
+            $this->SendDebug('WAIT', 'Frame must have ' . $len . ' Bytes. ' . strlen($stream) . ' Bytes given.', 0);
+            $this->Buffer = $stream;
             $this->unlock("ReceiveLock");
             return;
         }
         $packet = substr($stream, 3, $len + 1);
         // Ende wieder in den Buffer werfen
         $tail = substr($stream, $len + 4);
-        if ($tail===false) $tail='';
-        SetValueString($bufferID, $tail);
+        if ($tail === false)
+            $tail = '';
+        $this->Buffer = $tail;
         $this->unlock("ReceiveLock");
-        $this->DecodeData($packet);
+        $APIData = new TXB_API_Data($packet);
+        $this->ProcessAPIData($APIData);
         // Ende war länger als 4 ? Dann nochmal Packet suchen.
         if (strlen($tail) > 4)
             $this->ReceiveData(json_encode(array('Buffer' => '')));
         return true;
     }
 
-    protected function SendDataToParent($Data)
+    private function Send(TXB_API_Data $APIData, TXB_Node $Node = NULL)
     {
-//        IPS_LogMessage('SendDataToSerialPort:'.$this->InstanceID,$Data);
-        
-        //Parent ok ?
-        if (!$this->HasActiveParent())
-            throw new Exception("Instance has no active Parent.");
-        // Frame bauen
-        //Laenge bilden
-        $len = strlen($Data);
-        //Startzeichen
-        $frame = chr(0x7e);
-        //Laenge
-        $frame .= chr(floor($len / 256)) . chr($len % 256);
-        //Daten
-        $frame.=$Data;
-        //Checksum
-        $check = 0;
-        for ($x = 0; $x < $len; $x++)
-        {
-            $check = $check + ord($Data[$x]);
-        }
-        $check = $check & 0xff;
-        $check = 0xff - $check;
-        $frame = $frame . chr($check);
-        //Semaphore setzen
-        if (!$this->lock("ToParent"))
-        {
-            throw new Exception("Can not send to Parent");
-        }
-        // Daten senden
         try
         {
-            IPS_SendDataToParent($this->InstanceID, json_encode(Array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($frame))));
-        }
-        catch (Exception $exc)
-        {
-        // Senden fehlgeschlagen
-            $this->unlock("ToParent");
-            throw new Exception($exc);
-        }
-        $this->unlock("ToParent");
-        return true;
-    }
+            if ($this->HasActiveParent() === false)
+                throw new Exception('Instance has no active Parent Instance!');
 
-################## DUMMYS / WOARKAROUNDS - protected
-
-    protected function HasActiveParent()
-    {
-//        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
-        $instance = IPS_GetInstance($this->InstanceID);
-        if ($instance['ConnectionID'] > 0)
-        {
-            $parent = IPS_GetInstance($instance['ConnectionID']);
-            if ($parent['InstanceStatus'] == 102)
-                return true;
-        }
-        return false;
-    }
-
-    protected function RegisterTimer($Name, $Interval, $Script)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id === false)
-            $id = 0;
-        if ($id > 0)
-        {
-            if (!IPS_EventExists($id))
-                throw new Exception("Ident with name " . $Name . " is used for wrong object type");
-
-            if (IPS_GetEvent($id)['EventType'] <> 1)
+            if ($APIData->FrameID !== 0)
             {
-                IPS_DeleteEvent($id);
-                $id = 0;
+                if (!$this->lock('TransmitBuffer'))
+                    throw new Exception('TransmitBuffer is locked');
+                $TransmitBuffer = $this->TransmitBuffer;
+                $APIData->FrameID = $TransmitBuffer->Add();
+                $this->TransmitBuffer = $TransmitBuffer;
+                unlock('TransmitBuffer');
             }
-        }
-        if ($id == 0)
-        {
-            $id = IPS_CreateEvent(1);
-            IPS_SetParent($id, $this->InstanceID);
-            IPS_SetIdent($id, $Name);
-        }
-        IPS_SetName($id, $Name);
-        IPS_SetHidden($id, true);
-        IPS_SetEventScript($id, $Script);
-        if ($Interval > 0)
-        {
-            IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, $Interval);
-            IPS_SetEventActive($id, true);
-        }
-        else
-        {
-            IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, 1);
-            IPS_SetEventActive($id, false);
-        }
-    }
 
-    protected function UnregisterTimer($Name)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id > 0)
-        {
-            if (!IPS_EventExists($id))
-                throw new Exception('Timer not present');
-            IPS_DeleteEvent($id);
-        }
-    }
+            $Frame = $APIData->ToFrame($Node);
+            $this->SendDataToParent(json_encode(Array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($Frame))));
 
-    protected function SetTimerInterval($Name, $Interval)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id === false)
-            throw new Exception('Timer not present');
-        if (!IPS_EventExists($id))
-            throw new Exception('Timer not present');
-        $Event = IPS_GetEvent($id);
-        if ($Interval < 1)
-        {
-            if ($Event['EventActive'])
-                IPS_SetEventActive($id, false);
-        }
-        else
-        {
-            if ($Event['CyclicTimeValue'] <> $Interval)
-                IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, $Interval);
-            if (!$Event['EventActive'])
-                IPS_SetEventActive($id, true);
-        }
-    }
-
-    protected function SetStatus($InstanceStatus)
-    {
-        if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
-            parent::SetStatus($InstanceStatus);
-    }
-
-    protected function SetSummary($data)
-    {
-//        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
-    }
-
-################## SEMAPHOREN Helper  - private  
-
-    private function lock($ident)
-    {
-        for ($i = 0; $i < 100; $i++)
-        {
-            if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
-            {
+            if ($APIData->FrameID === 0)
                 return true;
+
+            $APIResponse = $this->WaitForResponse($APIData->FrameID);
+            $this->SendDebug('GotResponse', $APIResponse, 1);
+            return $APIResponse;
+        }
+        catch (Exception $ex)
+        {
+            trigger_error($ex);
+            return NULL;
+        }
+    }
+
+    private function WaitForResponse(int $FrameID)
+    {
+        //$TransmitStatusID = $this->GetIDForIdent('TransmitStatus');
+        for ($i = 0; $i < 500; $i++)
+        {
+            if ($this->lock('TransmitBuffer'))
+            {
+                $TransmitBuffer = $this->TransmitBuffer;
+                $Data = $TransmitBuffer->Get($FrameID);
+                if ($Data === false)
+                {
+                    $this->unlock('TransmitBuffer');
+                    $this->SendDebug('ERROR', 'Frame not found in TransmitBuffer.', 0);
+                    throw new Exception('Frame not found in TransmitBuffer.');
+                }
+                if (!is_null($Data))
+                {
+                    $TransmitBuffer->Remove($FrameID);
+                    $this->TransmitBuffer = $TransmitBuffer;
+                    $this->SendDebug('TransmitBuffer', $Data, 1);
+                    $this->unlock('TransmitBuffer');
+                    return $Data;
+                }
             }
             else
             {
-                IPS_Sleep(mt_rand(1, 5));
+                $this->SendDebug('ERROR', 'TransmitBuffer is locked.', 0);
+                throw new Exception('TransmitBuffer is locked.');
             }
+            IPS_Sleep(10);
         }
-        return false;
+        if ($this->lock('TransmitBuffer'))
+        {
+            $TransmitBuffer = $this->TransmitBuffer;
+            $TransmitBuffer->Remove($FrameID);
+            $this->TransmitBuffer = $TransmitBuffer;
+            $this->unlock('TransmitBuffer');
+        }
+        $this->SendDebug('ERROR', 'Wait for response timed out.', 0);
+        throw new Exception('Wait for response timed out.');
     }
 
-    private function unlock($ident)
-    {
-        IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
-    }
 
 }
 
-?>
+/** @} */

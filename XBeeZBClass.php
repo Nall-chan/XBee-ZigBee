@@ -144,298 +144,145 @@ if (@constant('IPS_BASE') == null) //Nur wenn Konstanten noch nicht bekannt sind
     define('vtString', 3);
 }
 
-//  API Datentypen
-class TXB_API_Command extends stdClass
+//  API Commandos
+class TXB_API_Commands
 {
 
-    const XB_API_AT_Command = 0x08;
-    const XB_API_Transmit_Request = 0x10;
-    const XB_API_Remote_AT_Command = 0x17;
-    const XB_API_AT_Command_Responde = 0x88;
-    const XB_API_Modem_Status = 0x8a;
-    const XB_API_Transmit_Status = 0x8b;
-    const XB_API_Receive_Paket = 0x90;
-    const XB_API_IO_Data_Sample_Rx = 0x92;
-    const XB_API_Node_Identification_Indicator = 0x95;
-    const XB_API_Remote_AT_Command_Responde = 0x97;
-
-}
-
-// AT Commandos
-class TXB_AT_Command extends stdClass
-{
-
-//    const XB_AT_ND = 0x4E44; // 'ND';
-//    const XB_AT_D0 = 0x4430; //'DO';
-//    const XB_AT_D1 = 0x4431; //'D1';
-//    const XB_AT_D2 = 0x4432; //'D2';
-//    const XB_AT_D3 = 0x4433; //'D3';
-//    const XB_AT_D4 = 0x4434; //'D4';
-//    const XB_AT_D5 = 0x4435; //'D5';
-//    const XB_AT_D6 = 0x4436; //'D6';
-//    const XB_AT_D7 = 0x4437; //'D7';
-//    const XB_AT_P0 = 0x5030; //'P0';
-//    const XB_AT_P1 = 0x5031; //'P1';
-//    const XB_AT_P2 = 0x5032; //'P2'
-//    const XB_AT_IS = 0x4953; // 'IS'
-//    const XB_AT_DN = 0x444E;
-//    const XB_AT_ID = 0x4944;
-//    const XB_AT_SC = 0x5343;
-//    const XB_AT_SD = 0x5344;
-//    const XB_AT_ZS = 0x5A53;
-//    const XB_AT_NJ = 0x4E4A;
-//    const XB_AT_JN = 0x4A4E;
-//    const XB_AT_OP = 0x4F50;
-//    const XB_AT_OI = 0x4F49;
-//    const XB_AT_CH = 0x4348;
-//    const XB_AT_NC = 0x4E43;
-//    const XB_AT_SH = 0x5348;
-//    const XB_AT_SL = 0x534C;
-//    const XB_AT_MY = 0x4D59;
-//    const XB_AT_MP = 0x4D50;
-//    const XB_AT_DH = 0x4448;
-//    const XB_AT_DL = 0x444C;
-//    const XB_AT_NI = 0x4E49;
-//    const XB_AT_NH = 0x4E48;
-//    const XB_AT_BH = 0x4248;
-//    const XB_AT_AR = 0x4152;
-//    const XB_AT_DD = 0x4444;
-//    const XB_AT_NT = 0x4E54;
-//    const XB_AT_NO = 0x4E4F;
-//    const XB_AT_NP = 0x4E50;
-//    const XB_AT_CR = 0x4352;
-//    const XB_AT_SE = 0x5345;
-//    const XB_AT_DE = 0x4445;
-//    const XB_AT_CI = 0x4349;
-//    const XB_AT_PL = 0x504C;
-//    const XB_AT_PM = 0x504D;
-//    const XB_AT_PP = 0x5050;
-//    const XB_AT_EE = 0x4545;
-//    const XB_AT_EO = 0x454F;
-//    const XB_AT_KY = 0x4B59;
-//    const XB_AT_NK = 0x4E4B;
-//    const XB_AT_BD = 0x4244;
-//    const XB_AT_NB = 0x4E42;
-//    const XB_AT_SB = 0x5342;
-//    const XB_AT_RO = 0x524F;
-//    const XB_AT_AP = 0x4150;
-//    const XB_AT_AO = 0x414F;
-//    const XB_AT_CT = 0x4354;
-//    const XB_AT_GT = 0x4754;
-//    const XB_AT_CC = 0x4343;
-//    const XB_AT_SM = 0x534D;
-//    const XB_AT_ST = 0x5354;
-//    const XB_AT_SP = 0x5350;
-//    const XB_AT_SN = 0x534E;
-//    const XB_AT_SO = 0x534F;
-//    const XB_AT_PO = 0x504F;
-//    const XB_AT_PR = 0x5052;
-//    const XB_AT_LT = 0x4C54;
-//    const XB_AT_RP = 0x5250;
-//    const XB_AT_DO = 0x444F;
-//    const XB_AT_IR = 0x4952;
-//    const XB_AT_IC = 0x4943;
-//    const XB_AT_VV = 0x562B;
-//    const XB_AT_VR = 0x5652;
-//    const XB_AT_HV = 0x4856;
-//    const XB_AT_AI = 0x4149;
-//    const XB_AT_DB = 0x4442; //'DB'
-//    const XB_AT_VSS = 0x2556; //"%V"
-
-    /*
-      private $Command;
-
-      public function __construct($XB_AT_Command)
-      {
-      $this->Command = $XB_AT_Command;
-      }
-
-      public function GetString()
-      {
-      return pack("n", $this->Command);
-      }
-     */
-    const XB_AT_ND = 'ND';
-    const XB_AT_D0 = 'D0';
-    const XB_AT_D1 = 'D1';
-    const XB_AT_D2 = 'D2';
-    const XB_AT_D3 = 'D3';
-    const XB_AT_D4 = 'D4';
-    const XB_AT_D5 = 'D5';
-    const XB_AT_D6 = 'D6';
-    const XB_AT_D7 = 'D7';
-    const XB_AT_P0 = 'P0';
-    const XB_AT_P1 = 'P1';
-    const XB_AT_P2 = 'P2';
-    const XB_AT_IS = 'IS';
-    const XB_AT_DN = 'DN';
-    const XB_AT_ID = 'ID';
-    const XB_AT_SC = 'SC';
-    const XB_AT_SD = 'SD';
-    const XB_AT_ZS = 'ZS';
-    const XB_AT_NJ = 'NJ';
-    const XB_AT_JN = 'JN';
-    const XB_AT_OP = 'OP';
-    const XB_AT_OI = 'OI';
-    const XB_AT_CH = 'CH';
-    const XB_AT_NC = 'NC';
-    const XB_AT_SH = 'SH';
-    const XB_AT_SL = 'SL';
-    const XB_AT_MY = 'MY';
-    const XB_AT_MP = 'MP';
-    const XB_AT_DH = 'DH';
-    const XB_AT_DL = 'DL';
-    const XB_AT_NI = 'NI';
-    const XB_AT_NH = 'NH';
-    const XB_AT_BH = 'BH';
-    const XB_AT_AR = 'AR';
-    const XB_AT_DD = 'DD';
-    const XB_AT_NT = 'NT';
-    const XB_AT_NO = 'NO';
-    const XB_AT_NP = 'NP';
-    const XB_AT_CR = 'CR';
-    const XB_AT_SE = 'SE';
-    const XB_AT_DE = 'DE';
-    const XB_AT_CI = 'CI';
-    const XB_AT_PL = 'PL';
-    const XB_AT_PM = 'PM';
-    const XB_AT_PP = 'PP';
-    const XB_AT_EE = 'EE';
-    const XB_AT_EO = 'EO';
-    const XB_AT_KY = 'KY';
-    const XB_AT_NK = 'NK';
-    const XB_AT_BD = 'BD';
-    const XB_AT_NB = 'NB';
-    const XB_AT_SB = 'SB';
-    const XB_AT_RO = 'RO';
-    const XB_AT_AP = 'AP';
-    const XB_AT_AO = 'AO';
-    const XB_AT_CT = 'CT';
-    const XB_AT_GT = 'GT';
-    const XB_AT_CC = 'CC';
-    const XB_AT_SM = 'SM';
-    const XB_AT_ST = 'ST';
-    const XB_AT_SP = 'SP';
-    const XB_AT_SN = 'SN';
-    const XB_AT_SO = 'SO';
-    const XB_AT_PO = 'PO';
-    const XB_AT_PR = 'PR';
-    const XB_AT_LT = 'LT';
-    const XB_AT_RP = 'RP';
-    const XB_AT_DO = 'DO';
-    const XB_AT_IR = 'IR';
-    const XB_AT_IC = 'IC';
-    const XB_AT_VV = 'V+';
-    const XB_AT_VR = 'VR';
-    const XB_AT_HV = 'HV';
-    const XB_AT_AI = 'AI';
-    const XB_AT_DB = 'DB';
-    const XB_AT_VSS = '%V';
-
-}
-
-// AT Command Status Response
-class TXB_Command_Status extends stdClass
-{
-
-    const XB_Command_OK = 0;
-    const XB_Command_Error = 1;
-    const XB_Command_Invalid_Command = 2;
-    const XB_Command_Invalid_Parameter = 3;
-    const XB_Command_Tx_Failure = 4;
-
-}
-
-// AT Command Record
-class TXB_Command_Data extends stdClass
-{
-
-    public $ATCommand;
-    public $Status;
-    public $Data;
-    public $FrameID;
-
-    public function GetDataFromJSONObject($Data)
-    {
-        $this->ATCommand = utf8_decode($Data->ATCommand);
-        $this->Status = utf8_decode($Data->Status);
-        $this->Data = utf8_decode($Data->Data);
-        $this->FrameID = utf8_decode($Data->FrameID);
-    }
-
-    public function ToJSONString($GUID)
-    {
-        $SendData = new stdClass;
-        $SendData->DataID = $GUID;
-        $SendData->ATCommand = utf8_encode($this->ATCommand);
-        $SendData->Status = utf8_encode($this->Status);
-        $SendData->Data = utf8_encode($this->Data);
-        $SendData->FrameID = utf8_encode($this->FrameID);
-        return json_encode($SendData);
-    }
-
-}
-
-// Trasmit Status Response
-class TXB_Transmit_Status extends stdClass
-{
-
-    const XB_Transmit_OK = 0x00;
-    const XB_Transmit_ACK_Fail = 0x01;
-    const XB_Transmit_CCA_Fail = 0x02;
-    const XB_Transmit_Invalid_Endpoint = 0x15;
-    const XB_Transmit_Network_ACK_Fail = 0x21;
-    const XB_Transmit_Not_Joined_to_Network = 0x22;
-    const XB_Transmit_Self_addressed = 0x23;
-    const XB_Transmit_Address_Not_Found = 0x24;
-    const XB_Transmit_Route_Not_Found = 0x25;
-    const XB_Transmit_Broadcast_Fail = 0x26;
-    const XB_Transmit_Invalid_binding_table_index = 0x2B;
-    const XB_Transmit_Resource_error = 0x2C;
-    const XB_Transmit_broadcast_with_APS = 0x2D;
-    const XB_Transmit_unicast_with_APS = 0x2E;
-    const XB_Transmit_Resource_error_2 = 0x32;
-    const XB_Transmit_Data_payload_too_large = 0x74;
-    const XB_Transmit_Indirect_message_unrequested = 0x75;
+    const AT_Command = 0x08;
+    const Transmit_Request = 0x10;
+    const Remote_AT_Command = 0x17;
+    const AT_Command_Responde = 0x88;
+    const Modem_Status = 0x8a;
+    const Transmit_Status = 0x8b;
+    const Receive_Paket = 0x90;
+    const IO_Data_Sample_Rx = 0x92;
+    const Node_Identification_Indicator = 0x95;
+    const Remote_AT_Command_Responde = 0x97;
 
     public static function ToString(int $Code)
     {
         switch ($Code)
         {
-            case self::XB_Transmit_OK:
-                return 'XB_Transmit_OK';            
-            case self::XB_Transmit_ACK_Fail:
-                return 'Transmit_ACK_Fail';
-            case self::XB_Transmit_CCA_Fail:
-                return 'Transmit_CCA_Fail';
-            case self:: XB_Transmit_Invalid_Endpoint:
-                return 'Transmit_Invalid_Endpoint';
-            case self:: XB_Transmit_Network_ACK_Fail:
-                return 'Transmit_Network_ACK_Fail';
-            case self:: XB_Transmit_Not_Joined_to_Network:
-                return 'Transmit_Not_Joined_to_Network';
-            case self:: XB_Transmit_Self_addressed:
-                return 'Transmit_Self_addressed';
-            case self:: XB_Transmit_Address_Not_Found:
-                return 'Transmit_Address_Not_Found';
-            case self:: XB_Transmit_Route_Not_Found:
-                return 'Transmit_Route_Not_Found';
-            case self:: XB_Transmit_Broadcast_Fail:
-                return 'Transmit_Broadcast_Fail';
-            case self:: XB_Transmit_Invalid_binding_table_index:
-                return 'Transmit_Invalid_binding_table_index';
-            case self:: XB_Transmit_Resource_error:
-                return 'Transmit_Resource_error';
-            case self:: XB_Transmit_broadcast_with_APS:
-                return 'Transmit_broadcast_with_APS';
-            case self:: XB_Transmit_unicast_with_APS:
-                return 'Transmit_unicast_with_APS';
-            case self:: XB_Transmit_Resource_error_2:
-                return 'Transmit_Resource_error_2';
-            case self:: XB_Transmit_Data_payload_too_large:
-                return 'Transmit_Data_payload_too_large';
-            case self:: XB_Transmit_Indirect_message_unrequested:
-                return 'Transmit_Indirect_message_unrequested';
+            case self::AT_Command:
+                return 'AT_Command';
+            case self::Transmit_Request:
+                return 'Transmit_Request';
+            case self::Remote_AT_Command:
+                return 'Remote_AT_Command';
+            case self::AT_Command_Responde:
+                return 'AT_Command_Responde';
+            case self::Modem_Status:
+                return 'Modem_Status';
+            case self::Transmit_Status:
+                return 'Transmit_Status';
+            case self::Receive_Paket:
+                return 'Receive_Paket';
+            case self::IO_Data_Sample_Rx:
+                return 'IO_Data_Sample_Rx';
+            case self::Node_Identification_Indicator:
+                return 'Node_Identification_Indicator';
+            case self::Remote_AT_Command_Responde:
+                return 'Remote_AT_Command_Responde';
+            default:
+                return bin2hex(chr($Code));
+        }
+    }
+
+}
+
+class TXB_Modem_Status
+{
+
+    const Hardware_reset = 0;
+    const Watchdog_timer_reset = 1;
+    const Joined_network = 2;
+    const Disassociated = 3;
+    const Coordinator_started = 6;
+    const Network_security_key_was_updated = 7;
+
+    public static function ToString(int $Code)
+    {
+        switch ($Code)
+        {
+            case self::Hardware_reset:
+                return 'Hardware_reset';
+            case self::Watchdog_timer_reset:
+                return 'Watchdog_timer_reset';
+            case self::Joined_network:
+                return 'Joined_network';
+            case self::Disassociated:
+                return 'Disassociated';
+            case self::Coordinator_started:
+                return 'Coordinator_started';
+            case self::Network_security_key_was_updated:
+                return 'Network_security_key_was_updated';
+            default:
+                return (string) $Code;
+        }
+    }
+
+}
+
+// Transmit Status Response
+class TXB_Transmit_Status
+{
+
+    const OK = 0x00;
+    const ACK_Fail = 0x01;
+    const CCA_Fail = 0x02;
+    const Invalid_Endpoint = 0x15;
+    const Network_ACK_Fail = 0x21;
+    const Not_Joined_to_Network = 0x22;
+    const Self_addressed = 0x23;
+    const Address_Not_Found = 0x24;
+    const Route_Not_Found = 0x25;
+    const Broadcast_Fail = 0x26;
+    const Invalid_binding_table_index = 0x2B;
+    const Resource_error = 0x2C;
+    const broadcast_with_APS = 0x2D;
+    const unicast_with_APS = 0x2E;
+    const Resource_error_2 = 0x32;
+    const Data_payload_too_large = 0x74;
+    const Indirect_message_unrequested = 0x75;
+
+    public static function ToString(int $Code)
+    {
+        switch ($Code)
+        {
+            case self::OK:
+                return 'OK';
+            case self::ACK_Fail:
+                return 'ACK_Fail';
+            case self::CCA_Fail:
+                return 'CCA_Fail';
+            case self:: Invalid_Endpoint:
+                return 'Invalid_Endpoint';
+            case self:: Network_ACK_Fail:
+                return 'Network_ACK_Fail';
+            case self:: Not_Joined_to_Network:
+                return 'Not_Joined_to_Network';
+            case self:: Self_addressed:
+                return 'Self_addressed';
+            case self:: Address_Not_Found:
+                return 'Address_Not_Found';
+            case self:: Route_Not_Found:
+                return 'Route_Not_Found';
+            case self:: Broadcast_Fail:
+                return 'Broadcast_Fail';
+            case self:: Invalid_binding_table_index:
+                return 'Invalid_binding_table_index';
+            case self:: Resource_error:
+                return 'Resource_error';
+            case self:: broadcast_with_APS:
+                return 'broadcast_with_APS';
+            case self:: unicast_with_APS:
+                return 'unicast_with_APS';
+            case self:: Resource_error_2:
+                return 'Resource_error_2';
+            case self:: Data_payload_too_large:
+                return 'Data_payload_too_large';
+            case self:: Indirect_message_unrequested:
+                return 'Indirect_message_unrequested';
             default:
                 return bin2hex(chr($Code));
         }
@@ -444,39 +291,306 @@ class TXB_Transmit_Status extends stdClass
 }
 
 // Receive Status Response
-class TXB_Receive_Status extends stdClass
+class TXB_Receive_Status
 {
 
-    const XB_Receive_Packet_Acknowledged = 0x01;
-    const XB_Receive_Packet_was_a_broadcast_packet = 0x02;
-    const XB_Receive_Packet_encrypted_with_APS_encryption = 0x20;
-    const XB_Receive_Packet_was_sent_from_an_end_device = 0x40;
+    const Packet_Acknowledged = 0x01;
+    const Packet_was_a_broadcast_packet = 0x02;
+    const Packet_encrypted_with_APS_encryption = 0x20;
+    const Packet_was_sent_from_an_end_device = 0x40;
+
+    public static function ToString(int $Code)
+    {
+        switch ($Code)
+        {
+            case self::Packet_Acknowledged:
+                return 'Packet_Acknowledged';
+            case self::Packet_was_a_broadcast_packet:
+                return 'Packet_was_a_broadcast_packet';
+            case self::Packet_encrypted_with_APS_encryption:
+                return 'Packet_encrypted_with_APS_encryption';
+            case self:: Packet_was_sent_from_an_end_device:
+                return 'Packet_was_sent_from_an_end_device';
+            default:
+                return bin2hex(chr($Code));
+        }
+    }
+
+}
+
+// AT Commandos
+class TXB_AT_Commands
+{
+
+    const AT_ND = 'ND';
+    const AT_D0 = 'D0';
+    const AT_D1 = 'D1';
+    const AT_D2 = 'D2';
+    const AT_D3 = 'D3';
+    const AT_D4 = 'D4';
+    const AT_D5 = 'D5';
+    const AT_D6 = 'D6';
+    const AT_D7 = 'D7';
+    const AT_P0 = 'P0';
+    const AT_P1 = 'P1';
+    const AT_P2 = 'P2';
+    const AT_IS = 'IS';
+    const AT_DN = 'DN';
+    const AT_ID = 'ID';
+    const AT_SC = 'SC';
+    const AT_SD = 'SD';
+    const AT_ZS = 'ZS';
+    const AT_NJ = 'NJ';
+    const AT_JN = 'JN';
+    const AT_OP = 'OP';
+    const AT_OI = 'OI';
+    const AT_CH = 'CH';
+    const AT_NC = 'NC';
+    const AT_SH = 'SH';
+    const AT_SL = 'SL';
+    const AT_MY = 'MY';
+    const AT_MP = 'MP';
+    const AT_DH = 'DH';
+    const AT_DL = 'DL';
+    const AT_NI = 'NI';
+    const AT_NH = 'NH';
+    const AT_BH = 'BH';
+    const AT_AR = 'AR';
+    const AT_DD = 'DD';
+    const AT_NT = 'NT';
+    const AT_NO = 'NO';
+    const AT_NP = 'NP';
+    const AT_CR = 'CR';
+    const AT_SE = 'SE';
+    const AT_DE = 'DE';
+    const AT_CI = 'CI';
+    const AT_PL = 'PL';
+    const AT_PM = 'PM';
+    const AT_PP = 'PP';
+    const AT_EE = 'EE';
+    const AT_EO = 'EO';
+    const AT_KY = 'KY';
+    const AT_NK = 'NK';
+    const AT_BD = 'BD';
+    const AT_NB = 'NB';
+    const AT_SB = 'SB';
+    const AT_RO = 'RO';
+    const AT_AP = 'AP';
+    const AT_AO = 'AO';
+    const AT_CT = 'CT';
+    const AT_GT = 'GT';
+    const AT_CC = 'CC';
+    const AT_SM = 'SM';
+    const AT_ST = 'ST';
+    const AT_SP = 'SP';
+    const AT_SN = 'SN';
+    const AT_SO = 'SO';
+    const AT_PO = 'PO';
+    const AT_PR = 'PR';
+    const AT_LT = 'LT';
+    const AT_RP = 'RP';
+    const AT_DO = 'DO';
+    const AT_IR = 'IR';
+    const AT_IC = 'IC';
+    const AT_VV = 'V+';
+    const AT_VR = 'VR';
+    const AT_HV = 'HV';
+    const AT_AI = 'AI';
+    const AT_DB = 'DB';
+    const AT_VSS = '%V';
+
+}
+
+// AT Command Status Response
+class TXB_AT_Command_Status
+{
+
+    const OK = 0;
+    const Error = 1;
+    const Invalid_Command = 2;
+    const Invalid_Parameter = 3;
+    const Tx_Failure = 4;
+
+    public static function ToString(int $Code)
+    {
+        switch ($Code)
+        {
+            case self::OK:
+                return 'OK';
+            case self::Error:
+                return 'Error';
+            case self::Invalid_Command:
+                return 'Invalid_Command';
+            case self::Invalid_Parameter:
+                return 'Invalid_Parameter';
+            case self::Tx_Failure:
+                return 'Tx_Failure';
+            default:
+                return (string) $Code;
+        }
+    }
 
 }
 
 // API Frame Record
 /**
- * @property mixed $APICommand
- * @property string $NodeName
- * @property string $Data
- * @property Byte $FrameID
+ * Enthält alle Daten eines API Commandos.
+ * 
  */
-class TXB_API_Data extends stdClass
+class TXB_API_Data
 {
 
+    /**
+     * API Command des Paketes.
+     * @var TXB_API_Commands  
+     * @access public
+     */
     public $APICommand;
-    public $NodeName;
-    public $Data;
-    public $FrameID;
 
-//  TxStatus   : TXB_Transmit_Status;
-//  RxStatus   : TXB_Receive_Status;
-    public function GetDataFromJSONObject($Data)
+    /**
+     * Name des Node.
+     * @var string
+     * @access public
+     */
+    public $NodeName;
+
+    /**
+     * Nutzdaten des Paketes.
+     * @var string
+     * @access public
+     */
+    public $Data;
+
+    /**
+     * FrameID des Paketes.
+     * @var Byte  
+     * @access public
+     */
+    public $FrameID = null;
+
+    /**
+     * Checksum des Paketes ok.
+     * @var bool  
+     * @access public
+     */
+    public $Checksum = true;
+
+    /**
+     * Liefert die Daten welche behalten werden müssen.
+     * @access public
+     */
+    public function __sleep()
     {
-        $this->APICommand = utf8_decode($Data->APICommand);
-        $this->NodeName = utf8_decode($Data->NodeName);
-        $this->Data = utf8_decode($Data->Data);
-        $this->FrameID = utf8_decode($Data->FrameID);
+        return array('APICommand', 'NodeName', 'Data', 'FrameID', 'Checksum');
+    }
+
+    public function __construct($Frame = null, $Payload = null)
+    {
+        if (is_null($Frame))
+            return;
+        if (is_object($Frame))
+            if (property_exists($Frame, 'APICommand'))
+            {
+                $this->APICommand = utf8_decode($Frame->APICommand);
+                if (!is_null($Frame->NodeName))
+                    $this->NodeName = utf8_decode($Frame->NodeName);
+                $this->Data = utf8_decode($Frame->Data);
+                $this->Checksum = true;
+                return;
+            }
+        if (property_exists($Frame, 'ATCommand'))
+        {
+            $this->APICommand = TXB_API_Commands::Remote_AT_Command;
+            $this->Data = chr(0x02) . $Frame->ATCommand . $Frame->Data;
+            $this->Checksum = true;
+            return;
+        }
+        if (!is_null($Payload))
+        {
+            $this->APICommand = $Frame;
+            $this->Data = $Payload;
+            return;
+        }
+        $checksum = ord($Frame[strlen($Frame) - 1]);
+        for ($x = 0; $x < (strlen($Frame) - 1); $x++)
+        {
+            $checksum = $checksum + ord($Frame[$x]);
+        }
+        $checksum = $checksum & 0xff;
+        $this->Checksum = ($checksum == 0xff);
+        $this->APICommand = ord($Frame[0]);
+        $this->FrameID = 0;
+        $Frame = substr($Frame, 1, -1);
+        switch ($this->APICommand)
+        {
+            case TXB_API_Commands::AT_Command_Responde:
+            case TXB_API_Commands::Transmit_Status:
+            case TXB_API_Commands::Remote_AT_Command_Responde:
+                $this->FrameID = ord($Frame[0]);
+                $Frame = substr($Frame, 1);
+                break;
+            /*            case TXB_API_Commands::Modem_Status:
+              case TXB_API_Commands::Receive_Paket:
+              case TXB_API_Commands::IO_Data_Sample_Rx:
+              case TXB_API_Commands::Node_Identification_Indicator:
+              default:
+              $this->Data = $Frame;
+              break; */
+        }
+        $this->Data = $Frame;
+    }
+
+    public function ExtractNodeAddr64()
+    {
+        $Addr64 = substr($this->Data, 0, 8);
+        $this->Data = substr($this->Data, 8);
+        return $Addr64;
+    }
+
+    public function ExtractNodeAddr16()
+    {
+        $Addr16 = substr($this->Data, 0, 2);
+        $this->Data = substr($this->Data, 2);
+        return $Addr16;
+    }
+
+    public function ExtractString()
+    {
+        $end = strpos($this->Data, chr(0));
+        $Value = substr($this->Data, 0, $end);
+        $this->Data = substr($this->Data, $end);
+        return $Value;
+    }
+
+    /** Liefert den APIFrame für den Versand an den Coordinator
+     * 
+     * @param TXB_Node $Node
+     * @return string
+     */
+    public function ToFrame(TXB_Node $Node = null)
+    {
+        $Data = chr($this->APICommand) . chr($this->FrameID);
+        if (!is_null($Node))
+            $Data .= $Node->NodeAddr64 . $Node->NodeAddr64;
+        $Data.=$this->Data;
+
+        $len = strlen($Data);
+        //Startzeichen
+        $frame = chr(0x7e);
+        //Laenge
+        $frame .= chr(floor($len / 256)) . chr($len % 256);
+        //Daten
+        $frame.=$Data;
+        //Checksum
+        $check = 0;
+        for ($x = 0; $x < $len; $x++)
+        {
+            $check = $check + ord($Data[$x]);
+        }
+        $check = $check & 0xff;
+        $check = 0xff - $check;
+        $frame = $frame . chr($check);
+        return $frame;
     }
 
     public function ToJSONString($GUID)
@@ -486,50 +600,176 @@ class TXB_API_Data extends stdClass
         $SendData->APICommand = utf8_encode($this->APICommand);
         $SendData->NodeName = utf8_encode($this->NodeName);
         $SendData->Data = utf8_encode($this->Data);
-        $SendData->FrameID = utf8_encode($this->FrameID);
         return json_encode($SendData);
     }
 
 }
 
-class TXB_API_IO_Sample extends stdClass
+/**
+ * TXB_API_DataList ist eine Klasse welche ein Array von TXB_API_Data enthält.
+ *
+ * @package       XBeeZigBee
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ * @example <b>Ohne</b>
+ */
+class TXB_API_DataList
 {
 
-    public $Status;
-    public $Sample;
+    /**
+     * Array mit allen Items.
+     * @var array
+     * @access public
+     */
+    public $Items = array();
 
-    public function GetDataFromJSONObject($Data)
+    /**
+     * Aktueller Frame.
+     * @var array
+     * @access public
+     */
+    public $FrameID = 1;
+
+    /**
+     * Liefert die Daten welche behalten werden müssen.
+     * @access public
+     */
+    public function __sleep()
     {
-        $this->Status = utf8_decode($Data->Status);
-        $this->Sample = utf8_decode($Data->Sample);
+        return array('Items', 'FrameID');
     }
 
-    public function ToJSONString($GUID)
+    /**
+     * Fügt einen Eintrag in $Items hinzu.
+     * @access public
+     * @return int FrameID Die FrameID in der Warteschlange.
+     */
+    public function Add()
     {
-        $SendData = new stdClass;
-        $SendData->DataID = $GUID;
-        $SendData->Status = utf8_encode($this->Status);
-        $SendData->Sample = utf8_encode($this->Sample);
-        return json_encode($SendData);
+        $FrameID = $this->FrameID;
+        $this->Items[$FrameID] = null;
+        if ($this->FrameID == 255)
+            $this->FrameID = 1;
+        else
+            $this->FrameID++;
+        return $FrameID;
+    }
+
+    /**
+     * Update für einen Eintrag in $Items.
+     * @access public
+     * @param TXB_API_Data $APIData Das neue Objekt.
+     * @return bool True bei erfolg, False wenn FrameID nicht vorhanden.
+     */
+    public function Update(TXB_API_Data $APIData)
+    {
+        if (isset($this->Items[$APIData->FrameID]))
+        {
+            $this->Items[$APIData->FrameID] = $APIData;
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Löscht einen Eintrag aus $Items.
+     * @access public
+     * @param int $Index Der Index des zu löschenden Items.
+     */
+    public function Remove(int $Index)
+    {
+        if (isset($this->Items[$Index]))
+            unset($this->Items[$Index]);
+    }
+
+    /**
+     * Liefert einen bestimmten Eintrag aus den Items.
+     * @access public
+     * @param int $Index
+     * @return TXB_API_Data APIData der Antwort.
+     */
+    public function Get(int $Index)
+    {
+        if (!isset($this->Items[$Index]))
+            return false;
+        return $this->Items[$Index];
     }
 
 }
+
+// AT Command Frame
+class TXB_CMD_Data
+{
+
+    public $ATCommand;
+    public $Status;
+    public $Data;
+
+    public function __sleep()
+    {
+        return array('ATCommand', 'Status', 'Data');
+    }
+
+    public function __construct(string $Data, string $Payload = null)
+    {
+        if (is_null($Payload))
+        {
+            if (is_string($Data))
+            {
+                $this->ATCommand = substr($Data, 0, 2);
+                $this->Status = substr($Data, 2, 1);
+                $this->Data = substr($Data, 3);
+            }
+        }
+        else
+        {
+            $this->ATCommand = $Data;
+            $this->Data = $Payload;
+        }
+    }
+
+    public function ExtractNodeAddr64()
+    {
+        $Addr64 = substr($this->Data, 0, 8);
+        $this->Data = substr($this->Data, 8);
+        return $Addr64;
+    }
+
+    public function ExtractNodeAddr16()
+    {
+        $Addr16 = substr($this->Data, 0, 2);
+        $this->Data = substr($this->Data, 2);
+        return $Addr16;
+    }
+
+    public function ExtractString()
+    {
+        $end = strpos($this->Data, chr(0));
+        $Value = substr($this->Data, 0, $end);
+        $this->Data = substr($this->Data, $end);
+        return $Value;
+    }
+
+}
+
 
 // I/O Pin BitMask
-class TXB_Pin_Mask extends stdClass
+class TXB_Pin_Mask
 {
 
-    const XB_PIN_D00 = 0;
-    const XB_PIN_D01 = 1;
-    const XB_PIN_D02 = 2;
-    const XB_PIN_D03 = 3;
-    const XB_PIN_D04 = 4;
-    const XB_PIN_D05 = 5;
-    const XB_PIN_D06 = 6;
-    const XB_PIN_D07 = 7;
-    const XB_PIN_D10 = 10;
-    const XB_PIN_D11 = 11;
-    const XB_PIN_D12 = 12;
+    const PIN_D00 = 0;
+    const PIN_D01 = 1;
+    const PIN_D02 = 2;
+    const PIN_D03 = 3;
+    const PIN_D04 = 4;
+    const PIN_D05 = 5;
+    const PIN_D06 = 6;
+    const PIN_D07 = 7;
+    const PIN_D10 = 10;
+    const PIN_D11 = 11;
+    const PIN_D12 = 12;
 
 }
 
@@ -537,49 +777,295 @@ class TXB_Pin_Mask extends stdClass
 //PWM/DI O11 | RSSI/DI O10 | NA | NA |
 //CTS/DI O7 | RTS/DI O6 | ASSOC DIO5 | DIO4 |
 //AD3/DI O3 | AD2/DI O2 | AD1/DI O1 | AD0/DI O0
-class TXB_Modem_Status extends stdClass
-{
 
-    const XB_Modem_Hardware_reset = 0;
-    const XB_Modem_Watchdog_timer_reset = 1;
-    const XB_Modem_Joined_network = 2;
-    const XB_Modem_Disassociated = 3;
-    const XB_Modem_Coordinator_started = 6;
-    const XB_Modem_Network_security_key_was_updated = 7;
-
-}
 
 class TXB_Node extends stdClass
 {
 
+    /**
+     * 64Bit Adresse des Node.
+     * @var string
+     * @access public
+     */
     public $NodeAddr64;
+
+    /**
+     * 16Bit Adresse des Node.
+     * @var string
+     * @access public
+     */
     public $NodeAddr16;
+
+    /**
+     * Name des Node.
+     * @var string
+     * @access public
+     */
     public $NodeName;
 
-    public function utf8_encode()
+    /**
+     * Liefert die Daten welche behalten werden müssen.
+     * @access public
+     */
+    public function __sleep()
     {
-        $this->NodeAddr16 = utf8_encode($this->NodeAddr16);
-        $this->NodeAddr64 = utf8_encode($this->NodeAddr64);
-        $this->NodeName = utf8_encode($this->NodeName);
+        return array('NodeName', 'NodeAddr16', 'NodeAddr64');
     }
 
-    public function utf8_decode()
+    /*
+      public function utf8_encode()
+      {
+      $this->NodeAddr16 = utf8_encode($this->NodeAddr16);
+      $this->NodeAddr64 = utf8_encode($this->NodeAddr64);
+      $this->NodeName = utf8_encode($this->NodeName);
+      }
+
+      public function utf8_decode()
+      {
+      $this->NodeAddr16 = utf8_decode($this->NodeAddr16);
+      $this->NodeAddr64 = utf8_decode($this->NodeAddr64);
+      $this->NodeName = utf8_decode($this->NodeName);
+      }
+     */
+}
+
+/**
+ * TXB_NodeList ist eine Klasse welche ein Array von TXB_Node enthält.
+ *
+ * @package       XBeeZigBee
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ * @example <b>Ohne</b>
+ */
+class TXB_NodeList
+{
+
+    /**
+     * Array mit allen Items.
+     * @var array
+     * @access public
+     */
+    public $Items = array();
+
+    /**
+     * Liefert die Daten welche behalten werden müssen.
+     * @access public
+     */
+    public function __sleep()
     {
-        $this->NodeAddr16 = utf8_decode($this->NodeAddr16);
-        $this->NodeAddr64 = utf8_decode($this->NodeAddr64);
-        $this->NodeName = utf8_decode($this->NodeName);
+        return array('Items');
+    }
+
+    /**
+     * Update für einen Eintrag in $Items.
+     * @access public
+     * @param TXB_Node $Node Das neue Objekt.
+     */
+    public function Update(TXB_Node $Node)
+    {
+        $this->Items[$Node->NodeName] = $Node;
+    }
+
+    /**
+     * Löscht einen Eintrag aus $Items.
+     * @access public
+     * @param string $NodeName Der Index des zu löschenden Items.
+     */
+    public function Remove(string $NodeName)
+    {
+        if (isset($this->Items[$NodeName]))
+            unset($this->Items[$NodeName]);
+    }
+
+    /**
+     * Liefert einen bestimmten Eintrag aus den Items.
+     * @access public
+     * @param string $NodeName
+     * @return TXB_Node Node
+     */
+    public function GetByNodeName(string $NodeName)
+    {
+        if (!isset($this->Items[$NodeName]))
+            return false;
+        return $this->Items[$NodeName];
+    }
+
+    /** Liefert einen bestimmten Eintrag aus den Items.
+     * @access public
+     * @param string $NodeAddr16
+     * @return TXB_Node Node
+     */
+    public function GetByNodeAddr16(string $NodeAddr16)
+    {
+        foreach ($this->Items as $Name => $Node)
+        {
+            if ($Node->NodeAddr16 == $NodeAddr16)
+                return $this->Items[$Name];
+        }
+        return false;
+    }
+
+    /** Liefert einen bestimmten Eintrag aus den Items.
+     * @access public
+     * @param string $NodeAddr64
+     * @return TXB_Node Node
+     */
+    public function GetByNodeAddr64(string $NodeAddr64)
+    {
+        foreach ($this->Items as $Name => $Node)
+        {
+            if ($Node->NodeAddr64 == $NodeAddr64)
+                return $this->Items[$Name];
+        }
+        return false;
     }
 
 }
 
-class TXB_NodeFromGeneric extends TXB_Node
+//class TXB_NodeFromGeneric extends TXB_Node
+//{
+//
+//    public function __construct($object)
+//    {
+//        $this->NodeAddr16 = $object->NodeAddr16;
+//        $this->NodeAddr64 = $object->NodeAddr64;
+//        $this->NodeName = $object->NodeName;
+//    }
+//
+//}
+
+/**
+ *  DebugHelper Trait.
+ *
+ * @package       NoTrigger
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ * @example <b>Ohne</b>
+ */
+trait DebugHelper
 {
 
-    public function __construct($object)
+    /**
+     * Ergänzt SetBuffer um eine Debug Ausgabe.
+     *
+     * @access protected
+     * @param string $Name Name des Buffer.
+     * @param string $Data Daten für den Buffer.
+     */
+    protected function SetBuffer($Name, $Data)
     {
-        $this->NodeAddr16 = $object->NodeAddr16;
-        $this->NodeAddr64 = $object->NodeAddr64;
-        $this->NodeName = $object->NodeName;
+        $this->SendDebug('SetBuffer ' . $Name, $Data, 0);
+        parent::SetBuffer($Name, $Data);
+    }
+
+    /**
+     * Ergänzt GetBuffer um eine Debug Ausgabe.
+     *
+     * @access protected
+     * @param string $Name Name des Buffer.
+     * @return string Daten aus den Buffer.
+     */
+    protected function GetBuffer($Name)
+    {
+        $Data = parent::GetBuffer($Name);
+        $this->SendDebug('GetBuffer ' . $Name, $Data, 0);
+        return $Data;
+    }
+
+    /**
+     * Ergänzt SendDebug um Möglichkeit Objekte und Array auszugeben.
+     *
+     * @access protected
+     * @param string $Message Nachricht für Data.
+     * @param TXB_API_Data|mixed $Data Daten für die Ausgabe.
+     * @return int $Format Ausgabeformat für Strings.
+     */
+    protected function SendDebug($Message, $Data, $Format)
+    {
+        if (is_a($Data, 'TXB_API_Data'))
+        {
+            $this->SendDebug($Message . ' APICmd', TXB_API_Commands::ToString($Data->APICommand), 0);
+            $this->SendDebug($Message . ' Data', $Data->Data, 1);
+            if (!is_null($Data->FrameID))
+                $this->SendDebug($Message . ' FrameID', (string) $Data->FrameID, 0);
+        }elseif (is_a($Data, 'TXB_CMD_Data'))
+        {
+            $this->SendDebug($Message . ' ATCmd', $Data->ATCommand, 0);
+            $this->SendDebug($Message . ' Status', TXB_AT_Command_Status::ToString($Data->Status), 0);
+            $this->SendDebug($Message . ' Data', $Data->Data, 1);
+        }
+        elseif (is_object($Data))
+        {
+            foreach ($Data as $Key => $DebugData)
+            {
+
+                $this->SendDebug($Message . ":" . $Key, $DebugData, 1);
+            }
+        }
+        else if (is_array($Data))
+        {
+            foreach ($Data as $Key => $DebugData)
+            {
+                $this->SendDebug($Message . ":" . $Key, $DebugData, 0);
+            }
+        }
+        else
+        {
+            parent::SendDebug($Message, $Data, $Format);
+        }
+    }
+
+}
+
+trait Semaphore
+{
+
+    private function lock($ident)
+    {
+        for ($i = 0; $i < 100; $i++)
+        {
+            if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
+            {
+                return true;
+            }
+            else
+            {
+                IPS_Sleep(mt_rand(1, 5));
+            }
+        }
+        return false;
+    }
+
+    private function unlock($ident)
+    {
+        IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
+    }
+
+}
+
+trait InstanceStatus
+{
+
+    protected function SetStatus($InstanceStatus)
+    {
+        if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
+            parent::SetStatus($InstanceStatus);
+    }
+
+    protected function HasActiveParent()
+    {
+        $instance = IPS_GetInstance($this->InstanceID);
+        if ($instance['ConnectionID'] > 0)
+        {
+            $parent = IPS_GetInstance($instance['ConnectionID']);
+            if ($parent['InstanceStatus'] == 102)
+                return true;
+        }
+        return false;
     }
 
 }

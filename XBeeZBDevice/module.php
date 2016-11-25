@@ -5,143 +5,146 @@ require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 class XBZBDevice extends IPSModule
 {
 
+    use DebugHelper,
+        InstanceStatus;
+
     private $DPin_Name = array('D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', '', '', 'P0', 'P1', 'P2');
     private $APin_Name = array('AD0', 'AD1', 'AD2', 'AD3', '', '', '', 'VSS');
     private $AT_WriteCommand = array(
-        TXB_AT_Command::XB_AT_D0,
-        TXB_AT_Command::XB_AT_D1,
-        TXB_AT_Command::XB_AT_D2,
-        TXB_AT_Command::XB_AT_D3,
-        TXB_AT_Command::XB_AT_D4,
-        TXB_AT_Command::XB_AT_D5,
-        TXB_AT_Command::XB_AT_D6,
-        TXB_AT_Command::XB_AT_D7,
-        TXB_AT_Command::XB_AT_P0,
-        TXB_AT_Command::XB_AT_P1,
-        TXB_AT_Command::XB_AT_P2,
-        TXB_AT_Command::XB_AT_ID,
-        TXB_AT_Command::XB_AT_SC,
-        TXB_AT_Command::XB_AT_SD,
-        TXB_AT_Command::XB_AT_ZS,
-        TXB_AT_Command::XB_AT_NJ,
-        TXB_AT_Command::XB_AT_DH,
-        TXB_AT_Command::XB_AT_DL,
-        TXB_AT_Command::XB_AT_NI,
-        TXB_AT_Command::XB_AT_NH,
-        TXB_AT_Command::XB_AT_BH,
-        TXB_AT_Command::XB_AT_AR,
-        TXB_AT_Command::XB_AT_DD,
-        TXB_AT_Command::XB_AT_NT,
-        TXB_AT_Command::XB_AT_NO,
-        TXB_AT_Command::XB_AT_CR,
-        TXB_AT_Command::XB_AT_SE,
-        TXB_AT_Command::XB_AT_DE,
-        TXB_AT_Command::XB_AT_CI,
-        TXB_AT_Command::XB_AT_PL,
-        TXB_AT_Command::XB_AT_PM,
-        TXB_AT_Command::XB_AT_EE,
-        TXB_AT_Command::XB_AT_EO,
-        TXB_AT_Command::XB_AT_KY,
-        TXB_AT_Command::XB_AT_NK,
-        TXB_AT_Command::XB_AT_BD,
-        TXB_AT_Command::XB_AT_NB,
-        TXB_AT_Command::XB_AT_SB,
-        TXB_AT_Command::XB_AT_RO,
-        TXB_AT_Command::XB_AT_AP,
-        TXB_AT_Command::XB_AT_AO,
-        TXB_AT_Command::XB_AT_CT,
-        TXB_AT_Command::XB_AT_GT,
-        TXB_AT_Command::XB_AT_CC,
-        TXB_AT_Command::XB_AT_SM,
-        TXB_AT_Command::XB_AT_ST,
-        TXB_AT_Command::XB_AT_SP,
-        TXB_AT_Command::XB_AT_SN,
-        TXB_AT_Command::XB_AT_SO,
-        TXB_AT_Command::XB_AT_PO,
-        TXB_AT_Command::XB_AT_PR,
-        TXB_AT_Command::XB_AT_LT,
-        TXB_AT_Command::XB_AT_RP,
-        TXB_AT_Command::XB_AT_DO,
-        TXB_AT_Command::XB_AT_IR,
-        TXB_AT_Command::XB_AT_IC,
-        TXB_AT_Command::XB_AT_VV);
+        TXB_AT_Commands::AT_D0,
+        TXB_AT_Commands::AT_D1,
+        TXB_AT_Commands::AT_D2,
+        TXB_AT_Commands::AT_D3,
+        TXB_AT_Commands::AT_D4,
+        TXB_AT_Commands::AT_D5,
+        TXB_AT_Commands::AT_D6,
+        TXB_AT_Commands::AT_D7,
+        TXB_AT_Commands::AT_P0,
+        TXB_AT_Commands::AT_P1,
+        TXB_AT_Commands::AT_P2,
+        TXB_AT_Commands::AT_ID,
+        TXB_AT_Commands::AT_SC,
+        TXB_AT_Commands::AT_SD,
+        TXB_AT_Commands::AT_ZS,
+        TXB_AT_Commands::AT_NJ,
+        TXB_AT_Commands::AT_DH,
+        TXB_AT_Commands::AT_DL,
+        TXB_AT_Commands::AT_NI,
+        TXB_AT_Commands::AT_NH,
+        TXB_AT_Commands::AT_BH,
+        TXB_AT_Commands::AT_AR,
+        TXB_AT_Commands::AT_DD,
+        TXB_AT_Commands::AT_NT,
+        TXB_AT_Commands::AT_NO,
+        TXB_AT_Commands::AT_CR,
+        TXB_AT_Commands::AT_SE,
+        TXB_AT_Commands::AT_DE,
+        TXB_AT_Commands::AT_CI,
+        TXB_AT_Commands::AT_PL,
+        TXB_AT_Commands::AT_PM,
+        TXB_AT_Commands::AT_EE,
+        TXB_AT_Commands::AT_EO,
+        TXB_AT_Commands::AT_KY,
+        TXB_AT_Commands::AT_NK,
+        TXB_AT_Commands::AT_BD,
+        TXB_AT_Commands::AT_NB,
+        TXB_AT_Commands::AT_SB,
+        TXB_AT_Commands::AT_RO,
+        TXB_AT_Commands::AT_AP,
+        TXB_AT_Commands::AT_AO,
+        TXB_AT_Commands::AT_CT,
+        TXB_AT_Commands::AT_GT,
+        TXB_AT_Commands::AT_CC,
+        TXB_AT_Commands::AT_SM,
+        TXB_AT_Commands::AT_ST,
+        TXB_AT_Commands::AT_SP,
+        TXB_AT_Commands::AT_SN,
+        TXB_AT_Commands::AT_SO,
+        TXB_AT_Commands::AT_PO,
+        TXB_AT_Commands::AT_PR,
+        TXB_AT_Commands::AT_LT,
+        TXB_AT_Commands::AT_RP,
+        TXB_AT_Commands::AT_DO,
+        TXB_AT_Commands::AT_IR,
+        TXB_AT_Commands::AT_IC,
+        TXB_AT_Commands::AT_VV);
     private $AT_ReadCommand = array(
-        TXB_AT_Command::XB_AT_DN,
-        TXB_AT_Command::XB_AT_ND,
-        TXB_AT_Command::XB_AT_D0,
-        TXB_AT_Command::XB_AT_D1,
-        TXB_AT_Command::XB_AT_D2,
-        TXB_AT_Command::XB_AT_D3,
-        TXB_AT_Command::XB_AT_D4,
-        TXB_AT_Command::XB_AT_D5,
-        TXB_AT_Command::XB_AT_D6,
-        TXB_AT_Command::XB_AT_D7,
-        TXB_AT_Command::XB_AT_P0,
-        TXB_AT_Command::XB_AT_P1,
-        TXB_AT_Command::XB_AT_P2,
-        TXB_AT_Command::XB_AT_IS,
-        TXB_AT_Command::XB_AT_ID,
-        TXB_AT_Command::XB_AT_SC,
-        TXB_AT_Command::XB_AT_SD,
-        TXB_AT_Command::XB_AT_ZS,
-        TXB_AT_Command::XB_AT_NJ,
-        TXB_AT_Command::XB_AT_JN,
-        TXB_AT_Command::XB_AT_OP,
-        TXB_AT_Command::XB_AT_OI,
-        TXB_AT_Command::XB_AT_CH,
-        TXB_AT_Command::XB_AT_NC,
-        TXB_AT_Command::XB_AT_SH,
-        TXB_AT_Command::XB_AT_SL,
-        TXB_AT_Command::XB_AT_MY,
-        TXB_AT_Command::XB_AT_MP,
-        TXB_AT_Command::XB_AT_DH,
-        TXB_AT_Command::XB_AT_DL,
-        TXB_AT_Command::XB_AT_NI,
-        TXB_AT_Command::XB_AT_NH,
-        TXB_AT_Command::XB_AT_BH,
-        TXB_AT_Command::XB_AT_AR,
-        TXB_AT_Command::XB_AT_DD,
-        TXB_AT_Command::XB_AT_NT,
-        TXB_AT_Command::XB_AT_NO,
-        TXB_AT_Command::XB_AT_NP,
-        TXB_AT_Command::XB_AT_CR,
-        TXB_AT_Command::XB_AT_SE,
-        TXB_AT_Command::XB_AT_DE,
-        TXB_AT_Command::XB_AT_CI,
-        TXB_AT_Command::XB_AT_PL,
-        TXB_AT_Command::XB_AT_PM,
-        TXB_AT_Command::XB_AT_PP,
-        TXB_AT_Command::XB_AT_EE,
-        TXB_AT_Command::XB_AT_EO,
-        TXB_AT_Command::XB_AT_KY,
-        TXB_AT_Command::XB_AT_NK,
-        TXB_AT_Command::XB_AT_BD,
-        TXB_AT_Command::XB_AT_NB,
-        TXB_AT_Command::XB_AT_SB,
-        TXB_AT_Command::XB_AT_RO,
-        TXB_AT_Command::XB_AT_AP,
-        TXB_AT_Command::XB_AT_AO,
-        TXB_AT_Command::XB_AT_CT,
-        TXB_AT_Command::XB_AT_GT,
-        TXB_AT_Command::XB_AT_CC,
-        TXB_AT_Command::XB_AT_SM,
-        TXB_AT_Command::XB_AT_ST,
-        TXB_AT_Command::XB_AT_SP,
-        TXB_AT_Command::XB_AT_SN,
-        TXB_AT_Command::XB_AT_SO,
-        TXB_AT_Command::XB_AT_PO,
-        TXB_AT_Command::XB_AT_PR,
-        TXB_AT_Command::XB_AT_LT,
-        TXB_AT_Command::XB_AT_RP,
-        TXB_AT_Command::XB_AT_DO,
-        TXB_AT_Command::XB_AT_IR,
-        TXB_AT_Command::XB_AT_IC,
-        TXB_AT_Command::XB_AT_VV,
-        TXB_AT_Command::XB_AT_VR,
-        TXB_AT_Command::XB_AT_HV,
-        TXB_AT_Command::XB_AT_AI,
-        TXB_AT_Command::XB_AT_DB,
-        TXB_AT_Command::XB_AT_VSS);
+        TXB_AT_Commands::AT_DN,
+        TXB_AT_Commands::AT_ND,
+        TXB_AT_Commands::AT_D0,
+        TXB_AT_Commands::AT_D1,
+        TXB_AT_Commands::AT_D2,
+        TXB_AT_Commands::AT_D3,
+        TXB_AT_Commands::AT_D4,
+        TXB_AT_Commands::AT_D5,
+        TXB_AT_Commands::AT_D6,
+        TXB_AT_Commands::AT_D7,
+        TXB_AT_Commands::AT_P0,
+        TXB_AT_Commands::AT_P1,
+        TXB_AT_Commands::AT_P2,
+        TXB_AT_Commands::AT_IS,
+        TXB_AT_Commands::AT_ID,
+        TXB_AT_Commands::AT_SC,
+        TXB_AT_Commands::AT_SD,
+        TXB_AT_Commands::AT_ZS,
+        TXB_AT_Commands::AT_NJ,
+        TXB_AT_Commands::AT_JN,
+        TXB_AT_Commands::AT_OP,
+        TXB_AT_Commands::AT_OI,
+        TXB_AT_Commands::AT_CH,
+        TXB_AT_Commands::AT_NC,
+        TXB_AT_Commands::AT_SH,
+        TXB_AT_Commands::AT_SL,
+        TXB_AT_Commands::AT_MY,
+        TXB_AT_Commands::AT_MP,
+        TXB_AT_Commands::AT_DH,
+        TXB_AT_Commands::AT_DL,
+        TXB_AT_Commands::AT_NI,
+        TXB_AT_Commands::AT_NH,
+        TXB_AT_Commands::AT_BH,
+        TXB_AT_Commands::AT_AR,
+        TXB_AT_Commands::AT_DD,
+        TXB_AT_Commands::AT_NT,
+        TXB_AT_Commands::AT_NO,
+        TXB_AT_Commands::AT_NP,
+        TXB_AT_Commands::AT_CR,
+        TXB_AT_Commands::AT_SE,
+        TXB_AT_Commands::AT_DE,
+        TXB_AT_Commands::AT_CI,
+        TXB_AT_Commands::AT_PL,
+        TXB_AT_Commands::AT_PM,
+        TXB_AT_Commands::AT_PP,
+        TXB_AT_Commands::AT_EE,
+        TXB_AT_Commands::AT_EO,
+        TXB_AT_Commands::AT_KY,
+        TXB_AT_Commands::AT_NK,
+        TXB_AT_Commands::AT_BD,
+        TXB_AT_Commands::AT_NB,
+        TXB_AT_Commands::AT_SB,
+        TXB_AT_Commands::AT_RO,
+        TXB_AT_Commands::AT_AP,
+        TXB_AT_Commands::AT_AO,
+        TXB_AT_Commands::AT_CT,
+        TXB_AT_Commands::AT_GT,
+        TXB_AT_Commands::AT_CC,
+        TXB_AT_Commands::AT_SM,
+        TXB_AT_Commands::AT_ST,
+        TXB_AT_Commands::AT_SP,
+        TXB_AT_Commands::AT_SN,
+        TXB_AT_Commands::AT_SO,
+        TXB_AT_Commands::AT_PO,
+        TXB_AT_Commands::AT_PR,
+        TXB_AT_Commands::AT_LT,
+        TXB_AT_Commands::AT_RP,
+        TXB_AT_Commands::AT_DO,
+        TXB_AT_Commands::AT_IR,
+        TXB_AT_Commands::AT_IC,
+        TXB_AT_Commands::AT_VV,
+        TXB_AT_Commands::AT_VR,
+        TXB_AT_Commands::AT_HV,
+        TXB_AT_Commands::AT_AI,
+        TXB_AT_Commands::AT_DB,
+        TXB_AT_Commands::VSS);
 
     public function Create()
     {
@@ -153,30 +156,14 @@ class XBZBDevice extends IPSModule
 
     public function ApplyChanges()
     {
-        //Never delete this line!
         parent::ApplyChanges();
-        $this->RegisterVariableString("ReplyATData", "ReplyATData", "", -3);
-        $this->RegisterVariableInteger("FrameID", "FrameID", "", -2);
-        IPS_SetHidden($this->GetIDForIdent('ReplyATData'), true);
-        IPS_SetHidden($this->GetIDForIdent('FrameID'), true);
-
-        // if fKernelRunlevel = KR_READY then
-
-
-        $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval'), 'XBee_RequestState($_IPS[\'TARGET\']);');
-//                                IDENT                 INTERVAL                                FUNKTION
+        if (IPS_GetKernelRunlevel() <> KR_READY)
+            return;
+        $this->UnregisterVariableString("ReplyATData");
+        $this->UnregisterVariableInteger("FrameID");
+        $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval') * 1000, 'XBee_RequestState($_IPS[\'TARGET\']);');
         $this->ReadPinConfig();
         $this->RequestPinState();
-
-        /*
-          fFrameID: byte;  // integer
-          fFrameIDLock : TCriticalSection;  //Lock
-          fReadyToSend : TEvent; // wird Lock
-          fDataReadyToReadReply: TEvent; // Wenn ReplyATData <> ""
-          fDelayTimerActive: boolean; //später ?
-          fReplyATData : TXB_Command_Data; // String JSON
-          fReplyATDataLock : TCriticalSection;  // Lock
-         */
     }
 
 ################## PRIVATE     
@@ -185,8 +172,11 @@ class XBZBDevice extends IPSModule
     public function RequestAction($Ident, $Value)
     {
         if (is_bool($Value) === false)
-            throw new Exception('Wrong Datatype for ' . $Ident);
-        $this->WriteBoolean($Ident, (bool) $Value);
+        {
+            trigger_error('Wrong Datatype for ' . $Ident, E_USER_NOTICE);
+            return false;
+        }
+        return $this->WriteBoolean($Ident, (bool) $Value);
     }
 
 ################## PUBLIC
@@ -198,71 +188,105 @@ class XBZBDevice extends IPSModule
     public function RequestState()
     {
         if (!$this->HasActiveParent())
-            throw new Exception('Instance has no active Parent Instance!');
-
-        $this->RequestPinState();
+        {
+            trigger_error('Instance has no active Parent Instance!', E_USER_NOTICE);
+            return false;
+        }
+        return $this->RequestPinState();
     }
 
     public function ReadConfig()
     {
         if (!$this->HasActiveParent())
-            throw new Exception('Instance has no active Parent Instance!');
-
-        $this->ReadPinConfig();
+        {
+            trigger_error('Instance has no active Parent Instance!', E_USER_NOTICE);
+            return false;
+        }
+        return $this->ReadPinConfig();
     }
 
-    public function WriteBoolean(string $Pin, boolean $Value)
+    public function WriteBoolean(string $Pin, bool $Value)
     {
-        if ($Pin == '')
-            throw new Exception('Pin is not Set!');
-        if (!in_array($Pin, $this->DPin_Name))
-            throw new Exception('Pin not exists!');
-        $VarID = @$this->GetIDForIdent($Pin);
-        if ($VarID === false)
-            throw new Exception('Pin not exists! Try WriteParameter.');
-        if (IPS_GetVariable($VarID)['VariableType'] !== 0)
-            throw new Exception('Wrong Datatype for ' . $VarID);
-        if ($Value === true)
-            $ValueStr = 0x05;
-        else
-            $ValueStr = 0x04;
-        $ATData = new TXB_Command_Data();
-        $ATData->ATCommand = $Pin;
-        $ATData->Data = chr($ValueStr);
-        /*        $ResponseATData = $this->SendCommand($ATData);
-          if ($ResponseATData->Status <> TXB_Command_Status::XB_Command_OK)
-          throw new Exception('Error on Send Command ' . $VarID); */
-        $this->SendCommand($ATData);
-        if ($this->ReadPropertyBoolean('EmulateStatus'))
-            SetValue($VarID, $Value);
-        return true;
+        try
+        {
+            if ($Pin == '')
+                throw new Exception('Pin is not Set!');
+            if (!in_array($Pin, $this->DPin_Name))
+                throw new Exception('Pin not exists!');
+            $VarID = @$this->GetIDForIdent($Pin);
+            if ($VarID === false)
+                throw new Exception('Pin not exists! Try WriteParameter.');
+            if (IPS_GetVariable($VarID)['VariableType'] !== 0)
+                throw new Exception('Wrong Datatype for ' . $VarID);
+            if ($Value === true)
+                $ValueStr = 0x05;
+            else
+                $ValueStr = 0x04;
+            $CMDData = new TXB_CMD_Data($Pin, chr($ValueStr));
+            $ResultCMDData = $this->Send($CMDData);
+            if (is_null($ResultCMDData))
+                return false;
+            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand)
+                throw new Exception('Wrong Command received.');
+            if ($this->ReadPropertyBoolean('EmulateStatus'))
+                SetValueBoolean($VarID, (ord($ResultCMDData->Data[0]) == 0x05));
+            if ($ResultCMDData->Data <> $CMDData->Data)
+                throw new Exception('Error on write Data.');
+            return true;
+        }
+        catch (Exception $ex)
+        {
+            trigger_error($ex, E_USER_NOTICE);
+            return false;
+        }
     }
 
     public function WriteParameter(string $Parameter, string $Value)
     {
-        if ($Value == "")
-            throw new Exception('Value is empty!');
-        if (!in_array($Parameter, $this->AT_WriteCommand))
-            throw new Exception('Unknown Parameter: ' . $Parameter);
-        $ATData = new TXB_Command_Data();
-        $ATData->ATCommand = $Parameter;
-        $ATData->Data = $Value;
-        /*        $ResponseATData = $this->SendCommand($ATData);
-          if ($ResponseATData->Status <> TXB_Command_Status::XB_Command_OK)
-          throw new Exception('Error on Send Command ' . $Parameter); */
-        $this->SendCommand($ATData);
-        return true;
+        try
+        {
+            if ($Value == "")
+                throw new Exception('Value is empty!');
+            if (!in_array($Parameter, $this->AT_WriteCommand))
+                throw new Exception('Unknown Parameter: ' . $Parameter);
+            $CMDData = new TXB_Command_Data($Parameter, $Value);
+            $ResultCMDData = $this->Send($CMDData);
+            if (is_null($ResultCMDData))
+                return false;
+            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand)
+                throw new Exception('Wrong Command received.');
+            if ($ResultCMDData->Data <> $CMDData->Data)
+                throw new Exception('Error on write Data.');
+            return true;
+        }
+        catch (Exception $ex)
+        {
+            trigger_error($ex, E_USER_NOTICE);
+            return false;
+        }
     }
 
     public function ReadParameter(string $Parameter)
     {
-        if (!in_array($Parameter, $this->AT_ReadCommand))
-            throw new Exception('Unknown Parameter: ' . $Parameter);
-        $ATData = new TXB_Command_Data();
-        $ATData->ATCommand = $Parameter;
-        $ATData->Data = '';
-        $ResponseATData = $this->SendCommand($ATData);
-        return $ResponseATData->Data;
+        try
+        {
+            if (!in_array($Parameter, $this->AT_ReadCommand))
+            {
+                throw new Exception('Unknown Parameter: ' . $Parameter);
+            }
+            $CMDData = new TXB_Command_Data($Parameter, '');
+            $ResultCMDData = $this->Send($CMDData);
+            if (is_null($ResultCMDData))
+                return false;
+            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand)
+                throw new Exception('Wrong Command received.');
+            return $ResultCMDData->Data;
+        }
+        catch (Exception $ex)
+        {
+            trigger_error($ex, E_USER_NOTICE);
+            return false;
+        }
     }
 
 ################## Datapoints
@@ -270,114 +294,111 @@ class XBZBDevice extends IPSModule
     public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
-        
-        if ($Data->DataID <> '{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}')
-            return false;
-        if (property_exists($Data, 'ATCommand'))
-        {
-//           IPS_LogMessage('ReceiveCMDData:'.$this->InstanceID,  print_r($Data,1));
 
-            $ATData = new TXB_Command_Data();
-            $ATData->GetDataFromJSONObject($Data);
-            $this->ReceiveCMDData($ATData);
-            return true;
-        }
-        if (property_exists($Data, 'Sample'))
+//                $IOSample->Status = $APIData->Data[0];
+//                $IOSample->Sample = substr($APIData->Data, 1);
+
+        $APIData = new TXB_API_Data($Data);
+        switch ($APIData->APICommand)
         {
-//            IPS_LogMessage('ReceiveIOSample:'.$this->InstanceID,  print_r($Data,1));
-            $IOSample = new TXB_API_IO_Sample();
-            $IOSample->GetDataFromJSONObject($Data);
-            $this->DecodeIOSample($IOSample);
-            return true;
+            case TXB_API_Commands::AT_Command_Responde:
+            case TXB_API_Commands::Remote_AT_Command_Responde:
+                // bail out... answer to late
+                break;
+            case TXB_API_Commands::Transmit_Status:
+                // hey data why are you here ???  Not for me... bail out
+                break;
+            case TXB_API_Commands::Node_Identification_Indicator:
+                // additional data ?!
+                break;
+            case TXB_API_Commands::IO_Data_Sample_Rx:
+                // gotcha
+                return $this->DecodeIOSample($APIData->Data);
         }
-        return false;
     }
 
-    private function ReceiveCMDData(TXB_Command_Data $ATData)
+    private function DecodePinConfig(TXB_CMD_Data $CMDData)
     {
-        $ReplyATDataID = $this->GetIDForIdent('ReplyATData');
-        $ReplyATData = $ATData->ToJSONString('');
-
-        if (!$this->lock('ReplyATData'))
-            throw new Exception('ReplyATData is locked');
-//         SendData('AT_Command_Responde('+XB_ATCommandToString(ATData.ATCommand)+')',ATData.data);        
-        SetValueString($ReplyATDataID, $ReplyATData);
-        $this->unlock('ReplyATData');
-        if ($ATData->Status <> TXB_Command_Status::XB_Command_OK)
-            return;
-
-        switch ($ATData->ATCommand)
+        if ($CMDData->Status <> TXB_AT_Command_Status::OK)
         {
-            case TXB_AT_Command::XB_AT_D0:
-            case TXB_AT_Command::XB_AT_D1:
-            case TXB_AT_Command::XB_AT_D2:
-            case TXB_AT_Command::XB_AT_D3:
-            case TXB_AT_Command::XB_AT_D4:
-            case TXB_AT_Command::XB_AT_D5:
-            case TXB_AT_Command::XB_AT_D6:
-            case TXB_AT_Command::XB_AT_D7:
-            case TXB_AT_Command::XB_AT_P0:
-            case TXB_AT_Command::XB_AT_P1:
-            case TXB_AT_Command::XB_AT_P2:
+            $this->SendDebug('Command Status Error', TXB_AT_Command_Status::ToString($CMDData->Status), 0);
+            trigger_error(TXB_AT_Command_Status::ToString($CMDData->Status), E_USER_NOTICE);
+            return false;
+        }
+
+
+        switch ($CMDData->ATCommand)
+        {
+            case TXB_AT_Commands::AT_D0:
+            case TXB_AT_Commands::AT_D1:
+            case TXB_AT_Commands::AT_D2:
+            case TXB_AT_Commands::AT_D3:
+            case TXB_AT_Commands::AT_D4:
+            case TXB_AT_Commands::AT_D5:
+            case TXB_AT_Commands::AT_D6:
+            case TXB_AT_Commands::AT_D7:
+            case TXB_AT_Commands::AT_P0:
+            case TXB_AT_Commands::AT_P1:
+            case TXB_AT_Commands::AT_P2:
                 // Neuen Wert darstellen und Variable anlegen und Schaltbar machen wenn Value 4 oder 5 sonst nicht schaltbar
-                if (strlen($ATData->Data) <> 1)
-                    return;
-                switch (ord($ATData->Data))
+                if (strlen($CMDData->Data) <> 1)
+                {
+                    $this->SendDebug('Wrong size for data:', $CMDData, 0);
+                    trigger_error('Wrong size for data.', E_USER_NOTICE);
+                    return false;
+                }
+                switch (ord($CMDData->Data))
                 {
                     case 0:
                     case 1:
-                        $VarID = @$this->GetIDForIdent($ATData->ATCommand);
+                        $VarID = @$this->GetIDForIdent($CMDData->ATCommand);
                         if ($VarID <> 0)
                         {
-                            $this->DisableAction($ATData->ATCommand);
+                            $this->DisableAction($CMDData->ATCommand);
                             IPS_SetVariableCustomProfile($VarID, '');
                         }
                         break;
                     case 2:
 
-                        $VarID = $this->RegisterVariableInteger('A' . $ATData->ATCommand, 'A' . $ATData->ATCommand);
+                        $VarID = $this->RegisterVariableInteger('A' . $CMDData->ATCommand, 'A' . $CMDData->ATCommand);
                         if ($VarID <> 0)
                         {
-                            $this->DisableAction($ATData->ATCommand);
+                            $this->DisableAction($CMDData->ATCommand);
                             IPS_SetVariableCustomProfile($VarID, '');
                         }
                         break;
                     case 3:
-                        $VarID = $this->RegisterVariableBoolean($ATData->ATCommand, $ATData->ATCommand);
-                        $this->DisableAction($ATData->ATCommand);
+                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
+                        $this->DisableAction($CMDData->ATCommand);
                         IPS_SetVariableCustomProfile($VarID, '');
                         break;
                     case 4:
-                        $VarID = $this->RegisterVariableBoolean($ATData->ATCommand, $ATData->ATCommand);
+                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
                         IPS_SetVariableCustomProfile($VarID, '~Switch');
-                        $this->EnableAction($ATData->ATCommand);
+                        $this->EnableAction($CMDData->ATCommand);
                         SetValueBoolean($VarID, false);
                         break;
                     case 5:
-                        $VarID = $this->RegisterVariableBoolean($ATData->ATCommand, $ATData->ATCommand);
+                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
                         IPS_SetVariableCustomProfile($VarID, '~Switch');
-                        $this->EnableAction($ATData->ATCommand);
+                        $this->EnableAction($CMDData->ATCommand);
                         SetValueBoolean($VarID, true);
                         break;
                 }
                 break;
-            case TXB_AT_Command::XB_AT_IS:
-//                if not fDelayTimerActive then
-                $IOSample = new TXB_API_IO_Sample();
-                $IOSample->Status = TXB_Receive_Status::XB_Receive_Packet_Acknowledged;
-                $IOSample->Sample = $ATData->Data;
-                $this->DecodeIOSample($IOSample);
-                break;
+            case TXB_AT_Commands::AT_IS:
+                return $this->DecodeIOSample(chr(01) . chr(01) . $CMDData);
         }
+        return true;
     }
 
-    private function DecodeIOSample(TXB_API_IO_Sample $IOSample)
+    private function DecodeIOSample(TXB_CMD_Data $CMDData)
     {
-        $ActiveDPins = unpack("n", substr($IOSample->Sample, 1, 2))[1];
-        $ActiveAPins = ord($IOSample->Sample[3]);
+        $ActiveDPins = unpack("n", substr($CMDData->Data, 2, 2))[1];
+        $ActiveAPins = ord($CMDData->Data[4]);
         if ($ActiveDPins <> 0)
         {
-            $PinValue = unpack("n", substr($IOSample->Sample, 4, 2))[1];
+            $PinValue = unpack("n", substr($CMDData->Data, 5, 2))[1];
             foreach ($this->DPin_Name as $Index => $Pin_Name)
             {
                 if ($Pin_Name == '')
@@ -385,27 +406,16 @@ class XBZBDevice extends IPSModule
                 $Bit = pow(2, $Index);
                 if (($ActiveDPins & $Bit) == $Bit)
                 {
-//                        {$IFDEF DEBUG}        SendData('DPIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $VarID = @$this->GetIDForIdent($Pin_Name);
                     if ($VarID === false)
                         $VarID = $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
-
-                    if (($PinValue & $Bit) == $Bit)
-                    {
-//                            {$IFDEF DEBUG}          SendData(DPin_Name[i],'true - Bit:'+inttostr(ord(i)));{$ENDIF}
-                        SetValueBoolean($VarID, true);
-                    }
-                    else
-                    {
-//                            {$IFDEF DEBUG}          SendData(DPin_Name[i],'false - Bit:'+inttostr(ord(i)));{$ENDIF}
-                        SetValueBoolean($VarID, false);
-                    }
+                    SetValueBoolean($VarID, (($PinValue & $Bit) == $Bit));
                 }
             }
         }
         if ($ActiveAPins <> 0)
         {
-            $i=0;
+            $i = 0;
             foreach ($this->APin_Name as $Index => $Pin_Name)
             {
                 if ($Pin_Name == "")
@@ -413,11 +423,10 @@ class XBZBDevice extends IPSModule
                 $Bit = pow(2, $Index);
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
-//                    {$IFDEF DEBUG}        SendData('APIN','I:'+floattostr(Power(2,ord(i))));{$ENDIF}
                     $PinAValue = 0;
-                    $PinAValue = unpack("n", substr($IOSample->Sample, 6 + ($i*2), 2))[1];
+                    $PinAValue = unpack("n", substr($CMDData->Data, 7 + ($i * 2), 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
-                    
+
                     if ($Pin_Name == 'VSS')
                     {
                         $VarID = @$this->GetIDForIdent($Pin_Name);
@@ -436,250 +445,76 @@ class XBZBDevice extends IPSModule
                 }
             }
         }
+        return true;
     }
 
     private function ReadPinConfig()
     {
-        $ATData = new TXB_Command_Data();
-        $ATData->Data = '';
+        $Result = true;
         foreach ($this->DPin_Name as $Pin)
         {
-            if ($Pin== '') continue;
-            
-            $ATData->ATCommand = $Pin;
-            $this->SendCommand($ATData);
+            if ($Pin == '')
+                continue;
+            $CMDData = new TXB_CMD_Data($Pin, '');
+            $ResultCMDData = $this->Send($CMDData);
+            if (!is_null($ResultCMDData))
+                if ($this->DecodePinConfig($ResultCMDData) === false)
+                    $Result = false;
         }
+        return $Result;
     }
 
 //------------------------------------------------------------------------------
     private function RequestPinState()
     {
-        $ATData = new TXB_Command_Data();
-        $ATData->ATCommand = TXB_AT_Command::XB_AT_IS;
-        $this->SendCommand($ATData);
+        $CMDData = new TXB_Command_Data(TXB_AT_Commands::AT_IS, '');
+        $ResultCMDData = $this->Send($CMDData);
+        if (is_null($ResultCMDData))
+            return false;
+        return $this->DecodePinConfig($ResultCMDData);
     }
 
-    private function SendCommand(TXB_Command_Data $ATData)
+    /**
+     * 
+     * @param TXB_CMD_Data $CMDData
+     * @return TXB_CMD_Data
+     * @throws Exception
+     */
+    private function Send(TXB_CMD_Data $CMDData)
     {
-        if (!$this->HasActiveParent())
-            throw new Exception("Instance has no active Parent.");
-
-//        $ReplayATData = new TXB_Command_Data();
-        $FrameID = $this->GetIDForIdent('FrameID');
-        $ReplyATDataID = $this->GetIDForIdent('ReplyATData');
-        if (!$this->lock('RequestSendData'))
-            throw new Exception('RequestSendData is locked');
-        $Frame = GetValueInteger($FrameID);
-        if ($Frame == 255)
-            $Frame = 1;
-        else
-            $Frame++;
-        SetValueInteger($FrameID, $Frame);
-        if (!$this->lock('ReplyATData'))
-        {
-            $this->unlock('RequestSendData');
-            throw new Exception('ReplyATData is locked');
-        }
-        SetValueString($ReplyATDataID, '');
-        $this->unlock('ReplyATData');
-        $ATData->FrameID = $Frame;
         try
         {
-            $this->SendDataToParent($ATData);
+
+            if (!$this->HasActiveParent())
+                throw new Exception("Instance has no active Parent.");
+            $this->SendDebug('Send', $CMDData, 0);
+            $APIData = new TXB_API_Data($CMDData);
+            $this->SendDebug('Send', $APIData, 0);
+            $JSONString = $CMDData->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
+            $anwser = $this->SendDataToParent($JSONString);
+            $this->SendDebug('Send', $JSONString, 0);
+            if ($anwser === false)
+            {
+                $this->SendDebug('Receive', 'No valid answer', 0);
+                return NULL;
+            }
+            $result = unserialize($anwser);
+            $this->SendDebug('Receive', $result, 0);
+            if (($result->APICommand != TXB_API_Commands::AT_Command_Responde) or ( $result->APICommand != TXB_API_Commands::Remote_AT_Command_Responde))
+                throw new Exception('Wrong APIFrame in Result');
+            $ResultCMDData = new TXB_CMD_Data($result->Data);
+            if ($ResultCMDData->Status == TXB_AT_Command_Status::OK)
+                return $ResultCMDData;
+            throw new Exception('Error on Transmit:' . TXB_AT_Command_Status::ToString($ResultCMDData->Status));
         }
         catch (Exception $exc)
         {
-            $this->unlock('RequestSendData');
-            throw new Exception($exc);
+            trigger_error($exc->getMessage(), E_USER_NOTICE);
+            return NULL;
         }
-        $ReplayATData = $this->WaitForResponse();
-
-//        IPS_LogMessage('ReplayATData:'.$this->InstanceID,print_r($ReplayATData,1));
-
-        if ($ReplayATData === false)
-        {
-//          Senddata('TX_Status','Timeout');
-            $this->unlock('RequestSendData');
-            throw new Exception('Send Data Timeout');
-        }
-        if ($ReplayATData->Status == TXB_Command_Status::XB_Command_OK)
-        {
-//            Senddata('TX_Status','OK')
-            $this->unlock('RequestSendData');
-            return $ReplayATData;
-        }
-//        Senddata('TX_Status','Error: '+ XB_Transmit_Status_to_String(fTransmitStatus));
-        $this->unlock('RequestSendData');
-
-        throw new Exception('Error on Transmit:' . ord($ReplayATData->Status));
-    }
-
-    protected function SendDataToParent($Data)
-    {
-        // API-Daten verpacken und dann versenden.
-        $JSONString = $Data->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
-//        IPS_LogMessage('SendDataToSplitter:'.$this->InstanceID,$JSONString);
-        // Daten senden
-        IPS_SendDataToParent($this->InstanceID, $JSONString);
-        return true;
     }
 
 ################## DUMMYS / WOARKAROUNDS - protected
-
-    private function WaitForResponse()
-    {
-        $ReplyATDataID = $this->GetIDForIdent('ReplyATData');
-        for ($i = 0; $i < 500; $i++)
-        {
-            if (GetValueString($ReplyATDataID) === '')
-                IPS_Sleep(10);
-            else
-            {
-                if ($this->lock('ReplyATData'))
-                {
-                    $ret = GetValueString($ReplyATDataID);
-                    SetValueString($ReplyATDataID, '');
-                    $this->unlock('ReplyATData');
-                    $JSON = json_decode($ret);
-                    $ATData = new TXB_Command_Data();
-                    $ATData->GetDataFromJSONObject($JSON);
-                    return $ATData;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
-    protected function HasActiveParent()
-    {
-//        IPS_LogMessage(__CLASS__, __FUNCTION__); //          
-        $instance = IPS_GetInstance($this->InstanceID);
-        if ($instance['ConnectionID'] > 0)
-        {
-            $parent = IPS_GetInstance($instance['ConnectionID']);
-            if ($parent['InstanceStatus'] == 102)
-                return true;
-        }
-        return false;
-    }
-
-    protected function RegisterTimer($Name, $Interval, $Script)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id === false)
-            $id = 0;
-
-
-        if ($id > 0)
-        {
-            if (!IPS_EventExists($id))
-                throw new Exception("Ident with name " . $Name . " is used for wrong object type");
-
-            if (IPS_GetEvent($id)['EventType'] <> 1)
-            {
-                IPS_DeleteEvent($id);
-                $id = 0;
-            }
-        }
-
-        if ($id == 0)
-        {
-            $id = IPS_CreateEvent(1);
-            IPS_SetParent($id, $this->InstanceID);
-            IPS_SetIdent($id, $Name);
-        }
-        IPS_SetName($id, $Name);
-        IPS_SetHidden($id, true);
-        IPS_SetEventScript($id, $Script);
-        if ($Interval > 0)
-        {
-            IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, $Interval);
-
-            IPS_SetEventActive($id, true);
-        }
-        else
-        {
-            IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, 1);
-
-            IPS_SetEventActive($id, false);
-        }
-    }
-
-    protected function UnregisterTimer($Name)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id > 0)
-        {
-            if (!IPS_EventExists($id))
-                throw new Exception('Timer not present');
-            IPS_DeleteEvent($id);
-        }
-    }
-
-    protected function SetTimerInterval($Name, $Interval)
-    {
-        $id = @IPS_GetObjectIDByIdent($Name, $this->InstanceID);
-        if ($id === false)
-            throw new Exception('Timer not present');
-        if (!IPS_EventExists($id))
-            throw new Exception('Timer not present');
-
-        $Event = IPS_GetEvent($id);
-
-        if ($Interval < 1)
-        {
-            if ($Event['EventActive'])
-                IPS_SetEventActive($id, false);
-        }
-        else
-        {
-            if ($Event['CyclicTimeValue'] <> $Interval)
-                IPS_SetEventCyclic($id, 0, 0, 0, 0, 1, $Interval);
-            if (!$Event['EventActive'])
-                IPS_SetEventActive($id, true);
-        }
-    }
-
-    protected function SetStatus($InstanceStatus)
-    {
-        if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
-            parent::SetStatus($InstanceStatus);
-    }
-
-    protected function LogMessage($data, $cata)
-    {
-        
-    }
-
-    protected function SetSummary($data)
-    {
-//        IPS_LogMessage(__CLASS__, __FUNCTION__ . "Data:" . $data); //                   
-    }
-
-################## SEMAPHOREN Helper  - private  
-
-    private function lock($ident)
-    {
-        for ($i = 0; $i < 100; $i++)
-        {
-            if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
-            {
-                return true;
-            }
-            else
-            {
-                IPS_Sleep(mt_rand(1, 5));
-            }
-        }
-        return false;
-    }
-
-    private function unlock($ident)
-    {
-        IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
-    }
-
 }
 
 ?>
