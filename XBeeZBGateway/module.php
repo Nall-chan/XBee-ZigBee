@@ -80,8 +80,58 @@ class XBZBGateway extends IPSModule
      *
      * @access public
      */
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        switch ($Message)
+        {
+            case IPS_KERNELMESSAGE:
+                if ($Data[0] == KR_READY)
+                {
+                    try
+                    {
+                        $this->KernelReady();
+                    }
+                    catch (Exception $exc)
+                    {
+                        return;
+                    }
+                }
+                break;
+            case DM_CONNECT:
+            case DM_DISCONNECT:
+                $this->ForceRefresh();
+                break;
+        }
+    }
+
+    /**
+     * Wird ausgeführt wenn der Kernel hochgefahren wurde.
+     */
+    protected function KernelReady()
+    {
+        $this->ApplyChanges();
+    }
+
+    /**
+     * Wird ausgeführt wenn sich der Parent ändert.
+     */
+    protected function ForceRefresh()
+    {
+        $this->ApplyChanges();
+    }
+
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function ApplyChanges()
     {
+        $this->RegisterMessage(0, IPS_KERNELMESSAGE);
+        $this->RegisterMessage($this->InstanceID, DM_CONNECT);
+        $this->RegisterMessage($this->InstanceID, DM_DISCONNECT);
+        // Wenn Kernel nicht bereit, dann warten... KR_READY kommt ja gleich
+
         parent::ApplyChanges();
         if (IPS_GetKernelRunlevel() != KR_READY)
             return;
