@@ -184,7 +184,7 @@ class XBZBGateway extends IPSModule
         {
             case TXB_API_Commands::AT_Command_Responde:
                 if ($this->UpdateTransmitBuffer($APIData) === false)
-                    $this->ProcessAT_Command_Responde($APIData);
+                    $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIData->Data));
                 break;
             case TXB_API_Commands::Modem_Status:
                 $this->SendDebug('API_Modem_Status: ', $APIData->Data, 1);
@@ -229,27 +229,29 @@ class XBZBGateway extends IPSModule
                 $NodeList = $this->NodeList;
                 $Node1 = $NodeList->GetByNodeAddr64($NodeAddr64);
                 $Node2 = $NodeList->GetByNodeAddr16($NodeAddr16);
-                if (($Node1 === false) or ( $Node2 === false) or ( $Node1->NodeName <> $Node2->NodeName)) //unbekannter node
+                if ($Node1 === false)
                 {
-                    if ($Node1 === false)
-                        $this->SendDebug('unkown NodeAddr64', $NodeAddr64, 1);
-                    if ($Node2 === false)
-                        $this->SendDebug('unkown NodeAddr16', $NodeAddr16, 1);
-                    if ($Node1->NodeName <> $Node2->NodeName)
-                    {
-                        $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr64, 1);
-                        $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr16, 1);
-                    }
+                    $this->SendDebug('unkown NodeAddr64', $NodeAddr64, 1);
+                    break;
                 }
+                if ($Node2 === false)
+                {
+                    $this->SendDebug('unkown NodeAddr16', $NodeAddr16, 1);
+                    break;
+                }
+
+                if ($Node1->NodeName <> $Node2->NodeName)
+                {
+                    $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr64, 1);
+                    $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr16, 1);
+                    break;
+                }
+                $APIData->NodeName = $Node1->NodeName;
+                $this->SendDebug(TXB_API_Commands::ToString($APIData->APICommand), $APIData->Data, 1);
+                if ($APIData->APICommand == TXB_API_Commands::Remote_AT_Command_Responde)
+                    $this->UpdateTransmitBuffer($APIData);
                 else
-                {
-                    $APIData->NodeName = $Node1->NodeName;
-                    $this->SendDebug(TXB_API_Commands::ToString($APIData->APICommand), $APIData->Data, 1);
-                    if ($APIData->APICommand == TXB_API_Commands::Remote_AT_Command_Responde)
-                        $this->UpdateTransmitBuffer($APIData);
-                    else
-                        $this->SendDataToSplitter($APIData);
-                }
+                    $this->SendDataToSplitter($APIData);
                 break;
             default:
                 $this->SendDebug('Ungültiger API Frame(' . bin2hex(chr($APIData->APICommand)) . ')', $APIData->Data, 1);
@@ -272,7 +274,7 @@ class XBZBGateway extends IPSModule
                 $Node = new TXB_Node();
                 $Node->NodeAddr16 = $CMDData->ExtractNodeAddr16();
                 $Node->NodeAddr64 = $CMDData->ExtractNodeAddr64();
-                $CMDData->Data = substr($CMDData->Data, 10); // Bytes wegwerfen....
+                //$CMDData->Data = substr($CMDData->Data, 10); // Bytes wegwerfen....
                 $Node->NodeName = $CMDData->ExtractString();
                 $this->SendDebug('AT_Command_Responde::XB_AT_ND', $Node->NodeName, 0);
                 $this->SendDebug('Command_Responde_ND: Addr64', $Node->NodeAddr64, 1);
@@ -306,7 +308,8 @@ class XBZBGateway extends IPSModule
             $this->unlock('TransmitBuffer');
             return true;
         }
-        $this->SendDebug('WARN', 'Frame not found in TransmitBuffer', 0);
+        $this->unlock('TransmitBuffer');
+        //$this->SendDebug('WARN', 'Frame not found in TransmitBuffer', 0);
         return false;
     }
 
@@ -450,12 +453,14 @@ class XBZBGateway extends IPSModule
             if ($this->HasActiveParent() === false)
                 throw new Exception('Instance has no active Parent Instance!');
 
-            if (($APIData->FrameID !== 0) and ( $APIData->Data !== TXB_AT_Commands::AT_ND))
+            if ($APIData->FrameID !== 0)
             {
                 if (!$this->lock('TransmitBuffer'))
                     throw new Exception('TransmitBuffer is locked');
                 $TransmitBuffer = $this->TransmitBuffer;
                 $APIData->FrameID = $TransmitBuffer->Add();
+                if ($APIData->Data === TXB_AT_Commands::AT_ND)
+                    $TransmitBuffer->Remove($APIData->FrameID);
                 $this->TransmitBuffer = $TransmitBuffer;
                 $this->unlock('TransmitBuffer');
             }
@@ -463,12 +468,15 @@ class XBZBGateway extends IPSModule
             $Frame = $APIData->ToFrame($Node);
             $this->SendDataToParent(json_encode(Array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($Frame))));
 
-            if (($APIData->FrameID === 0) or ( $APIData->Data === TXB_AT_Commands::AT_ND))
-                return true;
-
-            $APIResponse = $this->WaitForResponse($APIData->FrameID);
-            $this->SendDebug('Response', $APIResponse, 1);
-            return $APIResponse;
+            if ($APIData->FrameID !== 0)
+            {
+                if ($APIData->Data === TXB_AT_Commands::AT_ND)
+                    return true;
+                $APIResponse = $this->WaitForResponse($APIData->FrameID);
+                $this->SendDebug('Response', $APIResponse, 1);
+                return $APIResponse;
+            }
+            return true;
         }
         catch (Exception $ex)
         {

@@ -126,7 +126,7 @@ class XBZBSplitter extends IPSModule
         {
             throw new Exception($exc);
         }
-        if ($APIData->APICommand != TXB_API_Commands::Transmit_Status)
+        if ($APIResponse->APICommand != TXB_API_Commands::Transmit_Status)
         {
             throw new Exception("Wrong response in frame.");
         }
