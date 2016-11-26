@@ -144,7 +144,7 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_HV,
         TXB_AT_Commands::AT_AI,
         TXB_AT_Commands::AT_DB,
-        TXB_AT_Commands::VSS);
+        TXB_AT_Commands::AT_VSS);
 
     public function Create()
     {
@@ -159,8 +159,8 @@ class XBZBDevice extends IPSModule
         parent::ApplyChanges();
         if (IPS_GetKernelRunlevel() <> KR_READY)
             return;
-        $this->UnregisterVariableString("ReplyATData");
-        $this->UnregisterVariableInteger("FrameID");
+        $this->UnregisterVariable("ReplyATData");
+        $this->UnregisterVariable("FrameID");
         $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval') * 1000, 'XBee_RequestState($_IPS[\'TARGET\']);');
         $this->ReadPinConfig();
         $this->RequestPinState();
@@ -229,9 +229,9 @@ class XBZBDevice extends IPSModule
             if ($ResultCMDData->ATCommand <> $CMDData->ATCommand)
                 throw new Exception('Wrong Command received.');
             if ($this->ReadPropertyBoolean('EmulateStatus'))
-                SetValueBoolean($VarID, (ord($ResultCMDData->Data[0]) == 0x05));
-            if ($ResultCMDData->Data <> $CMDData->Data)
-                throw new Exception('Error on write Data.');
+                SetValueBoolean($VarID, $Value);
+//            if ($ResultCMDData->Data <> $CMDData->Data)
+//                throw new Exception('Error on write Data.');
             return true;
         }
         catch (Exception $ex)
@@ -249,7 +249,7 @@ class XBZBDevice extends IPSModule
                 throw new Exception('Value is empty!');
             if (!in_array($Parameter, $this->AT_WriteCommand))
                 throw new Exception('Unknown Parameter: ' . $Parameter);
-            $CMDData = new TXB_Command_Data($Parameter, $Value);
+            $CMDData = new TXB_CMD_Data($Parameter, $Value);
             $ResultCMDData = $this->Send($CMDData);
             if (is_null($ResultCMDData))
                 return false;
@@ -274,7 +274,7 @@ class XBZBDevice extends IPSModule
             {
                 throw new Exception('Unknown Parameter: ' . $Parameter);
             }
-            $CMDData = new TXB_Command_Data($Parameter, '');
+            $CMDData = new TXB_CMD_Data($Parameter, '');
             $ResultCMDData = $this->Send($CMDData);
             if (is_null($ResultCMDData))
                 return false;
@@ -295,10 +295,8 @@ class XBZBDevice extends IPSModule
     {
         $Data = json_decode($JSONString);
 
-//                $IOSample->Status = $APIData->Data[0];
-//                $IOSample->Sample = substr($APIData->Data, 1);
-
         $APIData = new TXB_API_Data($Data);
+        $this->SendDebug('Receive', $APIData, 1);
         switch ($APIData->APICommand)
         {
             case TXB_API_Commands::AT_Command_Responde:
@@ -352,7 +350,7 @@ class XBZBDevice extends IPSModule
                     case 0:
                     case 1:
                         $VarID = @$this->GetIDForIdent($CMDData->ATCommand);
-                        if ($VarID <> 0)
+                        if ($VarID > 0)
                         {
                             $this->DisableAction($CMDData->ATCommand);
                             IPS_SetVariableCustomProfile($VarID, '');
@@ -361,11 +359,11 @@ class XBZBDevice extends IPSModule
                     case 2:
 
                         $VarID = $this->RegisterVariableInteger('A' . $CMDData->ATCommand, 'A' . $CMDData->ATCommand);
-                        if ($VarID <> 0)
-                        {
-                            $this->DisableAction($CMDData->ATCommand);
-                            IPS_SetVariableCustomProfile($VarID, '');
-                        }
+//                        if ($VarID > 0)
+//                        {
+                        $this->DisableAction('A' . $CMDData->ATCommand);
+                        IPS_SetVariableCustomProfile($VarID, '');
+//                        }
                         break;
                     case 3:
                         $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
@@ -387,18 +385,18 @@ class XBZBDevice extends IPSModule
                 }
                 break;
             case TXB_AT_Commands::AT_IS:
-                return $this->DecodeIOSample(chr(01) . chr(01) . $CMDData);
+                return $this->DecodeIOSample( chr(01) . $CMDData->Data);
         }
         return true;
     }
 
-    private function DecodeIOSample(TXB_CMD_Data $CMDData)
+    private function DecodeIOSample($Data)
     {
-        $ActiveDPins = unpack("n", substr($CMDData->Data, 2, 2))[1];
-        $ActiveAPins = ord($CMDData->Data[4]);
+        $ActiveDPins = unpack("n", substr($Data, 2, 2))[1];
+        $ActiveAPins = ord($Data[4]);
         if ($ActiveDPins <> 0)
         {
-            $PinValue = unpack("n", substr($CMDData->Data, 5, 2))[1];
+            $PinValue = unpack("n", substr($Data, 5, 2))[1];
             foreach ($this->DPin_Name as $Index => $Pin_Name)
             {
                 if ($Pin_Name == '')
@@ -424,7 +422,7 @@ class XBZBDevice extends IPSModule
                 if (($ActiveAPins & $Bit) == $Bit)
                 {
                     $PinAValue = 0;
-                    $PinAValue = unpack("n", substr($CMDData->Data, 7 + ($i * 2), 2))[1];
+                    $PinAValue = unpack("n", substr($Data, 7 + ($i * 2), 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
 
                     if ($Pin_Name == 'VSS')
@@ -450,24 +448,23 @@ class XBZBDevice extends IPSModule
 
     private function ReadPinConfig()
     {
-        $Result = true;
         foreach ($this->DPin_Name as $Pin)
         {
             if ($Pin == '')
                 continue;
             $CMDData = new TXB_CMD_Data($Pin, '');
             $ResultCMDData = $this->Send($CMDData);
-            if (!is_null($ResultCMDData))
-                if ($this->DecodePinConfig($ResultCMDData) === false)
-                    $Result = false;
+            if (is_null($ResultCMDData))
+                return false;
+            if ($this->DecodePinConfig($ResultCMDData) === false)
+                return false;
         }
-        return $Result;
     }
 
 //------------------------------------------------------------------------------
     private function RequestPinState()
     {
-        $CMDData = new TXB_Command_Data(TXB_AT_Commands::AT_IS, '');
+        $CMDData = new TXB_CMD_Data(TXB_AT_Commands::AT_IS, '');
         $ResultCMDData = $this->Send($CMDData);
         if (is_null($ResultCMDData))
             return false;
@@ -490,19 +487,19 @@ class XBZBDevice extends IPSModule
             $this->SendDebug('Send', $CMDData, 0);
             $APIData = new TXB_API_Data($CMDData);
             $this->SendDebug('Send', $APIData, 0);
-            $JSONString = $CMDData->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
+            $JSONString = $APIData->ToJSONString('{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}');
             $anwser = $this->SendDataToParent($JSONString);
-            $this->SendDebug('Send', $JSONString, 0);
             if ($anwser === false)
             {
-                $this->SendDebug('Receive', 'No valid answer', 0);
+                $this->SendDebug('Response', 'No valid answer', 0);
                 return NULL;
             }
             $result = unserialize($anwser);
-            $this->SendDebug('Receive', $result, 0);
-            if (($result->APICommand != TXB_API_Commands::AT_Command_Responde) or ( $result->APICommand != TXB_API_Commands::Remote_AT_Command_Responde))
+            $this->SendDebug('Response', $result, 0);
+            if (($result->APICommand != TXB_API_Commands::AT_Command_Responde) and ( $result->APICommand != TXB_API_Commands::Remote_AT_Command_Responde))
                 throw new Exception('Wrong APIFrame in Result');
             $ResultCMDData = new TXB_CMD_Data($result->Data);
+            $this->SendDebug('Response', $ResultCMDData, 0);
             if ($ResultCMDData->Status == TXB_AT_Command_Status::OK)
                 return $ResultCMDData;
             throw new Exception('Error on Transmit:' . TXB_AT_Command_Status::ToString($ResultCMDData->Status));

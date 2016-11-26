@@ -56,6 +56,8 @@ class XBZBSplitter extends IPSModule
         $this->SetReceiveDataFilter('.*"NodeName":"' . $this->ReadPropertyString('NodeName') . '".*');
         if (IPS_GetKernelRunlevel() != KR_READY)
             return;
+        $this->UnregisterVariable("TransmitStatus");
+        $this->UnregisterVariable("FrameID");        
         if ($this->ReadPropertyString('NodeName') == '')
             $this->SetStatus(202);
         else
@@ -86,12 +88,12 @@ class XBZBSplitter extends IPSModule
             $anwser = $this->SendDataToParent($JSONString);
             if ($anwser === false)
             {
-                $this->SendDebug('Receive', 'No valid answer', 0);
+                $this->SendDebug('Response', 'No valid answer', 0);
                 return NULL;
             }
-            $result = unserialize($anwser);
-            if ($APIData->FrameID === 0)
-                return $result;
+            $APIResponse = unserialize($anwser);
+//            if ($APIData->FrameID === 0)
+//                return $APIResponse;
             $this->SendDebug('Response', $APIResponse, 1);
             return $APIResponse;
         }
@@ -166,7 +168,7 @@ class XBZBSplitter extends IPSModule
                         $APIData->Data = chr(0x02) . $APIData->Data;
                     }
                     $APIResponse = $this->Send($APIData);
-                    return $APIResponse;
+                    return serialize($APIResponse);
                 }
                 catch (Exception $exc)
                 {
@@ -204,14 +206,11 @@ class XBZBSplitter extends IPSModule
                 trigger_error($ex->getMessage(), E_USER_NOTICE);
                 $SendOk = FALSE;
             }
-
             $Data = substr($Data, $Max);
             if (strlen($Data) < $Max)
                 $Max = strlen($Data);
         }
-        if (!$SendOk)
-            return false;
-        return true;
+        return $SendOk;
     }
 
 ################## Send buffer-Data from here to Child
@@ -277,5 +276,4 @@ class XBZBSplitter extends IPSModule
     }
 
 }
-
 /** @} */

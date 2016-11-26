@@ -489,6 +489,7 @@ class TXB_API_Data
         if (is_null($Frame))
             return;
         if (is_object($Frame))
+        {
             if (property_exists($Frame, 'APICommand'))
             {
                 $this->APICommand = utf8_decode($Frame->APICommand);
@@ -498,12 +499,13 @@ class TXB_API_Data
                 $this->Checksum = true;
                 return;
             }
-        if (property_exists($Frame, 'ATCommand'))
-        {
-            $this->APICommand = TXB_API_Commands::Remote_AT_Command;
-            $this->Data = chr(0x02) . $Frame->ATCommand . $Frame->Data;
-            $this->Checksum = true;
-            return;
+            if (property_exists($Frame, 'ATCommand'))
+            {
+                $this->APICommand = TXB_API_Commands::Remote_AT_Command;
+                $this->Data = chr(0x02) . $Frame->ATCommand . $Frame->Data;
+                $this->Checksum = true;
+                return;
+            }
         }
         if (!is_null($Payload))
         {
@@ -571,7 +573,10 @@ class TXB_API_Data
     {
         $Data = chr($this->APICommand) . chr($this->FrameID);
         if (!is_null($Node))
-            $Data .= $Node->NodeAddr64 . $Node->NodeAddr64;
+        {
+            $Data .= $Node->NodeAddr64;
+            $Data .= $Node->NodeAddr16;
+        }
         $Data.=$this->Data;
 
         $len = strlen($Data);
@@ -665,11 +670,9 @@ class TXB_API_DataList
      */
     public function Update(TXB_API_Data $APIData)
     {
-        if (isset($this->Items[$APIData->FrameID]))
-        {
-            $this->Items[$APIData->FrameID] = $APIData;
+        if (!array_key_exists($APIData->FrameID, $this->Items))
             return false;
-        }
+        $this->Items[$APIData->FrameID] = $APIData;
         return true;
     }
 
@@ -680,7 +683,7 @@ class TXB_API_DataList
      */
     public function Remove(int $Index)
     {
-        if (isset($this->Items[$Index]))
+        if (array_key_exists($Index, $this->Items))
             unset($this->Items[$Index]);
     }
 
@@ -692,9 +695,10 @@ class TXB_API_DataList
      */
     public function Get(int $Index)
     {
-        if (!isset($this->Items[$Index]))
-            return false;
-        return $this->Items[$Index];
+//        var_dump(isset($this->Items[$Index]));
+        if (array_key_exists($Index, $this->Items))
+            return $this->Items[$Index];
+        return false;
     }
 
 }
@@ -747,13 +751,14 @@ class TXB_CMD_Data
     public function ExtractString()
     {
         $end = strpos($this->Data, chr(0));
+        if ($end === false)
+            $end = strlen($this->Data);
         $Value = substr($this->Data, 0, $end);
         $this->Data = substr($this->Data, $end);
         return $Value;
     }
 
 }
-
 
 // I/O Pin BitMask
 class TXB_Pin_Mask
@@ -958,7 +963,7 @@ trait DebugHelper
      */
     protected function SetBuffer($Name, $Data)
     {
-        $this->SendDebug('SetBuffer ' . $Name, $Data, 0);
+//        $this->SendDebug('SetBuffer ' . $Name, $Data, 0);
         parent::SetBuffer($Name, $Data);
     }
 
@@ -972,7 +977,7 @@ trait DebugHelper
     protected function GetBuffer($Name)
     {
         $Data = parent::GetBuffer($Name);
-        $this->SendDebug('GetBuffer ' . $Name, $Data, 0);
+//        $this->SendDebug('GetBuffer ' . $Name, $Data, 0);
         return $Data;
     }
 

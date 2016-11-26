@@ -87,7 +87,9 @@ class XBZBGateway extends IPSModule
             return;
         $this->UnregisterVariable("Nodes");
         $this->UnregisterVariable("BufferIN");
-        $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval')*1000, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
+        $this->TransmitBuffer = new TXB_API_DataList();
+        if ($this->ReadPropertyInteger('NDInterval') > 5)
+            $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval') * 1000, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
         if ($this->CheckParents())
         {
             try
@@ -114,7 +116,7 @@ class XBZBGateway extends IPSModule
         catch (Exception $exc)
         {
             IPS_LogMessage($this->InstanceID, 'Error in NodeDiscovery. Maybe no Node present.');
-            trigger_error($exc, E_USER_NOTICE);
+            trigger_error('Error in NodeDiscovery. Maybe no Node present.', E_USER_NOTICE);
             return false;
         }
         return true;
@@ -153,7 +155,7 @@ class XBZBGateway extends IPSModule
         $APIResponse = $this->Send($APIData);
         if (is_null($APIResponse))
             return false;
-        return $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIResponse));
+        return $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIResponse->Data));
     }
 
     /** Startet ein Discovery
@@ -163,10 +165,11 @@ class XBZBGateway extends IPSModule
     private function RequestNodeDiscovery()
     {
         $APIData = new TXB_API_Data(TXB_API_Commands::AT_Command, TXB_AT_Commands::AT_ND);
+
         $APIResponse = $this->Send($APIData);
         if (is_null($APIResponse))
             return false;
-        return $this->ProcessAT_Command_Responde(new TXB_CMD_Data($APIResponse));
+        return $APIResponse;
     }
 
     private function ProcessAPIData(TXB_API_Data $APIData)
@@ -176,13 +179,12 @@ class XBZBGateway extends IPSModule
             $this->SendDebug('Receive Checksum Error', $APIData, 0);
             return;
         }
-        $this->SendDebug('ProcessAPIData', $APIData, 0);
-
+        $this->SendDebug('Received', $APIData, 0);
         switch ($APIData->APICommand)
         {
             case TXB_API_Commands::AT_Command_Responde:
                 if ($this->UpdateTransmitBuffer($APIData) === false)
-                    $this->ProcessAT_Command_Responde($APIResponse);
+                    $this->ProcessAT_Command_Responde($APIData);
                 break;
             case TXB_API_Commands::Modem_Status:
                 $this->SendDebug('API_Modem_Status: ', $APIData->Data, 1);
@@ -257,7 +259,7 @@ class XBZBGateway extends IPSModule
 
     private function ProcessAT_Command_Responde(TXB_CMD_Data $CMDData)
     {
-        $this->SendDebug('AT_Command_Responde:', $CMDData, 0);
+        $this->SendDebug('Decode ATCommand', $CMDData, 0);
 
         if ($CMDData->Status != TXB_AT_Command_Status::OK)
         {
@@ -283,7 +285,7 @@ class XBZBGateway extends IPSModule
                 $this->NodeList = $NodeList;
                 $this->unlock('NodeList');
                 return true;
-            case TXB_AT_Command::XB_AT_NI:
+            case TXB_AT_Commands::AT_NI:
                 $this->SetSummary($CMDData->ExtractString());
                 return true;
         }
@@ -299,14 +301,13 @@ class XBZBGateway extends IPSModule
         }
         $TransmitBuffer = $this->TransmitBuffer;
         if ($TransmitBuffer->Update($APIData))
-            $this->TransmitBuffer = $TransmitBuffer;
-        else
         {
-            $this->SendDebug('WARN', 'Frame not found in TransmitBuffer', 0);
-            return false;
+            $this->TransmitBuffer = $TransmitBuffer;
+            $this->unlock('TransmitBuffer');
+            return true;
         }
-        $this->unlock('TransmitBuffer');
-        return true;
+        $this->SendDebug('WARN', 'Frame not found in TransmitBuffer', 0);
+        return false;
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -335,8 +336,10 @@ class XBZBGateway extends IPSModule
         if ($Node === false)
         {
             $this->SendDebug('unkown NodeName', $APIData->NodeName, 0);
-            throw new Exception('Unknown NodeName');
+            trigger_error('Unknown NodeName', E_USER_NOTICE);
+            return serialize(NULL);
         }
+        $this->SendDebug('Forward', $APIData, 0);
         $APIResponse = $this->Send($APIData, $Node);
         return serialize($APIResponse);
     }
@@ -348,18 +351,18 @@ class XBZBGateway extends IPSModule
      * @param TXB_API_Data $APIData
      * @throws Exception
      */
-    /*private function ForwardDataFromSplitter(TXB_API_Data $APIData)
-    {
-        $NodeList = $this->NodeList;
-        $Node = $NodeList->GetByNodeName($APIData->NodeName);
-        if ($Node === false)
-        {
-            $this->SendDebug('unkown NodeName', $APIData->NodeName, 0);
-            throw new Exception('Unknown NodeName');
-        }
-        $APIResponse = $this->Send($APIData, $Node);
-        return serialize($APIResponse);
-    }*/
+    /* private function ForwardDataFromSplitter(TXB_API_Data $APIData)
+      {
+      $NodeList = $this->NodeList;
+      $Node = $NodeList->GetByNodeName($APIData->NodeName);
+      if ($Node === false)
+      {
+      $this->SendDebug('unkown NodeName', $APIData->NodeName, 0);
+      throw new Exception('Unknown NodeName');
+      }
+      $APIResponse = $this->Send($APIData, $Node);
+      return serialize($APIResponse);
+      } */
 
     /** fertig
      * 
@@ -447,75 +450,84 @@ class XBZBGateway extends IPSModule
             if ($this->HasActiveParent() === false)
                 throw new Exception('Instance has no active Parent Instance!');
 
-            if ($APIData->FrameID !== 0)
+            if (($APIData->FrameID !== 0) and ( $APIData->Data !== TXB_AT_Commands::AT_ND))
             {
                 if (!$this->lock('TransmitBuffer'))
                     throw new Exception('TransmitBuffer is locked');
                 $TransmitBuffer = $this->TransmitBuffer;
                 $APIData->FrameID = $TransmitBuffer->Add();
                 $this->TransmitBuffer = $TransmitBuffer;
-                unlock('TransmitBuffer');
+                $this->unlock('TransmitBuffer');
             }
-
+            $this->SendDebug('Send', $APIData, 0);
             $Frame = $APIData->ToFrame($Node);
             $this->SendDataToParent(json_encode(Array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($Frame))));
 
-            if ($APIData->FrameID === 0)
+            if (($APIData->FrameID === 0) or ( $APIData->Data === TXB_AT_Commands::AT_ND))
                 return true;
 
             $APIResponse = $this->WaitForResponse($APIData->FrameID);
-            $this->SendDebug('GotResponse', $APIResponse, 1);
+            $this->SendDebug('Response', $APIResponse, 1);
             return $APIResponse;
         }
         catch (Exception $ex)
         {
-            trigger_error($ex);
+            trigger_error($ex->getMessage(), E_USER_NOTICE);
             return NULL;
         }
     }
 
     private function WaitForResponse(int $FrameID)
     {
-        //$TransmitStatusID = $this->GetIDForIdent('TransmitStatus');
-        for ($i = 0; $i < 500; $i++)
+        try
         {
-            if ($this->lock('TransmitBuffer'))
+
+            for ($i = 0; $i < 500; $i++)
             {
                 $TransmitBuffer = $this->TransmitBuffer;
                 $Data = $TransmitBuffer->Get($FrameID);
+
                 if ($Data === false)
                 {
                     $this->unlock('TransmitBuffer');
-                    $this->SendDebug('ERROR', 'Frame not found in TransmitBuffer.', 0);
-                    throw new Exception('Frame not found in TransmitBuffer.');
+                    $this->SendDebug('ERROR', 'Frame ' . $FrameID . ' not found in TransmitBuffer.', 0);
+                    throw new Exception('Frame ' . $FrameID . ' not found in TransmitBuffer.');
                 }
-                if (!is_null($Data))
+                if ($Data !== NULL)
                 {
-                    $TransmitBuffer->Remove($FrameID);
-                    $this->TransmitBuffer = $TransmitBuffer;
-                    $this->SendDebug('TransmitBuffer', $Data, 1);
-                    $this->unlock('TransmitBuffer');
-                    return $Data;
+                    if ($this->lock('TransmitBuffer'))
+                    {
+                        $TransmitBuffer = $this->TransmitBuffer;
+                        $TransmitBuffer->Remove($FrameID);
+                        $this->TransmitBuffer = $TransmitBuffer;
+//                        $this->SendDebug('TransmitBuffer', $Data, 1);
+                        $this->unlock('TransmitBuffer');
+                        return $Data;
+                    }
                 }
+//                }
+//                else
+//                {
+//                    $this->SendDebug('ERROR', 'TransmitBuffer is locked.', 0);
+//                    throw new Exception('TransmitBuffer is locked.');
+//                }
+                IPS_Sleep(10);
             }
-            else
+            if ($this->lock('TransmitBuffer'))
             {
-                $this->SendDebug('ERROR', 'TransmitBuffer is locked.', 0);
-                throw new Exception('TransmitBuffer is locked.');
+                $TransmitBuffer = $this->TransmitBuffer;
+                $TransmitBuffer->Remove($FrameID);
+                $this->TransmitBuffer = $TransmitBuffer;
+                $this->unlock('TransmitBuffer');
             }
-            IPS_Sleep(10);
+            $this->SendDebug('ERROR', 'Wait for response timed out.', 0);
+            throw new Exception('Wait for response timed out.');
         }
-        if ($this->lock('TransmitBuffer'))
+        catch (Exception $exc)
         {
-            $TransmitBuffer = $this->TransmitBuffer;
-            $TransmitBuffer->Remove($FrameID);
-            $this->TransmitBuffer = $TransmitBuffer;
-            $this->unlock('TransmitBuffer');
+            throw new Exception($exc);
         }
-        $this->SendDebug('ERROR', 'Wait for response timed out.', 0);
-        throw new Exception('Wait for response timed out.');
     }
-
 
 }
 
