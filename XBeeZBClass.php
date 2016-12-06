@@ -1,5 +1,17 @@
 <?
 
+/**
+ * @addtogroup xbeezigbee
+ * @{
+ *
+ * @package       XBeeZigBee
+ * @file          module.php
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ *
+ */
 if (@constant('IPS_BASE') == null) //Nur wenn Konstanten noch nicht bekannt sind.
 {
 // --- BASE MESSAGE
@@ -144,7 +156,9 @@ if (@constant('IPS_BASE') == null) //Nur wenn Konstanten noch nicht bekannt sind
     define('vtString', 3);
 }
 
-//  API Commandos
+/**
+ *  Alle unterstützen API Kommandos
+ */
 class TXB_API_Commands
 {
 
@@ -159,6 +173,12 @@ class TXB_API_Commands
     const Node_Identification_Indicator = 0x95;
     const Remote_AT_Command_Responde = 0x97;
 
+    /**
+     *  Liefert den Klartext zu einem Kommando
+     * 
+     * @param int $Code
+     * @return string
+     */
     public static function ToString(int $Code)
     {
         switch ($Code)
@@ -190,6 +210,9 @@ class TXB_API_Commands
 
 }
 
+/**
+ *  Alle bekannten Modem Stati
+ */
 class TXB_Modem_Status
 {
 
@@ -197,9 +220,29 @@ class TXB_Modem_Status
     const Watchdog_timer_reset = 1;
     const Joined_network = 2;
     const Disassociated = 3;
+    const Config_error = 4;
+    const Coordinator_realignment = 5;
     const Coordinator_started = 6;
     const Network_security_key_was_updated = 7;
+    const Network_woke_up = 0x0B;
+    const Network_went_to_sleep = 0x0C;
+    const Voltage_supply_limit_exceed = 0x0D;
+    const Modem_config_changed_while_join = 0x11;
+    const Stack_error = 0x80;
+    const Command_without_connecting_from_AP = 0x82;
+    const AP_not_found = 0x83;
+    const PSK_not_configured = 0x84;
+    const SSID_not_found = 0x87;
+    const Failed_to_join_with_security_enabled = 0x88;
+    const Invalid_channel = 0x8A;
+    const Failed_to_join_AP = 0x8E;
 
+    /**
+     *  Liefert den Klartext zu einem Modem Status.
+     * 
+     * @param int $Code
+     * @return string
+     */
     public static function ToString(int $Code)
     {
         switch ($Code)
@@ -212,18 +255,48 @@ class TXB_Modem_Status
                 return 'Joined_network';
             case self::Disassociated:
                 return 'Disassociated';
+            case self::Config_error:
+                return 'Config error / sync lost';
+            case self::Coordinator_realignment:
+                return 'Coordinator realignment';
             case self::Coordinator_started:
                 return 'Coordinator_started';
             case self::Network_security_key_was_updated:
                 return 'Network_security_key_was_updated';
+            case self::Network_woke_up:
+                return 'Network woke up';
+            case self::Network_went_to_sleep:
+                return 'Network went to sleep';
+            case self::Voltage_supply_limit_exceed:
+                return 'Voltage supply limit exceed';
+            case self::Modem_config_changed_while_join:
+                return 'Modem config changed while join';
+            case self::Stack_error:
+                return 'Stack error';
+            case self::Command_without_connecting_from_AP:
+                return 'Send/Join command without connecting from AP';
+            case self::AP_not_found:
+                return 'AP not found';
+            case self::PSK_not_configured:
+                return 'PSK not configured';
+            case self::SSID_not_found:
+                return 'SSID not found';
+            case self::Failed_to_join_with_security_enabled:
+                return 'Failed to join with security enabled';
+            case self::Invalid_channel:
+                return 'Invalid channel';
+            case self::Failed_to_join_AP:
+                return 'Failed to join AP';
             default:
-                return (string) $Code;
+                return bin2hex(chr($Code));
         }
     }
 
 }
 
-// Transmit Status Response
+/**
+ *  Alle möglichen Quittungen zu einer Datenübertragung.
+ */
 class TXB_Transmit_Status
 {
 
@@ -245,6 +318,12 @@ class TXB_Transmit_Status
     const Data_payload_too_large = 0x74;
     const Indirect_message_unrequested = 0x75;
 
+    /**
+     *  Liefert den Klartext zu einem Status.
+     * 
+     * @param int $Code
+     * @return string
+     */
     public static function ToString(int $Code)
     {
         switch ($Code)
@@ -290,7 +369,9 @@ class TXB_Transmit_Status
 
 }
 
-// Receive Status Response
+/**
+ *  Status eines empfangenen Datenpaketes.
+ */
 class TXB_Receive_Status
 {
 
@@ -299,6 +380,12 @@ class TXB_Receive_Status
     const Packet_encrypted_with_APS_encryption = 0x20;
     const Packet_was_sent_from_an_end_device = 0x40;
 
+    /**
+     *  Liefert den Klartext zu einem Status.
+     * 
+     * @param int $Code
+     * @return string
+     */
     public static function ToString(int $Code)
     {
         switch ($Code)
@@ -318,7 +405,9 @@ class TXB_Receive_Status
 
 }
 
-// AT Commandos
+/**
+ *  Alle unterstützen AT Kommandos
+ */
 class TXB_AT_Commands
 {
 
@@ -401,7 +490,9 @@ class TXB_AT_Commands
 
 }
 
-// AT Command Status Response
+/**
+ *  Status einer Antwort von einem AT Kommando.
+ */
 class TXB_AT_Command_Status
 {
 
@@ -411,6 +502,12 @@ class TXB_AT_Command_Status
     const Invalid_Parameter = 3;
     const Tx_Failure = 4;
 
+    /**
+     *  Liefert den Klartext zu einem Status.
+     * 
+     * @param int $Code
+     * @return string
+     */
     public static function ToString(int $Code)
     {
         switch ($Code)
@@ -426,19 +523,19 @@ class TXB_AT_Command_Status
             case self::Tx_Failure:
                 return 'Tx_Failure';
             default:
-                return (string) $Code;
+                return bin2hex(chr($Code));
         }
     }
 
 }
 
-// API Frame Record
 /**
- * Enthält alle Daten eines API Commandos.
- * 
+ * Enthält alle Daten eines API Paketes.
  */
 class TXB_API_Data
 {
+
+    use NodeExtracter;
 
     /**
      * API Command des Paketes.
@@ -469,21 +566,25 @@ class TXB_API_Data
     public $FrameID = null;
 
     /**
-     * Checksum des Paketes ok.
-     * @var bool  
-     * @access public
-     */
-    public $Checksum = true;
-
-    /**
      * Liefert die Daten welche behalten werden müssen.
      * @access public
      */
     public function __sleep()
     {
-        return array('APICommand', 'NodeName', 'Data', 'FrameID', 'Checksum');
+        return array('APICommand', 'NodeName', 'Data', 'FrameID');
     }
 
+    /**
+     * Erzeugt ein API Paket aus den übergeben Daten.
+     * Es können wahlweise Rohdaten vom Coordinator,
+     * ein API-Kommando mit Nutzdaten,
+     * ein utf8-encodiertes Objekt vom IPS Datenaustausch oder
+     * zu versendendes AT Kommando (TXB_CMD_DATA) übergeben werden.
+     * 
+     * @param object|TXB_API_Data|string $Frame
+     * @param null|string $Payload
+     * @return TXB_API_Data
+     */
     public function __construct($Frame = null, $Payload = null)
     {
         if (is_null($Frame))
@@ -496,14 +597,12 @@ class TXB_API_Data
                 if (!is_null($Frame->NodeName))
                     $this->NodeName = utf8_decode($Frame->NodeName);
                 $this->Data = utf8_decode($Frame->Data);
-                $this->Checksum = true;
                 return;
             }
             if (property_exists($Frame, 'ATCommand'))
             {
-                $this->APICommand = TXB_API_Commands::Remote_AT_Command;
-                $this->Data = chr(0x02) . $Frame->ATCommand . $Frame->Data;
-                $this->Checksum = true;
+                $this->APICommand = TXB_API_Commands::AT_Command;
+                $this->Data = $Frame->ATCommand . $Frame->Data;
                 return;
             }
         }
@@ -513,13 +612,7 @@ class TXB_API_Data
             $this->Data = $Payload;
             return;
         }
-        $checksum = ord($Frame[strlen($Frame) - 1]);
-        for ($x = 0; $x < (strlen($Frame) - 1); $x++)
-        {
-            $checksum = $checksum + ord($Frame[$x]);
-        }
-        $checksum = $checksum & 0xff;
-        $this->Checksum = ($checksum == 0xff);
+
         $this->APICommand = ord($Frame[0]);
         $this->FrameID = 0;
         $Frame = substr($Frame, 1, -1);
@@ -531,45 +624,18 @@ class TXB_API_Data
                 $this->FrameID = ord($Frame[0]);
                 $Frame = substr($Frame, 1);
                 break;
-            /*            case TXB_API_Commands::Modem_Status:
-              case TXB_API_Commands::Receive_Paket:
-              case TXB_API_Commands::IO_Data_Sample_Rx:
-              case TXB_API_Commands::Node_Identification_Indicator:
-              default:
-              $this->Data = $Frame;
-              break; */
         }
         $this->Data = $Frame;
     }
 
-    public function ExtractNodeAddr64()
-    {
-        $Addr64 = substr($this->Data, 0, 8);
-        $this->Data = substr($this->Data, 8);
-        return $Addr64;
-    }
-
-    public function ExtractNodeAddr16()
-    {
-        $Addr16 = substr($this->Data, 0, 2);
-        $this->Data = substr($this->Data, 2);
-        return $Addr16;
-    }
-
-    public function ExtractString()
-    {
-        $end = strpos($this->Data, chr(0));
-        $Value = substr($this->Data, 0, $end);
-        $this->Data = substr($this->Data, $end);
-        return $Value;
-    }
-
-    /** Liefert den APIFrame für den Versand an den Coordinator
+    /**
+     * Liefert den Byte-String für den Versand an den Coordinator
      * 
-     * @param TXB_Node $Node
-     * @return string
+     * @param bool $Escape True wenn API2 mit maskierten Zeichen.
+     * @param TXB_Node $Node Ziel Node oder NULL bei Versand an den Coordinator.
+     * @return string Byte-String für den Coordinator.
      */
-    public function ToFrame(TXB_Node $Node = null)
+    public function ToFrame(bool $Escape, TXB_Node $Node = NULL)
     {
         $Data = chr($this->APICommand) . chr($this->FrameID);
         if (!is_null($Node))
@@ -578,15 +644,8 @@ class TXB_API_Data
             $Data .= $Node->NodeAddr16;
         }
         $Data.=$this->Data;
-
         $len = strlen($Data);
-        //Startzeichen
-        $frame = chr(0x7e);
-        //Laenge
-        $frame .= chr(floor($len / 256)) . chr($len % 256);
-        //Daten
-        $frame.=$Data;
-        //Checksum
+        $frame = chr(floor($len / 256)) . chr($len % 256) . $Data;
         $check = 0;
         for ($x = 0; $x < $len; $x++)
         {
@@ -594,10 +653,23 @@ class TXB_API_Data
         }
         $check = $check & 0xff;
         $check = 0xff - $check;
-        $frame = $frame . chr($check);
-        return $frame;
+        $frame .= chr($check);
+        $escaped = array("\x7d\x5d", "\x7d\x31", "\x7d\x33", "\x7d\x5e");
+        $unescaped = array("\x7d", "\x11", "\x13", "\x7e");
+        if ($Escape)
+            $packet = chr(0x7e) . str_replace($unescaped, $escaped, $frame);
+        else
+            $packet = chr(0x7e) . $frame;
+
+        return $packet;
     }
 
+    /**
+     *  Erzeugt einen String für den Datenaustausch innerhalb von IPS.
+     * 
+     * @param string $GUID Die GUID des Ziel-Interfaces innerhalb von IPS.
+     * @return string Datenstring für den Datenaustausch innerhalb von IPS.
+     */
     public function ToJSONString($GUID)
     {
         $SendData = new stdClass;
@@ -612,13 +684,6 @@ class TXB_API_Data
 
 /**
  * TXB_API_DataList ist eine Klasse welche ein Array von TXB_API_Data enthält.
- *
- * @package       XBeeZigBee
- * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
- * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
- * @example <b>Ohne</b>
  */
 class TXB_API_DataList
 {
@@ -695,7 +760,6 @@ class TXB_API_DataList
      */
     public function Get(int $Index)
     {
-//        var_dump(isset($this->Items[$Index]));
         if (array_key_exists($Index, $this->Items))
             return $this->Items[$Index];
         return false;
@@ -703,19 +767,54 @@ class TXB_API_DataList
 
 }
 
-// AT Command Frame
+/**
+ * Enthält alle Daten eines AT Paketes.
+ * 
+ */
 class TXB_CMD_Data
 {
 
+    use NodeExtracter;
+
+    /**
+     * AT Command des Paketes.
+     * @var TXB_AT_Commands
+     * @access public
+     */
     public $ATCommand;
+
+    /**
+     * Status der Antwort.
+     * @var TXB_AT_Command_Status
+     * @access public
+     */
     public $Status;
+
+    /**
+     * Nutzdaten des Paketes.
+     * @var string
+     * @access public
+     */
     public $Data;
 
+    /**
+     * Liefert die Daten welche behalten werden müssen.
+     * @access public
+     */
     public function __sleep()
     {
         return array('ATCommand', 'Status', 'Data');
     }
 
+    /**
+     * Erzeugt ein AT Paket aus den übergeben Daten.
+     * Es können wahlweise die Nutzdaten eines API Paketes vom Typ TXB_API_Commands::AT_Command_Responde
+     * oder ein AT Kommando mit Nutzdaten übergeben werden.
+     * 
+     * @param string $Data
+     * @param null|string $Payload
+     * @return TXB_CMD_Data
+     */
     public function __construct(string $Data, string $Payload = null)
     {
         if (is_null($Payload))
@@ -734,6 +833,20 @@ class TXB_CMD_Data
         }
     }
 
+}
+
+/**
+ * Biete Funktionen um Adressen und Namen von Nodes aus den Nutzdaten zu extrahieren.
+ */
+trait NodeExtracter
+{
+
+    /**
+     *  Extrahiert die MAC-Adresse des Node aus den ersten 8 Bytes von $Data.
+     * 
+     * @access public
+     * @return string 64-Bit Adresse (MAC) des Node
+     */
     public function ExtractNodeAddr64()
     {
         $Addr64 = substr($this->Data, 0, 8);
@@ -741,6 +854,12 @@ class TXB_CMD_Data
         return $Addr64;
     }
 
+    /**
+     *  Extrahiert die dynamisch 16-Bit Adresse des Node aus den ersten 2 Bytes von $Data.
+     * 
+     * @access public
+     * @return string 16-Bit Adresse des Node
+     */
     public function ExtractNodeAddr16()
     {
         $Addr16 = substr($this->Data, 0, 2);
@@ -748,43 +867,34 @@ class TXB_CMD_Data
         return $Addr16;
     }
 
+    /**
+     *  Extrahiert eine Zeichenkette bis zum ersten 0-Byte aus $Data.
+     * 
+     * @access public
+     * @return string Der extrahierte String.
+     */
     public function ExtractString()
     {
         $end = strpos($this->Data, chr(0));
         if ($end === false)
-            $end = strlen($this->Data);
-        $Value = substr($this->Data, 0, $end);
-        $this->Data = substr($this->Data, $end);
+        {
+            $Value = $this->Data;
+            $this->Data = '';
+        }
+        else
+        {
+            $Value = substr($this->Data, 0, $end);
+            $this->Data = substr($this->Data, $end + 1);
+        }
         return $Value;
     }
 
 }
 
-// I/O Pin BitMask
-class TXB_Pin_Mask
-{
-
-    const PIN_D00 = 0;
-    const PIN_D01 = 1;
-    const PIN_D02 = 2;
-    const PIN_D03 = 3;
-    const PIN_D04 = 4;
-    const PIN_D05 = 5;
-    const PIN_D06 = 6;
-    const PIN_D07 = 7;
-    const PIN_D10 = 10;
-    const PIN_D11 = 11;
-    const PIN_D12 = 12;
-
-}
-
-//NA | NA | NA | CD/DIO 12 |
-//PWM/DI O11 | RSSI/DI O10 | NA | NA |
-//CTS/DI O7 | RTS/DI O6 | ASSOC DIO5 | DIO4 |
-//AD3/DI O3 | AD2/DI O2 | AD1/DI O1 | AD0/DI O0
-
-
-class TXB_Node extends stdClass
+/**
+ * Enthält die Daten eines Node.
+ */
+class TXB_Node
 {
 
     /**
@@ -817,32 +927,11 @@ class TXB_Node extends stdClass
         return array('NodeName', 'NodeAddr16', 'NodeAddr64');
     }
 
-    /*
-      public function utf8_encode()
-      {
-      $this->NodeAddr16 = utf8_encode($this->NodeAddr16);
-      $this->NodeAddr64 = utf8_encode($this->NodeAddr64);
-      $this->NodeName = utf8_encode($this->NodeName);
-      }
-
-      public function utf8_decode()
-      {
-      $this->NodeAddr16 = utf8_decode($this->NodeAddr16);
-      $this->NodeAddr64 = utf8_decode($this->NodeAddr64);
-      $this->NodeName = utf8_decode($this->NodeName);
-      }
-     */
 }
 
 /**
  * TXB_NodeList ist eine Klasse welche ein Array von TXB_Node enthält.
  *
- * @package       XBeeZigBee
- * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
- * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
- * @example <b>Ohne</b>
  */
 class TXB_NodeList
 {
@@ -929,57 +1018,12 @@ class TXB_NodeList
 
 }
 
-//class TXB_NodeFromGeneric extends TXB_Node
-//{
-//
-//    public function __construct($object)
-//    {
-//        $this->NodeAddr16 = $object->NodeAddr16;
-//        $this->NodeAddr64 = $object->NodeAddr64;
-//        $this->NodeName = $object->NodeName;
-//    }
-//
-//}
-
 /**
- *  DebugHelper Trait.
- *
- * @package       NoTrigger
- * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
- * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
- * @example <b>Ohne</b>
+ * DebugHelper ergänzt SendDebug um die Möglichkeit Array und Objekte auszugeben.
+ * 
  */
 trait DebugHelper
 {
-
-    /**
-     * Ergänzt SetBuffer um eine Debug Ausgabe.
-     *
-     * @access protected
-     * @param string $Name Name des Buffer.
-     * @param string $Data Daten für den Buffer.
-     */
-    protected function SetBuffer($Name, $Data)
-    {
-//        $this->SendDebug('SetBuffer ' . $Name, $Data, 0);
-        parent::SetBuffer($Name, $Data);
-    }
-
-    /**
-     * Ergänzt GetBuffer um eine Debug Ausgabe.
-     *
-     * @access protected
-     * @param string $Name Name des Buffer.
-     * @return string Daten aus den Buffer.
-     */
-    protected function GetBuffer($Name)
-    {
-        $Data = parent::GetBuffer($Name);
-//        $this->SendDebug('GetBuffer ' . $Name, $Data, 0);
-        return $Data;
-    }
 
     /**
      * Ergänzt SendDebug um Möglichkeit Objekte und Array auszugeben.
@@ -1026,9 +1070,17 @@ trait DebugHelper
 
 }
 
+/**
+ * Biete Funktionen um Thread-Safe auf Objekte zuzugrifen.
+ */
 trait Semaphore
 {
 
+    /**
+     * Versucht eine Semaphore zu setzen und wiederholt dies bei Misserfolg bis zu 100 mal.
+     * @param string $ident Ein String der den Lock bezeichnet.
+     * @return boolean TRUE bei Erfolg, FALSE bei Misserfolg.
+     */
     private function lock($ident)
     {
         for ($i = 0; $i < 100; $i++)
@@ -1045,6 +1097,10 @@ trait Semaphore
         return false;
     }
 
+    /**
+     * Löscht eine Semaphore.
+     * @param string $ident Ein String der den Lock bezeichnet.
+     */
     private function unlock($ident)
     {
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
@@ -1052,15 +1108,52 @@ trait Semaphore
 
 }
 
+/**
+ * Trait mit Hilfsfunktionen für den Datenaustausch.
+ */
 trait InstanceStatus
 {
 
+    /**
+     * Ermittelt den Parent und verwaltet die Einträge des Parent im MessageSink
+     * Ermöglicht es das Statusänderungen des Parent empfangen werden können.
+     * 
+     * @access private
+     */
+    protected function GetParentData()
+    {
+        $OldParentId = $this->Parent;
+        $ParentId = @IPS_GetInstance($this->InstanceID)['ConnectionID'];
+        if ($OldParentId > 0)
+            $this->UnregisterMessage($OldParentId, IM_CHANGESTATUS);
+        if ($ParentId > 0)
+        {
+            $this->RegisterMessage($ParentId, IM_CHANGESTATUS);
+            $this->Parent = $ParentId;
+        }
+        else
+            $this->Parent = 0;
+    }
+
+    /**
+     * Setzt den Status dieser Instanz auf den übergebenen Status.
+     * Prüft vorher noch ob sich dieser vom aktuellen Status unterscheidet.
+     * 
+     * @access protected
+     * @param int $InstanceStatus
+     */
     protected function SetStatus($InstanceStatus)
     {
         if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
             parent::SetStatus($InstanceStatus);
     }
 
+    /**
+     * Prüft den Parent auf vorhandensein und Status.
+     * 
+     * @access protected
+     * @return bool True wenn Parent vorhanden und in Status 102, sonst false.
+     */
     protected function HasActiveParent()
     {
         $instance = IPS_GetInstance($this->InstanceID);
@@ -1075,4 +1168,71 @@ trait InstanceStatus
 
 }
 
-?>
+trait Profile
+{
+
+    /**
+     * Erstell und konfiguriert ein VariablenProfil für den Typ integer mit Assoziationen
+     *
+     * @access protected
+     * @param string $Name Name des Profils.
+     * @param string $Icon Name des Icon.
+     * @param string $Prefix Prefix für die Darstellung.
+     * @param string $Suffix Suffix für die Darstellung.
+     * @param array $Associations Assoziationen der Werte als Array.
+     */
+    protected function RegisterProfileIntegerEx($Name, $Icon, $Prefix, $Suffix, $Associations)
+    {
+        if (sizeof($Associations) === 0)
+        {
+            $MinValue = 0;
+            $MaxValue = 0;
+        }
+        else
+        {
+            $MinValue = $Associations[0][0];
+            $MaxValue = $Associations[sizeof($Associations) - 1][0];
+        }
+
+        $this->RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, 0);
+
+        foreach ($Associations as $Association)
+        {
+            IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
+        }
+    }
+
+    /**
+     * Erstell und konfiguriert ein VariablenProfil für den Typ integer
+     *
+     * @access protected
+     * @param string $Name Name des Profils.
+     * @param string $Icon Name des Icon.
+     * @param string $Prefix Prefix für die Darstellung.
+     * @param string $Suffix Suffix für die Darstellung.
+     * @param int $MinValue Minimaler Wert.
+     * @param int $MaxValue Maximaler wert.
+     * @param int $StepSize Schrittweite
+     */
+    protected function RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $StepSize)
+    {
+
+        if (!IPS_VariableProfileExists($Name))
+        {
+            IPS_CreateVariableProfile($Name, 1);
+        }
+        else
+        {
+            $profile = IPS_GetVariableProfile($Name);
+            if ($profile['ProfileType'] != 1)
+                throw new Exception("Variable profile type does not match for profile " . $Name, E_USER_NOTICE);
+        }
+
+        IPS_SetVariableProfileIcon($Name, $Icon);
+        IPS_SetVariableProfileText($Name, $Prefix, $Suffix);
+        IPS_SetVariableProfileValues($Name, $MinValue, $MaxValue, $StepSize);
+    }
+
+}
+
+/** @} */

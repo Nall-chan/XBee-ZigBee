@@ -1,6 +1,10 @@
 {
     "elements":
-            [
+            [{
+                    "name": "API2",
+                    "type": "CheckBox",
+                    "caption": "API 2 (escaped)"
+                },
                 {
                     "type": "Label",
                     "label": "Node Discovery:"

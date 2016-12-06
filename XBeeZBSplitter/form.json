@@ -2,7 +2,9 @@
     "elements":
             [
                 {
-                    "name": "NodeName", "type": "ValidationTextBox", "caption": "Node Identifier"
+                    "name": "NodeName",
+                    "type": "ValidationTextBox",
+                    "caption": "Node Identifier (NI)"
                 }
             ],
     "status":

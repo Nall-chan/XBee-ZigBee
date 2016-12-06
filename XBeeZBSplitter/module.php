@@ -1,6 +1,6 @@
 <?
 
-/*
+/**
  * @addtogroup xbeezigbee
  * @{
  *
@@ -12,25 +12,16 @@
  * @version       1.0
  *
  */
-
 require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
 /**
  * XBZBSplitter ist die Klasse für einen remote XBee. (Router oder EndDevice) 
  * Erweitert ipsmodule 
- *
- * @package       XBeeZigBee
- * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
- * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
- * @example <b>Ohne</b>
  */
 class XBZBSplitter extends IPSModule
 {
 
     use DebugHelper,
-//        Semaphore,
         InstanceStatus;
 
     /**
@@ -57,131 +48,22 @@ class XBZBSplitter extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY)
             return;
         $this->UnregisterVariable("TransmitStatus");
-        $this->UnregisterVariable("FrameID");        
+        $this->UnregisterVariable("FrameID");
         if ($this->ReadPropertyString('NodeName') == '')
             $this->SetStatus(202);
         else
             $this->SetStatus(102);
-        $this->SetSummary($this->ReadPropertyString('NodeName'));
+        $this->SetSummary($this->ReadPropertyString('NodeName') . ' (unknown)');
     }
 
-################## PRIVATE     
-################## Send APIData to Parent
+################## Forward Serial Data
 
     /**
-     * 
-     * @param TXB_API_Command $APIData
-     * @return TXB_API_Command 
-     * @throws Exception
-     */
-    private function Send(TXB_API_Data $APIData)
-    {
-        try
-        {
-            if (!$this->HasActiveParent())
-                throw new Exception('Intance has no active parent.', E_USER_NOTICE);
-            if ($this->ReadPropertyString('NodeName') == '')
-                throw new Exception('NodeName not set.', E_USER_NOTICE);
-            $APIData->NodeName = $this->ReadPropertyString('NodeName');
-            $this->SendDebug('Send', $APIData, 0);
-            $JSONString = $APIData->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
-            $anwser = $this->SendDataToParent($JSONString);
-            if ($anwser === false)
-            {
-                $this->SendDebug('Response', 'No valid answer', 0);
-                return NULL;
-            }
-            $APIResponse = unserialize($anwser);
-//            if ($APIData->FrameID === 0)
-//                return $APIResponse;
-            $this->SendDebug('Response', $APIResponse, 1);
-            return $APIResponse;
-        }
-        catch (Exception $exc)
-        {
-            trigger_error($exc->getMessage(), E_USER_NOTICE);
-            return NULL;
-        }
-    }
-
-################## Send buffer-data from here to Parent
-
-    /**
-     * 
-     * @param string $Data
-     * @return boolean
-     * @throws Exception
-     */
-    private function RequestSendData(string $Data)
-    {
-        $APIData = new TXB_API_Data();
-        $APIData->APICommand = TXB_API_Commands::Transmit_Request;
-        $APIData->Data = chr(0x00) . chr(0x00) . $Data;
-        $this->SendDebug('Transmit_Request', $Data, 1);
-        try
-        {
-            $APIResponse = $this->Send($APIData);
-        }
-        catch (Exception $exc)
-        {
-            throw new Exception($exc);
-        }
-        if ($APIResponse->APICommand != TXB_API_Commands::Transmit_Status)
-        {
-            throw new Exception("Wrong response in frame.");
-        }
-        $this->SendDebug('TX_Status_Received(8B):Retry', $APIResponse->Data[0], 1);
-        $this->SendDebug('TX_Status_Received(8B):Status', $APIResponse->Data[1], 1);
-        $this->SendDebug('TX_Status_Received(8B):Discovery', $APIResponse->Data[2], 1);
-        if ($APIResponse->Data[1] == TXB_Transmit_Status::OK)
-        {
-            $this->SendDebug('TX_Status', 'OK', 0);
-            return true;
-        }
-        $this->SendDebug('TX_Status', 'Error: ' . TXB_Transmit_Status::ToString($APIResponse->Data[1]), 0);
-        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($APIResponse->Data[1]));
-    }
-
-################## DATAPOINT RECEIVE FROM CHILD
-//NEW
-
-    /**
-     * 
-     * @param string $JSONString
-     * @return boolean|string
-     */
-    public function ForwardData($JSONString)
-    {
-        // Prüfen und aufteilen nach ForwardDataFromChild und ForwardDataFromDevcie
-        $Data = json_decode($JSONString);
-        switch ($Data->DataID)
-        {
-            case "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}": //SendText
-                return $this->ForwardDataFromChild(utf8_decode($Data->Buffer));
-            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
-                $APIData = new TXB_API_Data($Data);
-                try
-                {
-                    if ($APIData->APICommand == TXB_API_Commands::AT_Command)
-                    {
-                        $APIData->APICommand = TXB_API_Commands::Remote_AT_Command;
-                        $APIData->Data = chr(0x02) . $APIData->Data;
-                    }
-                    $APIResponse = $this->Send($APIData);
-                    return serialize($APIResponse);
-                }
-                catch (Exception $exc)
-                {
-                    trigger_error($exc->getMessage(), E_USER_NOTICE);
-                    return false;
-                }
-        }
-    }
-
-    /**
-     * 
-     * @param string $Data
-     * @return boolean
+     * Nimmt Nutzdaten entgegen und versendet diese an die serielle Schnittstelle des Ziel-Node.
+     *
+     * @access private
+     * @param string $Data Der ByteString mit Nutzdaten.
+     * @return boolean True wenn Gegenseite alle Daten empfangen und quittiert hat, sonst false.
      */
     private function ForwardDataFromChild(string $Data)
     {
@@ -213,10 +95,110 @@ class XBZBSplitter extends IPSModule
         return $SendOk;
     }
 
-################## Send buffer-Data from here to Child
+    /**
+     * Nimmt bis zu 66 Byte Nutzdaten entgegen und versendet diese an die serielle Schnittstelle des Ziel-Node.
+     *
+     * @access private
+     * @param string $Data Der ByteString mit Nutzdaten.
+     * @return boolean True wenn Gegenseite den Empfang quittiert hat.
+     * @throws Exception Enthält den Fehler, wenn das Paket nicht erfolgreich übertragen wurde.
+     */
+    private function RequestSendData(string $Data)
+    {
+        $APIData = new TXB_API_Data();
+        $APIData->APICommand = TXB_API_Commands::Transmit_Request;
+        $APIData->Data = chr(0x00) . chr(0x00) . $Data;
+        $this->SendDebug('Transmit_Request', $Data, 1);
+        $APIResponse = $this->Send($APIData);
+        if (is_null($APIResponse))
+            return;
+        if ($APIResponse->APICommand != TXB_API_Commands::Transmit_Status)
+        {
+            throw new Exception("Wrong response in frame.");
+        }
+        $this->SendDebug('TX_Status_Received(8B):Retry', $APIResponse->Data[0], 1);
+        $this->SendDebug('TX_Status_Received(8B):Status', $APIResponse->Data[1], 1);
+        $this->SendDebug('TX_Status_Received(8B):Discovery', $APIResponse->Data[2], 1);
+        if ($APIResponse->Data[1] == TXB_Transmit_Status::OK)
+        {
+            $this->SendDebug('TX_Status', 'OK', 0);
+            return true;
+        }
+        $this->SendDebug('TX_Status', 'Error: ' . TXB_Transmit_Status::ToString($APIResponse->Data[1]), 0);
+        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($APIResponse->Data[1]));
+    }
+
+    ################## PRIVATE         
 
     /**
+     * Versendet ein TXB_API_Data-Objekt und empfängt die Antwort.
      * 
+     * @access private
+     * @param TXB_API_Data $APIData Das Objekt welches versendet werden soll.
+     * @result TXB_API_Data|null Enthält die Antwort oder NULL im Fehlerfall.
+     */
+    private function Send(TXB_API_Data $APIData)
+    {
+            if (!$this->HasActiveParent())
+                throw new Exception('Intance has no active parent.', E_USER_NOTICE);
+            if ($this->ReadPropertyString('NodeName') == '')
+                throw new Exception('NodeName not set.', E_USER_NOTICE);
+            $APIData->NodeName = $this->ReadPropertyString('NodeName');
+            $this->SendDebug('Send', $APIData, 0);
+            $JSONString = $APIData->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
+            $anwser = $this->SendDataToParent($JSONString);
+            if ($anwser === false)
+            {
+                $this->SendDebug('Response', 'No valid answer or timeout', 0);
+                return NULL;
+            }
+            $APIResponse = unserialize($anwser);
+            $this->SendDebug('Response', $APIResponse, 1);
+            return $APIResponse;
+    }
+
+################## DATAPOINT RECEIVE FROM CHILD
+
+    /**
+     * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
+     * 
+     * @access public
+     * @param type $JSONString Der JSON-kodierten String vom IPS-Datenaustausch.
+     * @return bool|string Die seriellisierte Antwort oder false im Fehlerfall.
+     */
+    public function ForwardData($JSONString)
+    {
+        $Data = json_decode($JSONString);
+        switch ($Data->DataID)
+        {
+            case "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}": //SendText
+                return $this->ForwardDataFromChild(utf8_decode($Data->Buffer));
+            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
+                $APIData = new TXB_API_Data($Data);
+                try
+                {
+                    if ($APIData->APICommand == TXB_API_Commands::AT_Command)
+                    {
+                        $APIData->APICommand = TXB_API_Commands::Remote_AT_Command;
+                        $APIData->Data = chr(0x02) . $APIData->Data;
+                    }
+                    $APIResponse = $this->Send($APIData);
+                    return serialize($APIResponse);
+                }
+                catch (Exception $exc)
+                {
+                    trigger_error($exc->getMessage(), E_USER_NOTICE);
+                    return serialize(NULL);
+                }
+        }
+    }
+
+################## DATAPOINT VARIOUS IPS-SPLITTER
+
+    /**
+     * Versendet den dekodierten Byte-Streams an die Childs (div. Splitter, Gateway, RegVar etc.)
+     * 
+     * @access private
      * @param string $Data
      */
     private function SendDataToChild(string $Data)
@@ -225,7 +207,7 @@ class XBZBSplitter extends IPSModule
         $this->SendDataToChildren($JSONString);
     }
 
-################## Send API-Data from here to Child
+################## DATAPOINTS DEVICE
 
     /**
      * 
@@ -240,9 +222,11 @@ class XBZBSplitter extends IPSModule
 ################## Datapoints PARENT
 
     /**
+     * Empfängt Daten vom Parent (Gateway).
      * 
-     * @param string $JSONString
-     * @return boolean
+     * @access public
+     * @param string $JSONString Das empfangene API-Objekt als JSON-kodierter String vom Parent.
+     * @result bool Immer True
      */
     public function ReceiveData($JSONString)
     {
@@ -251,6 +235,19 @@ class XBZBSplitter extends IPSModule
         $this->SendDebug('Receive', $APIData, 1);
         switch ($APIData->APICommand)
         {
+            case TXB_API_Commands::Node_Identification_Indicator:
+                $Parent = bin2hex($APIData->ExtractNodeAddr16());
+                $Typ = ord($APIData->Data[0]);
+                if ($Typ == 1)
+                    $Typ = 'Router';
+                elseif ($Typ == 2)
+                    $Typ = 'End Device';
+                else
+                    $Typ = 'unknown';
+                $Value = ' (' . $Typ . ' over ' . $Parent . ')';
+                $this->SetSummary($this->ReadPropertyString('NodeName') . $Value);
+
+                break;
             case TXB_API_Commands::Transmit_Status:
             case TXB_API_Commands::Remote_AT_Command_Responde:
                 $this->SendDebug('WARN', 'Late Receive', 0);
@@ -276,4 +273,5 @@ class XBZBSplitter extends IPSModule
     }
 
 }
+
 /** @} */

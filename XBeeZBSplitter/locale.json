@@ -1,0 +1,9 @@
+{
+    "translations": {
+        "de": {
+            "Node Identifier (NI)": "Node Identifier (NI)",
+            "Node Identifier valid.": "Node Identifier gültig.",
+            "Node Identifier is empty.": "Node Identifier darf nicht leer sein."
+        }
+    }
+}

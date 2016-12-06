@@ -1,0 +1,11 @@
+{
+    "translations": {
+        "de": {
+            "Pin Read Timer:": "Pin lesen:",
+            "seconds": "Sekunden",
+            "Emulate Status": "Status emulieren",
+            "Request State": "Pins auslesen",
+            "Read Config": "Konfiguration lesen"
+        }
+    }
+}

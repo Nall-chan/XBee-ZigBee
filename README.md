@@ -29,7 +29,7 @@ Implementierung der XBee-ZigBee Serie2.
 
 ## 2. Voraussetzungen
 
- - IPS ab Version 3.1 oder IPS Version 4.x
+ - IPS ab Version 3.1 oder IPS Version ab 4.1 (nicht 4.0!)
  - min. zwei XBee-Serie2 (ZigBee)
  - Konfigurationssoftware X-CTU (www.digi.com)
  - RS232 / auf 3,3V Adapter (-Platine) oder USB-Seriell-Wandler mit 3,3V für den Coordinator (oder jede andere Form der seriellen Datenanbindung mit 3,3V)
@@ -55,7 +55,8 @@ Implementierung der XBee-ZigBee Serie2.
    ![](Doku/firmware1.png)  
 
   - ID	(PAN ID)                :   eigene beliebige PAN ID eintragen
-  - ZS	(ZigBee Stack Profile)  :   0x2
+  - ZS	(ZigBee Stack Profile)  :   0x2  
+  - AP  (Enables API mode)      :   0x1 oder 0x2 für API 1 oder API 2(= mit escaping)
 
    ![](Doku/konfig1.png)  
 
@@ -101,12 +102,15 @@ Implementierung der XBee-ZigBee Serie2.
 Unter Instanz hinzufügen (Splitter) wählen und ein XBee ZigBee Splitter hinzufügen (Haken bei Alle Module anzeigen!).
 Es wird automatisch ein XBee ZigBee Gateway und ein SerialPort angelegt.
 Zuerst den SerialPort Konfigurieren , dabei die Eingestellten Parameter (Baudrate) des Coordinator eintragen. Defaultwert ist 9600. In der Splitter Instanz den Node-ID des entfernten XBee eintragen. Sind diese Parameter eingestellt und übernommen, kann im Debug-Fenster der Gateway-Instanz das Debuging aktivieren werden. Wird jetzt im Testcenter der Instanz (unter Einstellungen) ein Node Discovery ausgelöst, sollten die entfernten XBee im Debug entsprechende Ausgaben erzeugen.
-(AT_Command_Responde(ND) : <NI>  <Adresse> <HW-Adresse>)
+(AT_Command_Responde(ND) : <NI>  <Adresse> <HW-Adresse>)  
+Diese Ausgaben können je nach IPS-Version unterschiedlich aussehen.  
    ![](Doku/debug.png)  
 
 Nun kann mit dem anlegen eigener Instanzen an den XBee-ZigBee Splitter fortgefahren werden.  
 Hier ist der jeweilige NI (Node Identifier) einzutragen.
 
+Sollen Nutzdaten über das XBEE-Netzwerk übertragen werden, wo die Werte 0x11, 0x13, 0x7D oder 0x7E vorkommen, so ist es empfehlendwert den Parameter AP des Coordinator aus 0x2 zu setzen (API mit escaping).  
+(Erst ab IPS 4.1 verfügbar.)  
 
 ## 6. Einrichten der Analog / Digital IOs in IPS
 
@@ -228,6 +232,7 @@ Eigenschaften des Gateways für Get/SetProperty-Befehle:
 | Eigenschaft | Typ     | Standardwert | Funktion                            |
 | :---------: | :-----: | :----------: | :---------------------------------: |
 | NDInterval  | integer | 60           | Zyklischer Node Discovery (0 = aus) |
+| API2        | boolean | false        | false für API, true für API2        |
 
 Eigenschaften des Splitters für Get/SetProperty-Befehle:  
 
@@ -254,19 +259,22 @@ Eigenschaften des Devices für Get/SetProperty-Befehle:
 - Die Debug Ausgaben der einzelnen Instanzen helfen bei der Fehlersuche. Enthalten sind u.a. die Datenpakete, Statusinformationen und eventuelle Fehlermeldungen.
 - Die Baudraten der Geräte können alle unterschiedlich sein !
 - Die Baudrate des Coordinator sollte mindestens der höchsten Baudrate der EndDevices/Routers betragen.
+- Ist nicht bekannt welche Daten über die Splitter versendet werden, so ist die API2 (escaped) immer vorzuziehen (ab IPS4.1).
 - XBEE_WriteParameter &  XBEE_ReadParameter arbeiten mit RAW-Daten. Es ist somit nötig die Daten in das korrekte Format zu bekommen.  
 
 Das funktioniert z.B. nicht korrekt:  
 ```php
-XBEE_WriteParameter(123456,'IR',10000) // Sample-Intervall 10Sek.
-XBEE_WriteParameter(123456,'IR',0x2710) // Sample-Intervall 10Sek.
+XBEE_WriteParameter(123456,'IR',10000); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(123456,'IR',0x2710); // Sample-Intervall 10Sek.
 ```
 
 So funktioniert es wie gewünscht:  
 ```php
-XBEE_WriteParameter(123456,'IR',chr(0x27).chr(0x10)) // Sample-Intervall 10Sek.
+XBEE_WriteParameter(123456,'IR',chr(0x27).chr(0x10)); // Sample-Intervall 10Sek.
 // oder
-XBEE_WriteParameter(123456,'IR',pack("n",10000)) // Sample-Intervall 10Sek.
+XBEE_WriteParameter(123456,'IR',"\x27\x10"); // Sample-Intervall 10Sek.
+// oder
+XBEE_WriteParameter(123456,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
 ```
 
 ## 10. Anhang
@@ -274,4 +282,4 @@ XBEE_WriteParameter(123456,'IR',pack("n",10000)) // Sample-Intervall 10Sek.
 **Changlog:**
 
 1.0.	:  Erstes öffentliches Release für IPS 3.1
-2.0     :  Erstes öffentliches Release für IPS 4
+2.0     :  Erstes öffentliches Release für IPS 4.1

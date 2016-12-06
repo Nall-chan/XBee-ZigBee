@@ -1,15 +1,52 @@
 <?
 
+/**
+ * @addtogroup xbeezigbee
+ * @{
+ *
+ * @package       XBeeZigBee
+ * @file          module.php
+ * @author        Michael Tröger <micha@nall-chan.net>
+ * @copyright     2016 Michael Tröger
+ * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
+ * @version       1.0
+ *
+ * @todo Timer überprüfen
+ */
 require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
 
+/**
+ * XBZBDevice ist die Klasse für die IO-Pins und die Konfiguration eines XBee-Nodes.
+ * Erweitert ipsmodule 
+ */
 class XBZBDevice extends IPSModule
 {
 
     use DebugHelper,
         InstanceStatus;
 
+    /**
+     * Enthält die digitalen IO-Pins wie sie in den IO-Sampeln übertragen werden.
+     * 
+     * @var array
+     * @access private
+     */
     private $DPin_Name = array('D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', '', '', 'P0', 'P1', 'P2');
+
+    /**
+     * Enthält die analogen IO-Pins wie sie in den IO-Sampeln übertragen werden.
+     * 
+     * @var array
+     * @access private
+     */
     private $APin_Name = array('AD0', 'AD1', 'AD2', 'AD3', '', '', '', 'VSS');
+
+    /**
+     * Enthält alle AT Parameter welche beschrieben werden können.
+     * 
+     * @var array
+     * @access private
+     */
     private $AT_WriteCommand = array(
         TXB_AT_Commands::AT_D0,
         TXB_AT_Commands::AT_D1,
@@ -68,6 +105,13 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_IR,
         TXB_AT_Commands::AT_IC,
         TXB_AT_Commands::AT_VV);
+
+    /**
+     * Enthält alle AT Parameter welche gelesen werden können.
+     * 
+     * @var array
+     * @access private
+     */
     private $AT_ReadCommand = array(
         TXB_AT_Commands::AT_DN,
         TXB_AT_Commands::AT_ND,
@@ -146,6 +190,11 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_DB,
         TXB_AT_Commands::AT_VSS);
 
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function Create()
     {
         parent::Create();
@@ -154,6 +203,11 @@ class XBZBDevice extends IPSModule
         $this->RegisterPropertyInteger("Interval", 0);
     }
 
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function ApplyChanges()
     {
         parent::ApplyChanges();
@@ -166,9 +220,13 @@ class XBZBDevice extends IPSModule
         $this->RequestPinState();
     }
 
-################## PRIVATE     
 ################## ActionHandler
 
+    /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
     public function RequestAction($Ident, $Value)
     {
         if (is_bool($Value) === false)
@@ -180,11 +238,14 @@ class XBZBDevice extends IPSModule
     }
 
 ################## PUBLIC
-    /**
-     * This function will be available automatically after the module is imported with the module control.
-     * Using the custom prefix this function will be callable from PHP and JSON-RPC through:
-     */
 
+    /**
+     * IPS-Instanzfunktion 'XBEE_RequestState.
+     * Fordert den aktuellen Status der IO-Pins an.
+     * 
+     * @access private
+     * @return boolean True bei erfolg, False im Fehlerfall.
+     */
     public function RequestState()
     {
         if (!$this->HasActiveParent())
@@ -195,6 +256,13 @@ class XBZBDevice extends IPSModule
         return $this->RequestPinState();
     }
 
+    /**
+     * IPS-Instanzfunktion 'XBEE_ReadConfig.
+     * Fordert die aktuelle Konfiguration der IO-Pins an.
+     * 
+     * @access public
+     * @return boolean True bei erfolg, False im Fehlerfall.
+     */
     public function ReadConfig()
     {
         if (!$this->HasActiveParent())
@@ -205,6 +273,15 @@ class XBZBDevice extends IPSModule
         return $this->ReadPinConfig();
     }
 
+    /**
+     * IPS-Instanzfunktion 'XBEE_WriteBoolean.
+     * Steuert einen Digital IO-Pin des Node.
+     * 
+     * @access public
+     * @param string $Pin Der zu setzende Pin.
+     * @param bool $Value Der neue Wert des Pin.
+     * @result bool  True bei Erlof, False im Fehlerfall.
+     */
     public function WriteBoolean(string $Pin, bool $Value)
     {
         try
@@ -230,8 +307,6 @@ class XBZBDevice extends IPSModule
                 throw new Exception('Wrong Command received.');
             if ($this->ReadPropertyBoolean('EmulateStatus'))
                 SetValueBoolean($VarID, $Value);
-//            if ($ResultCMDData->Data <> $CMDData->Data)
-//                throw new Exception('Error on write Data.');
             return true;
         }
         catch (Exception $ex)
@@ -241,6 +316,15 @@ class XBZBDevice extends IPSModule
         }
     }
 
+    /**
+     * IPS-Instanzfunktion 'XBEE_WriteParameter.
+     * Schreibt einen Parameter in den Node.
+     * 
+     * @access public
+     * @param string $Parameter Der zu beschreibene Parameter.
+     * @param string $Value Der Wert des Parameters als Byte-String.
+     * @result bool  True bei Erlof, False im Fehlerfall.
+     */
     public function WriteParameter(string $Parameter, string $Value)
     {
         try
@@ -266,6 +350,14 @@ class XBZBDevice extends IPSModule
         }
     }
 
+    /**
+     * IPS-Instanzfunktion 'XBEE_ReadParameter.
+     * Sendet eine Leseanfrage für einen Parameter an den Node.
+     * 
+     * @access public
+     * @param string $Parameter Der abzufragende Parameter.
+     * @result bool|string Der Wert des Parameters als Byte-String. False im Fehlerfall.
+     */
     public function ReadParameter(string $Parameter)
     {
         try
@@ -291,6 +383,13 @@ class XBZBDevice extends IPSModule
 
 ################## Datapoints
 
+    /**
+     * Empfängt Daten vom Parent (Splitter oder Gateway).
+     * 
+     * @access public
+     * @param string $JSONString Das empfangene API-Objekt als JSON-kodierter String vom Parent.
+     * @result bool Immer True
+     */
     public function ReceiveData($JSONString)
     {
         $Data = json_decode($JSONString);
@@ -311,10 +410,18 @@ class XBZBDevice extends IPSModule
                 break;
             case TXB_API_Commands::IO_Data_Sample_Rx:
                 // gotcha
-                return $this->DecodeIOSample($APIData->Data);
+                $this->DecodeIOSample($APIData->Data);
         }
+        return true;
     }
 
+    /**
+     * Wertet ein AT-Befehl der IO-Pins aus und konfiguriert entsprechend die IPS-Variablen.
+     * 
+     * @access private
+     * @param TXB_CMD_Data $CMDData AT-Paket mit dem Status des IO-Pins.
+     * @return boolean True bei Erflog, sonst false.
+     */
     private function DecodePinConfig(TXB_CMD_Data $CMDData)
     {
         if ($CMDData->Status <> TXB_AT_Command_Status::OK)
@@ -323,8 +430,6 @@ class XBZBDevice extends IPSModule
             trigger_error(TXB_AT_Command_Status::ToString($CMDData->Status), E_USER_NOTICE);
             return false;
         }
-
-
         switch ($CMDData->ATCommand)
         {
             case TXB_AT_Commands::AT_D0:
@@ -338,7 +443,6 @@ class XBZBDevice extends IPSModule
             case TXB_AT_Commands::AT_P0:
             case TXB_AT_Commands::AT_P1:
             case TXB_AT_Commands::AT_P2:
-                // Neuen Wert darstellen und Variable anlegen und Schaltbar machen wenn Value 4 oder 5 sonst nicht schaltbar
                 if (strlen($CMDData->Data) <> 1)
                 {
                     $this->SendDebug('Wrong size for data:', $CMDData, 0);
@@ -359,37 +463,36 @@ class XBZBDevice extends IPSModule
                     case 2:
 
                         $VarID = $this->RegisterVariableInteger('A' . $CMDData->ATCommand, 'A' . $CMDData->ATCommand);
-//                        if ($VarID > 0)
-//                        {
                         $this->DisableAction('A' . $CMDData->ATCommand);
-                        IPS_SetVariableCustomProfile($VarID, '');
-//                        }
                         break;
                     case 3:
                         $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
                         $this->DisableAction($CMDData->ATCommand);
-                        IPS_SetVariableCustomProfile($VarID, '');
                         break;
                     case 4:
-                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
-                        IPS_SetVariableCustomProfile($VarID, '~Switch');
+                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand, '~Switch');
                         $this->EnableAction($CMDData->ATCommand);
                         SetValueBoolean($VarID, false);
                         break;
                     case 5:
-                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand);
-                        IPS_SetVariableCustomProfile($VarID, '~Switch');
+                        $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand, '~Switch');
                         $this->EnableAction($CMDData->ATCommand);
                         SetValueBoolean($VarID, true);
                         break;
                 }
                 break;
             case TXB_AT_Commands::AT_IS:
-                return $this->DecodeIOSample( chr(01) . $CMDData->Data);
+                return $this->DecodeIOSample(chr(01) . $CMDData->Data);
         }
         return true;
     }
 
+    /**
+     * Dekodiert ein empfangenen Datensatz mit den Statu der IO-Pins und führt die IPS-Variablen nach.
+     * 
+     * @access private
+     * @return boolean Immer True.
+     */
     private function DecodeIOSample($Data)
     {
         $ActiveDPins = unpack("n", substr($Data, 2, 2))[1];
@@ -446,6 +549,12 @@ class XBZBDevice extends IPSModule
         return true;
     }
 
+    /**
+     * Fordert die aktuelle Konfiguration der IO-Pins an.
+     * 
+     * @access private
+     * @return boolean True bei erfolg, False im Fehlerfall.
+     */
     private function ReadPinConfig()
     {
         foreach ($this->DPin_Name as $Pin)
@@ -461,7 +570,12 @@ class XBZBDevice extends IPSModule
         }
     }
 
-//------------------------------------------------------------------------------
+    /**
+     * Fordert den aktuellen Status der IO-Pins an.
+     * 
+     * @access private
+     * @return boolean True bei erfolg, False im Fehlerfall.
+     */
     private function RequestPinState()
     {
         $CMDData = new TXB_CMD_Data(TXB_AT_Commands::AT_IS, '');
@@ -472,10 +586,11 @@ class XBZBDevice extends IPSModule
     }
 
     /**
+     * Versendet ein TXB_CMD_Data-Objekt und empfängt die Antwort.
      * 
-     * @param TXB_CMD_Data $CMDData
-     * @return TXB_CMD_Data
-     * @throws Exception
+     * @access private
+     * @param TXB_CMD_Data $CMDData Das Objekt welches versendet werden soll.
+     * @result TXB_CMD_Data|null Enthält die Antwort oder NULL im Fehlerfall.
      */
     private function Send(TXB_CMD_Data $CMDData)
     {
@@ -511,7 +626,6 @@ class XBZBDevice extends IPSModule
         }
     }
 
-################## DUMMYS / WOARKAROUNDS - protected
 }
 
-?>
+/** @} */
