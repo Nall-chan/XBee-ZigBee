@@ -339,8 +339,6 @@ class XBZBDevice extends IPSModule
                 return false;
             if ($ResultCMDData->ATCommand <> $CMDData->ATCommand)
                 throw new Exception('Wrong Command received.');
-            if ($ResultCMDData->Data <> $CMDData->Data)
-                throw new Exception('Error on write Data.');
             return true;
         }
         catch (Exception $ex)
