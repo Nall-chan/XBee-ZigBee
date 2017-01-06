@@ -71,6 +71,17 @@ class XBZBGateway extends IPSModule
     }
 
     /**
+     * Interne Funktion des SDK.
+     *
+     * @access public
+     */
+    public function Destroy()
+    {
+        $this->UnregisterProfil("XBeeZB.ModemStatus");
+        parent::Destroy();
+    }
+
+    /**
      * Nachrichten aus der Nachrichtenschlange verarbeiten.
      *
      * @access public

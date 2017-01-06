@@ -1168,6 +1168,9 @@ trait InstanceStatus
 
 }
 
+/**
+ * Trait mit Hilfsfunktionen für Variablenprofile.
+ */
 trait Profile
 {
 
@@ -1231,6 +1234,24 @@ trait Profile
         IPS_SetVariableProfileIcon($Name, $Icon);
         IPS_SetVariableProfileText($Name, $Prefix, $Suffix);
         IPS_SetVariableProfileValues($Name, $MinValue, $MaxValue, $StepSize);
+    }
+
+    /**
+     * Löscht ein Variablenprofile, sofern es nicht außerhalb dieser Instanz noch verwendet wird.
+     * @param string $Profil Name des zu löschenden Profils.
+     */
+    protected function UnregisterProfil(string $Profil)
+    {
+        if (!IPS_VariableProfileExists($Profil))
+            return;
+        foreach (IPS_GetVariableList() as $VarID)
+        {
+            if (IPS_GetParent($VarID) == $this->InstanceID)
+                continue;
+            if (IPS_GetVariable($VarID)['VariableCustomProfile'] == $Profil)
+                return;
+        }
+        IPS_DeleteVariableProfile($Profil);
     }
 
 }
