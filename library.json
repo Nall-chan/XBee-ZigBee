@@ -6,7 +6,7 @@
     "version": "2.0",
     "build": 110,
     "date": 1483805292,
-    "title": "Nutzung eines XBee-Netzwerkes mit allen Geräten der Serie2 mit ZigBee Standart.",
+    "title": "Nutzung eines XBee-Netzwerkes mit allen Geräten der Serie2 mit ZigBee Standard.",
     "description": "Implementierung des ZigBee API-Protokoll der XBee Serie2. Bereitstellen und Abbilden der Schnittstellen und A/D-PIN-IOs eines XBee-ZigBee Netzwerkes. Senden und Empfang von seriellen Daten eines Gerätes, welches an einem entfernten XBee Router bzw. EndDevice angeschlossen ist. Empfangen von PIN-IO-Samples. Lesen und schreiben von Parametern aller im ZigBee-Netzwerk vorhandenen Geräte (inkl. Coordinator).",
     "tags": ["XBee", "ZigBee", "Funk", "seriell", "remote"],
     "req_ips_version": "4.1"
