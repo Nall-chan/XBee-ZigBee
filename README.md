@@ -16,6 +16,7 @@ Implementierung der XBee-ZigBee Serie2.
 8. [Parameter / Modul-Infos](#8-parameter--modul-infos) 
 9. [Tips & Tricks](#9-tips--tricks) 
 10. [Anhang](#10-anhang)
+11. [Lizenz](#11-lizenz)
 
 ## 1. Funktionsumfang
 
@@ -37,15 +38,17 @@ Implementierung der XBee-ZigBee Serie2.
  
 ## 3. Software-Installation
 
-**IPS 3.1 bis 3.4:**  
+### IPS 3.1 bis 3.4:
    Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
    Die enthaltende Datei MS35.dll in das /modules Verzeichnis von IPS kopieren.  
    Ist der Ordner Modules nicht vorhanden, so ist er anzulegen.  
    IPS-Dienst neustarten.
 
-**IPS 4.x:**  
+### IPS 4.1 und neuer:
    Über das Modul-Control folgende URL hinzufügen.  
    `git://github.com/Nall-chan/IPSXBeeZigBee.git`  
+
+   **Bei kommerzieller Nutzung (z.B. als Errichter oder Integrator) wenden Sie sich bitte an den Autor.**  
 
 
 ## 4. Hardware-Installation
@@ -191,7 +194,7 @@ boolean XBEE_WriteBoolean(integer $InstanzeID, string $Pin, boolean $Value);
 Digitalen Ausgang ansteuern. Pin ist der Name des IOs aus XTCU, welcher auch dem Ident der Statusvariable entspricht. Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis TRUE, andernfalls FALSE.  
 Beispiel:  
 ```php
-XBEE_WriteBoolean(123456, 'D4', true);  // Setzt Ausgage D4
+XBEE_WriteBoolean(12345, 'D4', true);  // Setzt Ausgage D4
 ```
 
 ---
@@ -202,8 +205,8 @@ boolean XBEE_WriteParameter(integer $InstanzeID, string $Parameter, string $Valu
 Schreibt den Inhalt von Value (=RAW-String) in den Parameter. Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis TRUE, andernfalls FALSE.  
 Beispiele:  
 ```php
-XBEE_WriteParameter(123456, 'NI', 'MS35_5');  // Setzt den NodeIdent auf MS35_5
-XBEE_WriteParameter(123456, 'IR', chr(0x27).chr(0x10));  // Legt 10 sek. als Intervall für das periodische Sampling des Node fest.
+XBEE_WriteParameter(12345, 'NI', 'MS35_5');  // Setzt den NodeIdent auf MS35_5
+XBEE_WriteParameter(12345, 'IR', chr(0x27).chr(0x10));  // Legt 10 sek. als Intervall für das periodische Sampling des Node fest.
 ```
 
 ---
@@ -214,7 +217,7 @@ string XBEE_ReadParameter(integer $InstanzeID, string $Parameter);
 Ließt einen Parameter und gibt ihn als RAW-String zurück. Konnte der Befehl nicht erfolgreich ausgeführt werden, liefert er als Ergebnis FALSE.  
 Beispiel:  
 ```php
-echo XBEE_ReadParameter(123456, 'NI');  // Gibt den NodeIdent aus (z.B. MS35_5)
+echo XBEE_ReadParameter(12345, 'NI');  // Gibt den NodeIdent aus (z.B. MS35_5)
 ```
 
 ## 8. Parameter / Modul-Infos
@@ -264,22 +267,27 @@ Eigenschaften des Devices für Get/SetProperty-Befehle:
 
 Das funktioniert z.B. nicht korrekt:  
 ```php
-XBEE_WriteParameter(123456,'IR',10000); // Sample-Intervall 10Sek.
-XBEE_WriteParameter(123456,'IR',0x2710); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(12345,'IR',10000); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(12345,'IR',0x2710); // Sample-Intervall 10Sek.
 ```
 
 So funktioniert es wie gewünscht:  
 ```php
-XBEE_WriteParameter(123456,'IR',chr(0x27).chr(0x10)); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(12345,'IR',chr(0x27).chr(0x10)); // Sample-Intervall 10Sek.
 // oder
-XBEE_WriteParameter(123456,'IR',"\x27\x10"); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(12345,'IR',"\x27\x10"); // Sample-Intervall 10Sek.
 // oder
-XBEE_WriteParameter(123456,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
+XBEE_WriteParameter(12345,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
 ```
 
 ## 10. Anhang
 
-**Changlog:**
+**Changlog:**  
 
-1.0.	:  Erstes öffentliches Release für IPS 3.1
-2.0     :  Erstes öffentliches Release für IPS 4.1
+2.0     :  Erstes öffentliches Release für IPS 4.1  
+
+1.0.	:  Erstes öffentliches Release für IPS 3.1  
+
+## 11. Lizenz
+
+  [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
