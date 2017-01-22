@@ -116,16 +116,16 @@ class XBZBSplitter extends IPSModule
         {
             throw new Exception("Wrong response in frame.");
         }
-        $this->SendDebug('TX_Status_Received(8B):Retry', $APIResponse->Data[0], 1);
-        $this->SendDebug('TX_Status_Received(8B):Status', $APIResponse->Data[1], 1);
-        $this->SendDebug('TX_Status_Received(8B):Discovery', $APIResponse->Data[2], 1);
-        if ($APIResponse->Data[1] == TXB_Transmit_Status::OK)
+        $this->SendDebug('TX_Status_Received:Retry', $APIResponse->Data[0], 1);
+        $this->SendDebug('TX_Status_Received:Status', TXB_Transmit_Status::ToString(ord($APIResponse->Data[1])), 1);
+        $this->SendDebug('TX_Status_Received:Discovery', $APIResponse->Data[2], 1);
+        if (ord($APIResponse->Data[1]) == TXB_Transmit_Status::OK)
         {
-            $this->SendDebug('TX_Status', 'OK', 0);
+            //$this->SendDebug('TX_Status', 'OK', 0);
             return true;
         }
-        $this->SendDebug('TX_Status', 'Error: ' . TXB_Transmit_Status::ToString($APIResponse->Data[1]), 0);
-        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString($APIResponse->Data[1]));
+        //$this->SendDebug('TX_Status', 'Error: ' . TXB_Transmit_Status::ToString(ord($APIResponse->Data[1])), 0);
+        throw new Exception('Error on Transmit:' . TXB_Transmit_Status::ToString(ord($APIResponse->Data[1])));
     }
 
     ################## PRIVATE         
@@ -139,22 +139,22 @@ class XBZBSplitter extends IPSModule
      */
     private function Send(TXB_API_Data $APIData)
     {
-            if (!$this->HasActiveParent())
-                throw new Exception('Intance has no active parent.', E_USER_NOTICE);
-            if ($this->ReadPropertyString('NodeName') == '')
-                throw new Exception('NodeName not set.', E_USER_NOTICE);
-            $APIData->NodeName = $this->ReadPropertyString('NodeName');
-            $this->SendDebug('Send', $APIData, 0);
-            $JSONString = $APIData->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
-            $anwser = $this->SendDataToParent($JSONString);
-            if ($anwser === false)
-            {
-                $this->SendDebug('Response', 'No valid answer or timeout', 0);
-                return NULL;
-            }
-            $APIResponse = unserialize($anwser);
-            $this->SendDebug('Response', $APIResponse, 1);
-            return $APIResponse;
+        if (!$this->HasActiveParent())
+            throw new Exception('Intance has no active parent.', E_USER_NOTICE);
+        if ($this->ReadPropertyString('NodeName') == '')
+            throw new Exception('NodeName not set.', E_USER_NOTICE);
+        $APIData->NodeName = $this->ReadPropertyString('NodeName');
+        $this->SendDebug('Send', $APIData, 0);
+        $JSONString = $APIData->ToJSONString('{5971FB22-3F96-45AE-916F-AE3AC8CA8782}');
+        $anwser = $this->SendDataToParent($JSONString);
+        if ($anwser === false)
+        {
+            $this->SendDebug('Response', 'No valid answer or timeout', 0);
+            return NULL;
+        }
+        $APIResponse = unserialize($anwser);
+        $this->SendDebug('Response', $APIResponse, 1);
+        return $APIResponse;
     }
 
 ################## DATAPOINT RECEIVE FROM CHILD
@@ -253,8 +253,9 @@ class XBZBSplitter extends IPSModule
                 $this->SendDebug('WARN', 'Late Receive', 0);
                 break;
             case TXB_API_Commands::Receive_Paket:
-                $Receive_Status = $APIData->Data[0];
-                if ((ord($Receive_Status) & ( TXB_Receive_Status::Packet_Acknowledged)) == TXB_Receive_Status::Packet_Acknowledged)
+                $Receive_Status = ord($APIData->Data[0]);
+                $this->SendDebug('Receive_Status', TXB_Receive_Status::ToString($Receive_Status), 1);
+                if (($Receive_Status & TXB_Receive_Status::Packet_Acknowledged) == TXB_Receive_Status::Packet_Acknowledged)
                 {
                     $this->SendDebug('Receive_Paket(OK)', substr($APIData->Data, 1), 1);
                     $this->SendDataToChild(substr($APIData->Data, 1));

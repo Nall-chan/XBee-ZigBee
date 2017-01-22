@@ -40,7 +40,7 @@ Implementierung der XBee-ZigBee Serie2.
 
 ### IPS 3.1 bis 3.4:
    Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
-   Die enthaltende Datei MS35.dll in das /modules Verzeichnis von IPS kopieren.  
+   Die enthaltende Datei XBEE.dll in das /modules Verzeichnis von IPS kopieren.  
    Ist der Ordner Modules nicht vorhanden, so ist er anzulegen.  
    IPS-Dienst neustarten.
 
@@ -284,9 +284,17 @@ XBEE_WriteParameter(12345,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
 
 **Changlog:**  
 
-2.0     :  Erstes öffentliches Release für IPS 4.1  
+Version 2.1:  
+ - Neu: Debug-Ausgaben um mehr Klartexte erweitert  
+ - Fix: Unter PHP 7.1 diverse Typenfehler beseitigt  
+ - Fix: Timer in Create verschoben  
+ 
 
-1.0.	:  Erstes öffentliches Release für IPS 3.1  
+Version 2.0:  
+  - Erstes öffentliches Release für IPS 4.1  
+
+Version 1.0:  
+  - Erstes öffentliches Release für IPS 3.1  
 
 ## 11. Lizenz
 

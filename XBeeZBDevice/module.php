@@ -201,6 +201,7 @@ class XBZBDevice extends IPSModule
         $this->ConnectParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
         $this->RegisterPropertyBoolean("EmulateStatus", false);
         $this->RegisterPropertyInteger("Interval", 0);
+        $this->RegisterTimer('RequestPinState', 0, 'XBee_RequestState($_IPS[\'TARGET\']);');
     }
 
     /**
@@ -215,7 +216,11 @@ class XBZBDevice extends IPSModule
             return;
         $this->UnregisterVariable("ReplyATData");
         $this->UnregisterVariable("FrameID");
-        $this->RegisterTimer('RequestPinState', $this->ReadPropertyInteger('Interval') * 1000, 'XBee_RequestState($_IPS[\'TARGET\']);');
+        if ($this->ReadPropertyInteger('Interval') > 0)
+            $this->SetTimerInterval('RequestPinState', $this->ReadPropertyInteger('Interval') * 1000);
+        else
+            $this->SetTimerInterval('RequestPinState', 0);
+
         $this->ReadPinConfig();
         $this->RequestPinState();
     }

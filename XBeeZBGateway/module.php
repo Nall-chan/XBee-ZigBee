@@ -39,6 +39,7 @@ class XBZBGateway extends IPSModule
      */
     public function __get($name)
     {
+        //$this->SendDebug('GET_' . $name, unserialize($this->GetBuffer($name)), 0);
         return unserialize($this->GetBuffer($name));
     }
 
@@ -52,6 +53,7 @@ class XBZBGateway extends IPSModule
     public function __set($name, $value)
     {
         $this->SetBuffer($name, serialize($value));
+        //$this->SendDebug('SET_' . $name, serialize($value), 0);
     }
 
     /**
@@ -68,6 +70,7 @@ class XBZBGateway extends IPSModule
         $this->Buffer = "";
         $this->TransmitBuffer = new TXB_API_DataList();
         $this->NodeList = new TXB_NodeList();
+        $this->RegisterTimer('NodeDiscovery', 0, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
     }
 
     /**
@@ -180,9 +183,9 @@ class XBZBGateway extends IPSModule
             ));
 
         if ($this->ReadPropertyInteger('NDInterval') >= 5)
-            $this->RegisterTimer('NodeDiscovery', $this->ReadPropertyInteger('NDInterval') * 1000, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
+            $this->SetTimerInterval('NodeDiscovery', $this->ReadPropertyInteger('NDInterval') * 1000);
         else
-            $this->RegisterTimer('NodeDiscovery', 0, 'XBee_NodeDiscovery($_IPS[\'TARGET\']);');
+            $this->SetTimerInterval('NodeDiscovery', 0);
 
         if (($this->ReadPropertyInteger('NDInterval') < 5) and ( $this->ReadPropertyInteger('NDInterval') != 0))
         {

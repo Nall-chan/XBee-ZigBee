@@ -388,19 +388,17 @@ class TXB_Receive_Status
      */
     public static function ToString(int $Code)
     {
-        switch ($Code)
-        {
-            case self::Packet_Acknowledged:
-                return 'Packet_Acknowledged';
-            case self::Packet_was_a_broadcast_packet:
-                return 'Packet_was_a_broadcast_packet';
-            case self::Packet_encrypted_with_APS_encryption:
-                return 'Packet_encrypted_with_APS_encryption';
-            case self:: Packet_was_sent_from_an_end_device:
-                return 'Packet_was_sent_from_an_end_device';
-            default:
-                return bin2hex(chr($Code));
-        }
+        $ret = array();
+        if (($Code & self::Packet_Acknowledged) == self::Packet_Acknowledged)
+            $ret[] = 'Packet_Acknowledged';
+        if (($Code & self::Packet_was_a_broadcast_packet) == self::Packet_was_a_broadcast_packet)
+            $ret[] = 'Packet_was_a_broadcast_packet';
+        if (($Code & self::Packet_encrypted_with_APS_encryption) == self::Packet_encrypted_with_APS_encryption)
+            $ret[] = 'Packet_encrypted_with_APS_encryption';
+        if (($Code & self::Packet_was_sent_from_an_end_device) == self::Packet_was_sent_from_an_end_device)
+            $ret[] = 'Packet_was_sent_from_an_end_device';
+
+        return implode(' + ', $ret);
     }
 
 }
@@ -643,7 +641,7 @@ class TXB_API_Data
             $Data .= $Node->NodeAddr64;
             $Data .= $Node->NodeAddr16;
         }
-        $Data.=$this->Data;
+        $Data .= $this->Data;
         $len = strlen($Data);
         $frame = chr(floor($len / 256)) . chr($len % 256) . $Data;
         $check = 0;
@@ -822,7 +820,7 @@ class TXB_CMD_Data
             if (is_string($Data))
             {
                 $this->ATCommand = substr($Data, 0, 2);
-                $this->Status = substr($Data, 2, 1);
+                $this->Status = ord(substr($Data, 2, 1));
                 $this->Data = substr($Data, 3);
             }
         }
