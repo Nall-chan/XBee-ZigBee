@@ -301,7 +301,7 @@ class XBZBGateway extends IPSModule
      */
     private function ProcessAPIData(TXB_API_Data $APIData)
     {
-        $this->SendDebug('Received', $APIData, 0);
+        $this->SendDebug('ProcessAPIData', $APIData, 0);
         switch ($APIData->APICommand)
         {
             case TXB_API_Commands::AT_Command_Responde:
@@ -543,20 +543,25 @@ class XBZBGateway extends IPSModule
         $start = strpos($stream, chr(0x7e));
         if ($start === false)
         {
-            $this->SendDebug('Frame without 0x7e', $stream, 1);
-            $stream = '';
+            $this->SendDebug('WAIT (Stream without 0x7e)', $stream, 1);
+            $this->Buffer = $stream;
+            return;
         }
-        elseif ($start > 0)
-        {
-            $this->SendDebug('Frame do not start with 0x7e', $stream, 1);
-        }
+
         //Paket suchen
         if (strlen($stream) < 5)
         {
-            $this->SendDebug('Frame to short', $stream, 1);
+            $this->SendDebug('Stream to short', $stream, 1);
             $this->Buffer = $stream;
             return true;
         }
+
+        if ($start > 0)
+        {
+            $this->SendDebug('Receive Stream (WARN - no 0x7e at Pos 0)', $stream, 1);
+        }
+        else
+            $this->SendDebug('Receive Stream', $stream, 1);
 
         $packets = explode(chr(0x7E), $stream);
         unset($packets[0]);
@@ -565,22 +570,33 @@ class XBZBGateway extends IPSModule
         $doescape = $this->ReadPropertyBoolean('API2');
         foreach ($packets as $i => $rawpacket)
         {
+            $this->SendDebug('Receive Rawframe ' . $i, chr(0x7e) . $rawpacket, 1);
+
             if ($doescape)
-                $packet = str_replace($escaped, $unescaped, $rawpacket);
+                (string) $packet = str_replace($escaped, $unescaped, $rawpacket);
             else
-                $packet = $rawpacket;
+                (string) $packet = $rawpacket;
+
+            if (strlen($packet) < 2)
+            {
+                $this->SendDebug('WARN', 'Frame to small', 0);
+                continue;
+            }
+            $this->SendDebug('Receive APIFrame ' . $i, chr(0x7e) . $rawpacket, 1);
+
             $len = ord($packet[0]) * 256 + ord($packet[1]);
+
             if (strlen($packet) < $len + 3)
             {
-                if ($i == count($packets))
+                if ($i == count($packets)) // letztes Paket 
                 {
-                    $this->SendDebug('WAIT', 'Frame must have ' . $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
-                    $this->Buffer = $rawpacket;
+                    $this->SendDebug('WAIT', 'Frame must have ' . (int) $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
+                    $this->Buffer = (string) $rawpacket;
                     return true;
                 }
                 else
                 {
-                    $this->SendDebug('ERROR', 'Frame must have ' . $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
+                    $this->SendDebug('ERROR', 'Frame must have ' . (int) $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
                     continue;
                 }
             }
@@ -593,7 +609,7 @@ class XBZBGateway extends IPSModule
 
             if (($checksum & 0xff) != 0xff)
             {
-                $this->SendDebug('ERROR', 'Checksumm error.', 0);
+                $this->SendDebug('ERROR Frame' . $i, 'Checksumm error.', 0);
                 continue;
             }
             $APIData = new TXB_API_Data($packet);
