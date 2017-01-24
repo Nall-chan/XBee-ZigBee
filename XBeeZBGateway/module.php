@@ -591,7 +591,7 @@ class XBZBGateway extends IPSModule
                 if ($i == count($packets)) // letztes Paket 
                 {
                     $this->SendDebug('WAIT', 'Frame must have ' . (int) $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
-                    $this->Buffer = (string) $rawpacket;
+                    $this->Buffer = chr(0x7E) . (string) $rawpacket;
                     return true;
                 }
                 else
