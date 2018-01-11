@@ -284,12 +284,14 @@ XBEE_WriteParameter(12345,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
 
 **Changlog:**  
 
+Version 2.2:  
+ - Fix: Für IPS 5.0  
+
 Version 2.1:  
  - Neu: Debug-Ausgaben um mehr Klartexte erweitert  
  - Fix: Unter PHP 7.1 diverse Typenfehler beseitigt  
  - Fix: Timer in Create verschoben  
  
-
 Version 2.0:  
   - Erstes öffentliches Release für IPS 4.1  
 

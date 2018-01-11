@@ -7,11 +7,11 @@
  * @package       XBeeZigBee
  * @file          module.php
  * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
+ * @copyright     2018 Michael Tröger
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
+ * @version       2.2
  */
-require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
+require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
 
 /**
  * XBZBGateway ist die Klasse für einen Coordinator XBee.
@@ -110,8 +110,8 @@ class XBZBGateway extends IPSModule
                     }
                 }
                 break;
-            case DM_CONNECT:
-            case DM_DISCONNECT:
+            case FM_CONNECT:
+            case FM_DISCONNECT:
                 $this->ForceRefresh();
                 break;
             case IM_CHANGESTATUS:
@@ -149,8 +149,8 @@ class XBZBGateway extends IPSModule
     public function ApplyChanges()
     {
         $this->RegisterMessage(0, IPS_KERNELMESSAGE);
-        $this->RegisterMessage($this->InstanceID, DM_CONNECT);
-        $this->RegisterMessage($this->InstanceID, DM_DISCONNECT);
+        $this->RegisterMessage($this->InstanceID, FM_CONNECT);
+        $this->RegisterMessage($this->InstanceID, FM_DISCONNECT);
         // Wenn Kernel nicht bereit, dann warten... KR_READY kommt ja gleich
         parent::ApplyChanges();
         if (IPS_GetKernelRunlevel() != KR_READY)
@@ -160,14 +160,14 @@ class XBZBGateway extends IPSModule
         $this->TransmitBuffer = new TXB_API_DataList();
         if (!IPS_VariableProfileExists('XBeeZB.ModemStatus'))
             $this->RegisterProfileIntegerEx('XBeeZB.ModemStatus', "Gear", "", "", Array(
-                Array(0, 'Hardware reset', '', -1),
-                Array(1, 'Watchdog timer reset', '', -1),
-                Array(2, 'Joined Network', '', -1),
-                Array(3, 'Disassociated', '', -1),
-                Array(4, 'Config error / sync lost', '', -1),
-                Array(5, 'Coordinator realignment', '', -1),
-                Array(6, 'Coordinator started', '', -1),
-                Array(7, 'Network security key updated', '', -1),
+                Array(0x00, 'Hardware reset', '', -1),
+                Array(0x01, 'Watchdog timer reset', '', -1),
+                Array(0x02, 'Joined Network', '', -1),
+                Array(0x03, 'Disassociated', '', -1),
+                Array(0x04, 'Config error / sync lost', '', -1),
+                Array(0x05, 'Coordinator realignment', '', -1),
+                Array(0x06, 'Coordinator started', '', -1),
+                Array(0x07, 'Network security key updated', '', -1),
                 Array(0x0B, 'Network woke up', '', -1),
                 Array(0x0C, 'Network went to sleep', '', -1),
                 Array(0x0D, 'Voltage supply limit exceed', '', -1),

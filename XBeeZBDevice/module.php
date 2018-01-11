@@ -7,13 +7,13 @@
  * @package       XBeeZigBee
  * @file          module.php
  * @author        Michael Tröger <micha@nall-chan.net>
- * @copyright     2016 Michael Tröger
+ * @copyright     2018 Michael Tröger
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       1.0
+ * @version       2.2
  *
  * @todo Timer überprüfen
  */
-require_once(__DIR__ . "/../XBeeZBClass.php");  // diverse Klassen
+require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
 
 /**
  * XBZBDevice ist die Klasse für die IO-Pins und die Konfiguration eines XBee-Nodes.
