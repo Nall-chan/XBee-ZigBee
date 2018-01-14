@@ -1,3 +1,8 @@
+[![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![Version](https://img.shields.io/badge/Modul%20Version-2.2-blue.svg)]()
+[![Version](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
+[![Version](https://img.shields.io/badge/Symcon%20Version-4.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migration-v40-v41/)
+
 # IPSXBeeZigBee
 
 Implementierung der XBee-ZigBee Serie2.
@@ -16,7 +21,8 @@ Implementierung der XBee-ZigBee Serie2.
 8. [Parameter / Modul-Infos](#8-parameter--modul-infos) 
 9. [Tips & Tricks](#9-tips--tricks) 
 10. [Anhang](#10-anhang)
-11. [Lizenz](#11-lizenz)
+11. [Spenden](#11-spenden)
+12. [Lizenz](#12-lizenz)
 
 ## 1. Funktionsumfang
 
@@ -298,6 +304,12 @@ Version 2.0:
 Version 1.0:  
   - Erstes öffentliches Release für IPS 3.1  
 
-## 11. Lizenz
+## 11. Spenden  
+  
+  Die Library ist für die nicht kommzerielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
+
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
+
+## 12. Lizenz
 
   [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
