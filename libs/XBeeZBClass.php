@@ -1,4 +1,4 @@
-<?
+<?php
 
 /**
  * @addtogroup xbeezigbee
@@ -12,16 +12,14 @@
  * @version       2.2
  *
  */
-if (!defined("IPS_BASE"))
-{
-// --- BASE MESSAGE
+if (!defined("IPS_BASE")) {
+    // --- BASE MESSAGE
     define('IPS_BASE', 10000);                             //Base Message
     define('IPS_KERNELSTARTED', IPS_BASE + 1);             //Post Ready Message
     define('IPS_KERNELSHUTDOWN', IPS_BASE + 2);            //Pre Shutdown Message, Runlevel UNINIT Follows
 }
-if (!defined("IPS_KERNELMESSAGE"))
-{
-// --- KERNEL
+if (!defined("IPS_KERNELMESSAGE")) {
+    // --- KERNEL
     define('IPS_KERNELMESSAGE', IPS_BASE + 100);           //Kernel Message
     define('KR_CREATE', IPS_KERNELMESSAGE + 1);            //Kernel is beeing created
     define('KR_INIT', IPS_KERNELMESSAGE + 2);              //Kernel Components are beeing initialised, Modules loaded, Settings read
@@ -29,9 +27,8 @@ if (!defined("IPS_KERNELMESSAGE"))
     define('KR_UNINIT', IPS_KERNELMESSAGE + 4);            //Got Shutdown Message, unloading all stuff
     define('KR_SHUTDOWN', IPS_KERNELMESSAGE + 5);          //Uninit Complete, Destroying Kernel Inteface
 }
-if (!defined("IPS_LOGMESSAGE"))
-{
-// --- KERNEL LOGMESSAGE
+if (!defined("IPS_LOGMESSAGE")) {
+    // --- KERNEL LOGMESSAGE
     define('IPS_LOGMESSAGE', IPS_BASE + 200);              //Logmessage Message
     define('KL_MESSAGE', IPS_LOGMESSAGE + 1);              //Normal Message                      | FG: Black | BG: White  | STLYE : NONE
     define('KL_SUCCESS', IPS_LOGMESSAGE + 2);              //Success Message                     | FG: Black | BG: Green  | STYLE : NONE
@@ -41,16 +38,14 @@ if (!defined("IPS_LOGMESSAGE"))
     define('KL_DEBUG', IPS_LOGMESSAGE + 6);                //Debug Informations + Script Results | FG: Grey  | BG: White  | STLYE : NONE
     define('KL_CUSTOM', IPS_LOGMESSAGE + 7);               //User Message                        | FG: Black | BG: White  | STLYE : NONE
 }
-if (!defined("IPS_MODULEMESSAGE"))
-{
-// --- MODULE LOADER
+if (!defined("IPS_MODULEMESSAGE")) {
+    // --- MODULE LOADER
     define('IPS_MODULEMESSAGE', IPS_BASE + 300);           //ModuleLoader Message
     define('ML_LOAD', IPS_MODULEMESSAGE + 1);              //Module loaded
     define('ML_UNLOAD', IPS_MODULEMESSAGE + 2);            //Module unloaded
 }
-if (!defined("IPS_OBJECTMESSAGE"))
-{
-// --- OBJECT MANAGER
+if (!defined("IPS_OBJECTMESSAGE")) {
+    // --- OBJECT MANAGER
     define('IPS_OBJECTMESSAGE', IPS_BASE + 400);
     define('OM_REGISTER', IPS_OBJECTMESSAGE + 1);          //Object was registered
     define('OM_UNREGISTER', IPS_OBJECTMESSAGE + 2);        //Object was unregistered
@@ -67,9 +62,8 @@ if (!defined("IPS_OBJECTMESSAGE"))
     define('OM_CHILDREMOVED', IPS_OBJECTMESSAGE + 13);     //Child for Object was removed
     define('OM_CHANGEIDENT', IPS_OBJECTMESSAGE + 14);      //Ident was Changed
 }
-if (!defined("IPS_INSTANCEMESSAGE"))
-{
-// --- INSTANCE MANAGER
+if (!defined("IPS_INSTANCEMESSAGE")) {
+    // --- INSTANCE MANAGER
     define('IPS_INSTANCEMESSAGE', IPS_BASE + 500);         //Instance Manager Message
     define('IM_CREATE', IPS_INSTANCEMESSAGE + 1);          //Instance created
     define('IM_DELETE', IPS_INSTANCEMESSAGE + 2);          //Instance deleted
@@ -82,9 +76,8 @@ if (!defined("IPS_INSTANCEMESSAGE"))
     define('IM_SEARCHPROGRESS', IPS_INSTANCEMESSAGE + 9);  //Searching progress in %
     define('IM_SEARCHCOMPLETE', IPS_INSTANCEMESSAGE + 10); //Searching is complete
 }
-if (!defined("IPS_VARIABLEMESSAGE"))
-{
-// --- VARIABLE MANAGER
+if (!defined("IPS_VARIABLEMESSAGE")) {
+    // --- VARIABLE MANAGER
     define('IPS_VARIABLEMESSAGE', IPS_BASE + 600);              //Variable Manager Message
     define('VM_CREATE', IPS_VARIABLEMESSAGE + 1);               //Variable Created
     define('VM_DELETE', IPS_VARIABLEMESSAGE + 2);               //Variable Deleted
@@ -92,18 +85,16 @@ if (!defined("IPS_VARIABLEMESSAGE"))
     define('VM_CHANGEPROFILENAME', IPS_VARIABLEMESSAGE + 4);    //On Profile Name Change
     define('VM_CHANGEPROFILEACTION', IPS_VARIABLEMESSAGE + 5);  //On Profile Action Change
 }
-if (!defined("IPS_SCRIPTMESSAGE"))
-{
-// --- SCRIPT MANAGER
+if (!defined("IPS_SCRIPTMESSAGE")) {
+    // --- SCRIPT MANAGER
     define('IPS_SCRIPTMESSAGE', IPS_BASE + 700);           //Script Manager Message
     define('SM_CREATE', IPS_SCRIPTMESSAGE + 1);            //On Script Create
     define('SM_DELETE', IPS_SCRIPTMESSAGE + 2);            //On Script Delete
     define('SM_CHANGEFILE', IPS_SCRIPTMESSAGE + 3);        //On Script File changed
     define('SM_BROKEN', IPS_SCRIPTMESSAGE + 4);            //Script Broken Status changed
 }
-if (!defined("IPS_EVENTMESSAGE"))
-{
-// --- EVENT MANAGER
+if (!defined("IPS_EVENTMESSAGE")) {
+    // --- EVENT MANAGER
     define('IPS_EVENTMESSAGE', IPS_BASE + 800);             //Event Scripter Message
     define('EM_CREATE', IPS_EVENTMESSAGE + 1);             //On Event Create
     define('EM_DELETE', IPS_EVENTMESSAGE + 2);             //On Event Delete
@@ -120,9 +111,8 @@ if (!defined("IPS_EVENTMESSAGE"))
     define('EM_CHANGECYCLICTIMEFROM', IPS_EVENTMESSAGE + 13);
     define('EM_CHANGECYCLICTIMETO', IPS_EVENTMESSAGE + 14);
 }
-if (!defined("IPS_MEDIAMESSAGE"))
-{
-// --- MEDIA MANAGER
+if (!defined("IPS_MEDIAMESSAGE")) {
+    // --- MEDIA MANAGER
     define('IPS_MEDIAMESSAGE', IPS_BASE + 900);           //Media Manager Message
     define('MM_CREATE', IPS_MEDIAMESSAGE + 1);             //On Media Create
     define('MM_DELETE', IPS_MEDIAMESSAGE + 2);             //On Media Delete
@@ -130,32 +120,28 @@ if (!defined("IPS_MEDIAMESSAGE"))
     define('MM_AVAILABLE', IPS_MEDIAMESSAGE + 4);          //Media Available Status changed
     define('MM_UPDATE', IPS_MEDIAMESSAGE + 5);
 }
-if (!defined("IPS_LINKMESSAGE"))
-{
-// --- LINK MANAGER
+if (!defined("IPS_LINKMESSAGE")) {
+    // --- LINK MANAGER
     define('IPS_LINKMESSAGE', IPS_BASE + 1000);           //Link Manager Message
     define('LM_CREATE', IPS_LINKMESSAGE + 1);             //On Link Create
     define('LM_DELETE', IPS_LINKMESSAGE + 2);             //On Link Delete
     define('LM_CHANGETARGET', IPS_LINKMESSAGE + 3);       //On Link TargetID change
 }
-if (!defined("IPS_FLOWMESSAGE"))
-{
-// --- DATA HANDLER
+if (!defined("IPS_FLOWMESSAGE")) {
+    // --- DATA HANDLER
     define('IPS_FLOWMESSAGE', IPS_BASE + 1100);             //Data Handler Message
     define('FM_CONNECT', IPS_FLOWMESSAGE + 1);             //On Instance Connect
     define('FM_DISCONNECT', IPS_FLOWMESSAGE + 2);          //On Instance Disconnect
 }
-if (!defined("IPS_ENGINEMESSAGE"))
-{
-// --- SCRIPT ENGINE
+if (!defined("IPS_ENGINEMESSAGE")) {
+    // --- SCRIPT ENGINE
     define('IPS_ENGINEMESSAGE', IPS_BASE + 1200);           //Script Engine Message
     define('SE_UPDATE', IPS_ENGINEMESSAGE + 1);             //On Library Refresh
     define('SE_EXECUTE', IPS_ENGINEMESSAGE + 2);            //On Script Finished execution
     define('SE_RUNNING', IPS_ENGINEMESSAGE + 3);            //On Script Started execution
 }
-if (!defined("IPS_PROFILEMESSAGE"))
-{
-// --- PROFILE POOL
+if (!defined("IPS_PROFILEMESSAGE")) {
+    // --- PROFILE POOL
     define('IPS_PROFILEMESSAGE', IPS_BASE + 1300);
     define('PM_CREATE', IPS_PROFILEMESSAGE + 1);
     define('PM_DELETE', IPS_PROFILEMESSAGE + 2);
@@ -167,9 +153,8 @@ if (!defined("IPS_PROFILEMESSAGE"))
     define('PM_ASSOCIATIONREMOVED', IPS_PROFILEMESSAGE + 8);
     define('PM_ASSOCIATIONCHANGED', IPS_PROFILEMESSAGE + 9);
 }
-if (!defined("IPS_TIMERMESSAGE"))
-{
-// --- TIMER POOL
+if (!defined("IPS_TIMERMESSAGE")) {
+    // --- TIMER POOL
     define('IPS_TIMERMESSAGE', IPS_BASE + 1400);            //Timer Pool Message
     define('TM_REGISTER', IPS_TIMERMESSAGE + 1);
     define('TM_UNREGISTER', IPS_TIMERMESSAGE + 2);
@@ -178,8 +163,7 @@ if (!defined("IPS_TIMERMESSAGE"))
     define('TM_RUNNING', IPS_TIMERMESSAGE + 5);
 }
 
-if (!defined("IS_ACTIVE")) //Nur wenn Konstanten noch nicht bekannt sind.
-{
+if (!defined("IS_ACTIVE")) { //Nur wenn Konstanten noch nicht bekannt sind.
 // --- STATUS CODES
     define('IS_SBASE', 100);
     define('IS_CREATING', IS_SBASE + 1); //module is being created
@@ -191,8 +175,7 @@ if (!defined("IS_ACTIVE")) //Nur wenn Konstanten noch nicht bekannt sind.
     define('IS_NOTCREATED', IS_EBASE + 1); //instance could not be created
 }
 
-if (!defined("vtBoolean")) //Nur wenn Konstanten noch nicht bekannt sind.
-{
+if (!defined("vtBoolean")) { //Nur wenn Konstanten noch nicht bekannt sind.
     define('vtBoolean', 0);
     define('vtInteger', 1);
     define('vtFloat', 2);
@@ -204,7 +187,6 @@ if (!defined("vtBoolean")) //Nur wenn Konstanten noch nicht bekannt sind.
  */
 class TXB_API_Commands
 {
-
     const AT_Command = 0x08;
     const Transmit_Request = 0x10;
     const Remote_AT_Command = 0x17;
@@ -218,14 +200,13 @@ class TXB_API_Commands
 
     /**
      *  Liefert den Klartext zu einem Kommando
-     * 
+     *
      * @param int $Code
      * @return string
      */
     public static function ToString(int $Code)
     {
-        switch ($Code)
-        {
+        switch ($Code) {
             case self::AT_Command:
                 return 'AT_Command';
             case self::Transmit_Request:
@@ -250,7 +231,6 @@ class TXB_API_Commands
                 return bin2hex(chr($Code));
         }
     }
-
 }
 
 /**
@@ -258,7 +238,6 @@ class TXB_API_Commands
  */
 class TXB_Modem_Status
 {
-
     const Hardware_reset = 0;
     const Watchdog_timer_reset = 1;
     const Joined_network = 2;
@@ -282,14 +261,13 @@ class TXB_Modem_Status
 
     /**
      *  Liefert den Klartext zu einem Modem Status.
-     * 
+     *
      * @param int $Code
      * @return string
      */
     public static function ToString(int $Code)
     {
-        switch ($Code)
-        {
+        switch ($Code) {
             case self::Hardware_reset:
                 return 'Hardware_reset';
             case self::Watchdog_timer_reset:
@@ -334,7 +312,6 @@ class TXB_Modem_Status
                 return bin2hex(chr($Code));
         }
     }
-
 }
 
 /**
@@ -342,7 +319,6 @@ class TXB_Modem_Status
  */
 class TXB_Transmit_Status
 {
-
     const OK = 0x00;
     const ACK_Fail = 0x01;
     const CCA_Fail = 0x02;
@@ -363,14 +339,13 @@ class TXB_Transmit_Status
 
     /**
      *  Liefert den Klartext zu einem Status.
-     * 
+     *
      * @param int $Code
      * @return string
      */
     public static function ToString(int $Code)
     {
-        switch ($Code)
-        {
+        switch ($Code) {
             case self::OK:
                 return 'OK';
             case self::ACK_Fail:
@@ -409,7 +384,6 @@ class TXB_Transmit_Status
                 return bin2hex(chr($Code));
         }
     }
-
 }
 
 /**
@@ -417,7 +391,6 @@ class TXB_Transmit_Status
  */
 class TXB_Receive_Status
 {
-
     const Packet_Acknowledged = 0x01;
     const Packet_was_a_broadcast_packet = 0x02;
     const Packet_encrypted_with_APS_encryption = 0x20;
@@ -425,25 +398,28 @@ class TXB_Receive_Status
 
     /**
      *  Liefert den Klartext zu einem Status.
-     * 
+     *
      * @param int $Code
      * @return string
      */
     public static function ToString(int $Code)
     {
         $ret = array();
-        if (($Code & self::Packet_Acknowledged) == self::Packet_Acknowledged)
+        if (($Code & self::Packet_Acknowledged) == self::Packet_Acknowledged) {
             $ret[] = 'Packet_Acknowledged';
-        if (($Code & self::Packet_was_a_broadcast_packet) == self::Packet_was_a_broadcast_packet)
+        }
+        if (($Code & self::Packet_was_a_broadcast_packet) == self::Packet_was_a_broadcast_packet) {
             $ret[] = 'Packet_was_a_broadcast_packet';
-        if (($Code & self::Packet_encrypted_with_APS_encryption) == self::Packet_encrypted_with_APS_encryption)
+        }
+        if (($Code & self::Packet_encrypted_with_APS_encryption) == self::Packet_encrypted_with_APS_encryption) {
             $ret[] = 'Packet_encrypted_with_APS_encryption';
-        if (($Code & self::Packet_was_sent_from_an_end_device) == self::Packet_was_sent_from_an_end_device)
+        }
+        if (($Code & self::Packet_was_sent_from_an_end_device) == self::Packet_was_sent_from_an_end_device) {
             $ret[] = 'Packet_was_sent_from_an_end_device';
+        }
 
         return implode(' + ', $ret);
     }
-
 }
 
 /**
@@ -451,7 +427,6 @@ class TXB_Receive_Status
  */
 class TXB_AT_Commands
 {
-
     const AT_ND = 'ND';
     const AT_D0 = 'D0';
     const AT_D1 = 'D1';
@@ -528,7 +503,6 @@ class TXB_AT_Commands
     const AT_AI = 'AI';
     const AT_DB = 'DB';
     const AT_VSS = '%V';
-
 }
 
 /**
@@ -536,7 +510,6 @@ class TXB_AT_Commands
  */
 class TXB_AT_Command_Status
 {
-
     const OK = 0;
     const Error = 1;
     const Invalid_Command = 2;
@@ -545,14 +518,13 @@ class TXB_AT_Command_Status
 
     /**
      *  Liefert den Klartext zu einem Status.
-     * 
+     *
      * @param int $Code
      * @return string
      */
     public static function ToString(int $Code)
     {
-        switch ($Code)
-        {
+        switch ($Code) {
             case self::OK:
                 return 'OK';
             case self::Error:
@@ -567,7 +539,6 @@ class TXB_AT_Command_Status
                 return bin2hex(chr($Code));
         }
     }
-
 }
 
 /**
@@ -575,12 +546,11 @@ class TXB_AT_Command_Status
  */
 class TXB_API_Data
 {
-
     use NodeExtracter;
 
     /**
      * API Command des Paketes.
-     * @var TXB_API_Commands  
+     * @var TXB_API_Commands
      * @access public
      */
     public $APICommand;
@@ -601,7 +571,7 @@ class TXB_API_Data
 
     /**
      * FrameID des Paketes.
-     * @var Byte  
+     * @var Byte
      * @access public
      */
     public $FrameID = null;
@@ -621,34 +591,32 @@ class TXB_API_Data
      * ein API-Kommando mit Nutzdaten,
      * ein utf8-encodiertes Objekt vom IPS Datenaustausch oder
      * zu versendendes AT Kommando (TXB_CMD_DATA) übergeben werden.
-     * 
+     *
      * @param object|TXB_API_Data|string $Frame
      * @param null|string $Payload
      * @return TXB_API_Data
      */
     public function __construct($Frame = null, $Payload = null)
     {
-        if (is_null($Frame))
+        if (is_null($Frame)) {
             return;
-        if (is_object($Frame))
-        {
-            if (property_exists($Frame, 'APICommand'))
-            {
+        }
+        if (is_object($Frame)) {
+            if (property_exists($Frame, 'APICommand')) {
                 $this->APICommand = utf8_decode($Frame->APICommand);
-                if (!is_null($Frame->NodeName))
+                if (!is_null($Frame->NodeName)) {
                     $this->NodeName = utf8_decode($Frame->NodeName);
+                }
                 $this->Data = utf8_decode($Frame->Data);
                 return;
             }
-            if (property_exists($Frame, 'ATCommand'))
-            {
+            if (property_exists($Frame, 'ATCommand')) {
                 $this->APICommand = TXB_API_Commands::AT_Command;
                 $this->Data = $Frame->ATCommand . $Frame->Data;
                 return;
             }
         }
-        if (!is_null($Payload))
-        {
+        if (!is_null($Payload)) {
             $this->APICommand = $Frame;
             $this->Data = $Payload;
             return;
@@ -657,8 +625,7 @@ class TXB_API_Data
         $this->APICommand = ord($Frame[0]);
         $this->FrameID = 0;
         $Frame = substr($Frame, 1, -1);
-        switch ($this->APICommand)
-        {
+        switch ($this->APICommand) {
             case TXB_API_Commands::AT_Command_Responde:
             case TXB_API_Commands::Transmit_Status:
             case TXB_API_Commands::Remote_AT_Command_Responde:
@@ -671,16 +638,15 @@ class TXB_API_Data
 
     /**
      * Liefert den Byte-String für den Versand an den Coordinator
-     * 
+     *
      * @param bool $Escape True wenn API2 mit maskierten Zeichen.
      * @param TXB_Node $Node Ziel Node oder NULL bei Versand an den Coordinator.
      * @return string Byte-String für den Coordinator.
      */
-    public function ToFrame(bool $Escape, TXB_Node $Node = NULL)
+    public function ToFrame(bool $Escape, TXB_Node $Node = null)
     {
         $Data = chr($this->APICommand) . chr($this->FrameID);
-        if (!is_null($Node))
-        {
+        if (!is_null($Node)) {
             $Data .= $Node->NodeAddr64;
             $Data .= $Node->NodeAddr16;
         }
@@ -688,8 +654,7 @@ class TXB_API_Data
         $len = strlen($Data);
         $frame = chr(floor($len / 256)) . chr($len % 256) . $Data;
         $check = 0;
-        for ($x = 0; $x < $len; $x++)
-        {
+        for ($x = 0; $x < $len; $x++) {
             $check = $check + ord($Data[$x]);
         }
         $check = $check & 0xff;
@@ -697,17 +662,18 @@ class TXB_API_Data
         $frame .= chr($check);
         $escaped = array("\x7d\x5d", "\x7d\x31", "\x7d\x33", "\x7d\x5e");
         $unescaped = array("\x7d", "\x11", "\x13", "\x7e");
-        if ($Escape)
+        if ($Escape) {
             $packet = chr(0x7e) . str_replace($unescaped, $escaped, $frame);
-        else
+        } else {
             $packet = chr(0x7e) . $frame;
+        }
 
         return $packet;
     }
 
     /**
      *  Erzeugt einen String für den Datenaustausch innerhalb von IPS.
-     * 
+     *
      * @param string $GUID Die GUID des Ziel-Interfaces innerhalb von IPS.
      * @return string Datenstring für den Datenaustausch innerhalb von IPS.
      */
@@ -720,7 +686,6 @@ class TXB_API_Data
         $SendData->Data = utf8_encode($this->Data);
         return json_encode($SendData);
     }
-
 }
 
 /**
@@ -761,10 +726,11 @@ class TXB_API_DataList
     {
         $FrameID = $this->FrameID;
         $this->Items[$FrameID] = null;
-        if ($this->FrameID == 255)
+        if ($this->FrameID == 255) {
             $this->FrameID = 1;
-        else
+        } else {
             $this->FrameID++;
+        }
         return $FrameID;
     }
 
@@ -776,8 +742,9 @@ class TXB_API_DataList
      */
     public function Update(TXB_API_Data $APIData)
     {
-        if (!array_key_exists($APIData->FrameID, $this->Items))
+        if (!array_key_exists($APIData->FrameID, $this->Items)) {
             return false;
+        }
         $this->Items[$APIData->FrameID] = $APIData;
         return true;
     }
@@ -789,8 +756,9 @@ class TXB_API_DataList
      */
     public function Remove(int $Index)
     {
-        if (array_key_exists($Index, $this->Items))
+        if (array_key_exists($Index, $this->Items)) {
             unset($this->Items[$Index]);
+        }
     }
 
     /**
@@ -801,20 +769,19 @@ class TXB_API_DataList
      */
     public function Get(int $Index)
     {
-        if (array_key_exists($Index, $this->Items))
+        if (array_key_exists($Index, $this->Items)) {
             return $this->Items[$Index];
+        }
         return false;
     }
-
 }
 
 /**
  * Enthält alle Daten eines AT Paketes.
- * 
+ *
  */
 class TXB_CMD_Data
 {
-
     use NodeExtracter;
 
     /**
@@ -851,29 +818,24 @@ class TXB_CMD_Data
      * Erzeugt ein AT Paket aus den übergeben Daten.
      * Es können wahlweise die Nutzdaten eines API Paketes vom Typ TXB_API_Commands::AT_Command_Responde
      * oder ein AT Kommando mit Nutzdaten übergeben werden.
-     * 
+     *
      * @param string $Data
      * @param null|string $Payload
      * @return TXB_CMD_Data
      */
     public function __construct(string $Data, string $Payload = null)
     {
-        if (is_null($Payload))
-        {
-            if (is_string($Data))
-            {
+        if (is_null($Payload)) {
+            if (is_string($Data)) {
                 $this->ATCommand = substr($Data, 0, 2);
                 $this->Status = ord(substr($Data, 2, 1));
                 $this->Data = substr($Data, 3);
             }
-        }
-        else
-        {
+        } else {
             $this->ATCommand = $Data;
             $this->Data = $Payload;
         }
     }
-
 }
 
 /**
@@ -884,7 +846,7 @@ trait NodeExtracter
 
     /**
      *  Extrahiert die MAC-Adresse des Node aus den ersten 8 Bytes von $Data.
-     * 
+     *
      * @access public
      * @return string 64-Bit Adresse (MAC) des Node
      */
@@ -897,7 +859,7 @@ trait NodeExtracter
 
     /**
      *  Extrahiert die dynamisch 16-Bit Adresse des Node aus den ersten 2 Bytes von $Data.
-     * 
+     *
      * @access public
      * @return string 16-Bit Adresse des Node
      */
@@ -910,26 +872,22 @@ trait NodeExtracter
 
     /**
      *  Extrahiert eine Zeichenkette bis zum ersten 0-Byte aus $Data.
-     * 
+     *
      * @access public
      * @return string Der extrahierte String.
      */
     public function ExtractString()
     {
         $end = strpos($this->Data, chr(0));
-        if ($end === false)
-        {
+        if ($end === false) {
             $Value = $this->Data;
             $this->Data = '';
-        }
-        else
-        {
+        } else {
             $Value = substr($this->Data, 0, $end);
             $this->Data = substr($this->Data, $end + 1);
         }
         return $Value;
     }
-
 }
 
 /**
@@ -967,7 +925,6 @@ class TXB_Node
     {
         return array('NodeName', 'NodeAddr16', 'NodeAddr64');
     }
-
 }
 
 /**
@@ -1010,8 +967,9 @@ class TXB_NodeList
      */
     public function Remove(string $NodeName)
     {
-        if (isset($this->Items[$NodeName]))
+        if (isset($this->Items[$NodeName])) {
             unset($this->Items[$NodeName]);
+        }
     }
 
     /**
@@ -1022,8 +980,9 @@ class TXB_NodeList
      */
     public function GetByNodeName(string $NodeName)
     {
-        if (!isset($this->Items[$NodeName]))
+        if (!isset($this->Items[$NodeName])) {
             return false;
+        }
         return $this->Items[$NodeName];
     }
 
@@ -1034,10 +993,10 @@ class TXB_NodeList
      */
     public function GetByNodeAddr16(string $NodeAddr16)
     {
-        foreach ($this->Items as $Name => $Node)
-        {
-            if ($Node->NodeAddr16 == $NodeAddr16)
+        foreach ($this->Items as $Name => $Node) {
+            if ($Node->NodeAddr16 == $NodeAddr16) {
                 return $this->Items[$Name];
+            }
         }
         return false;
     }
@@ -1049,19 +1008,18 @@ class TXB_NodeList
      */
     public function GetByNodeAddr64(string $NodeAddr64)
     {
-        foreach ($this->Items as $Name => $Node)
-        {
-            if ($Node->NodeAddr64 == $NodeAddr64)
+        foreach ($this->Items as $Name => $Node) {
+            if ($Node->NodeAddr64 == $NodeAddr64) {
                 return $this->Items[$Name];
+            }
         }
         return false;
     }
-
 }
 
 /**
  * DebugHelper ergänzt SendDebug um die Möglichkeit Array und Objekte auszugeben.
- * 
+ *
  */
 trait DebugHelper
 {
@@ -1076,39 +1034,28 @@ trait DebugHelper
      */
     protected function SendDebug($Message, $Data, $Format)
     {
-        if (is_a($Data, 'TXB_API_Data'))
-        {
+        if (is_a($Data, 'TXB_API_Data')) {
             $this->SendDebug($Message . ' APICmd', TXB_API_Commands::ToString($Data->APICommand), 0);
             $this->SendDebug($Message . ' Data', $Data->Data, 1);
-            if (!is_null($Data->FrameID))
+            if (!is_null($Data->FrameID)) {
                 $this->SendDebug($Message . ' FrameID', (string) $Data->FrameID, 0);
-        }elseif (is_a($Data, 'TXB_CMD_Data'))
-        {
+            }
+        } elseif (is_a($Data, 'TXB_CMD_Data')) {
             $this->SendDebug($Message . ' ATCmd', $Data->ATCommand, 0);
             $this->SendDebug($Message . ' Status', TXB_AT_Command_Status::ToString($Data->Status), 0);
             $this->SendDebug($Message . ' Data', $Data->Data, 1);
-        }
-        elseif (is_object($Data))
-        {
-            foreach ($Data as $Key => $DebugData)
-            {
-
+        } elseif (is_object($Data)) {
+            foreach ($Data as $Key => $DebugData) {
                 $this->SendDebug($Message . ":" . $Key, $DebugData, 1);
             }
-        }
-        else if (is_array($Data))
-        {
-            foreach ($Data as $Key => $DebugData)
-            {
+        } elseif (is_array($Data)) {
+            foreach ($Data as $Key => $DebugData) {
                 $this->SendDebug($Message . ":" . $Key, $DebugData, 0);
             }
-        }
-        else
-        {
+        } else {
             parent::SendDebug($Message, $Data, $Format);
         }
     }
-
 }
 
 /**
@@ -1124,14 +1071,10 @@ trait Semaphore
      */
     private function lock($ident)
     {
-        for ($i = 0; $i < 100; $i++)
-        {
-            if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1))
-            {
+        for ($i = 0; $i < 100; $i++) {
+            if (IPS_SemaphoreEnter("XBZB_" . (string) $this->InstanceID . (string) $ident, 1)) {
                 return true;
-            }
-            else
-            {
+            } else {
                 IPS_Sleep(mt_rand(1, 5));
             }
         }
@@ -1146,7 +1089,6 @@ trait Semaphore
     {
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
     }
-
 }
 
 /**
@@ -1158,55 +1100,55 @@ trait InstanceStatus
     /**
      * Ermittelt den Parent und verwaltet die Einträge des Parent im MessageSink
      * Ermöglicht es das Statusänderungen des Parent empfangen werden können.
-     * 
+     *
      * @access private
      */
     protected function GetParentData()
     {
         $OldParentId = $this->Parent;
         $ParentId = @IPS_GetInstance($this->InstanceID)['ConnectionID'];
-        if ($OldParentId > 0)
+        if ($OldParentId > 0) {
             $this->UnregisterMessage($OldParentId, IM_CHANGESTATUS);
-        if ($ParentId > 0)
-        {
+        }
+        if ($ParentId > 0) {
             $this->RegisterMessage($ParentId, IM_CHANGESTATUS);
             $this->Parent = $ParentId;
-        }
-        else
+        } else {
             $this->Parent = 0;
+        }
     }
 
     /**
      * Setzt den Status dieser Instanz auf den übergebenen Status.
      * Prüft vorher noch ob sich dieser vom aktuellen Status unterscheidet.
-     * 
+     *
      * @access protected
      * @param int $InstanceStatus
      */
     protected function SetStatus($InstanceStatus)
     {
-        if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus'])
+        if ($InstanceStatus <> IPS_GetInstance($this->InstanceID)['InstanceStatus']) {
             parent::SetStatus($InstanceStatus);
+        }
     }
 
     /**
      * Prüft den Parent auf vorhandensein und Status.
-     * 
+     *
      * @access protected
      * @return bool True wenn Parent vorhanden und in Status 102, sonst false.
      */
     protected function HasActiveParent()
     {
         $instance = IPS_GetInstance($this->InstanceID);
-        if ($instance['ConnectionID'] > 0)
-        {
+        if ($instance['ConnectionID'] > 0) {
             $parent = IPS_GetInstance($instance['ConnectionID']);
-            if ($parent['InstanceStatus'] == 102)
+            if ($parent['InstanceStatus'] == 102) {
                 return true;
+            }
         }
         return false;
     }
-
 }
 
 /**
@@ -1227,21 +1169,17 @@ trait Profile
      */
     protected function RegisterProfileIntegerEx($Name, $Icon, $Prefix, $Suffix, $Associations)
     {
-        if (sizeof($Associations) === 0)
-        {
+        if (sizeof($Associations) === 0) {
             $MinValue = 0;
             $MaxValue = 0;
-        }
-        else
-        {
+        } else {
             $MinValue = $Associations[0][0];
             $MaxValue = $Associations[sizeof($Associations) - 1][0];
         }
 
         $this->RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, 0);
 
-        foreach ($Associations as $Association)
-        {
+        foreach ($Associations as $Association) {
             IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
         }
     }
@@ -1260,16 +1198,13 @@ trait Profile
      */
     protected function RegisterProfileInteger($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $StepSize)
     {
-
-        if (!IPS_VariableProfileExists($Name))
-        {
+        if (!IPS_VariableProfileExists($Name)) {
             IPS_CreateVariableProfile($Name, 1);
-        }
-        else
-        {
+        } else {
             $profile = IPS_GetVariableProfile($Name);
-            if ($profile['ProfileType'] != 1)
+            if ($profile['ProfileType'] != 1) {
                 throw new Exception("Variable profile type does not match for profile " . $Name, E_USER_NOTICE);
+            }
         }
 
         IPS_SetVariableProfileIcon($Name, $Icon);
@@ -1283,18 +1218,19 @@ trait Profile
      */
     protected function UnregisterProfil(string $Profil)
     {
-        if (!IPS_VariableProfileExists($Profil))
+        if (!IPS_VariableProfileExists($Profil)) {
             return;
-        foreach (IPS_GetVariableList() as $VarID)
-        {
-            if (IPS_GetParent($VarID) == $this->InstanceID)
+        }
+        foreach (IPS_GetVariableList() as $VarID) {
+            if (IPS_GetParent($VarID) == $this->InstanceID) {
                 continue;
-            if (IPS_GetVariable($VarID)['VariableCustomProfile'] == $Profil)
+            }
+            if (IPS_GetVariable($VarID)['VariableCustomProfile'] == $Profil) {
                 return;
+            }
         }
         IPS_DeleteVariableProfile($Profil);
     }
-
 }
 
 /** @} */
