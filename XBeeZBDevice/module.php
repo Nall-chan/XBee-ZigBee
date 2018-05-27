@@ -9,7 +9,7 @@
  * @author        Michael Tröger <micha@nall-chan.net>
  * @copyright     2018 Michael Tröger
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       2.2
+ * @version       2.3
  *
  * @todo Timer überprüfen
  */
@@ -66,6 +66,7 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_DH,
         TXB_AT_Commands::AT_DL,
         TXB_AT_Commands::AT_NI,
+        TXB_AT_Commands::AT_NR,
         TXB_AT_Commands::AT_NH,
         TXB_AT_Commands::AT_BH,
         TXB_AT_Commands::AT_AR,

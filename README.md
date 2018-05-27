@@ -1,5 +1,5 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-[![Version](https://img.shields.io/badge/Modul%20Version-2.2-blue.svg)]()
+[![Version](https://img.shields.io/badge/Modul%20Version-2.3-blue.svg)]()
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
 [![Version](https://img.shields.io/badge/Symcon%20Version-4.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migration-v40-v41/)
 [![StyleCI](https://styleci.io/repos/43311204/shield?style=flat)](https://styleci.io/repos/43311204)  
@@ -290,6 +290,9 @@ XBEE_WriteParameter(12345,'IR',pack("n",10000)); // Sample-Intervall 10Sek.
 ## 10. Anhang
 
 **Changlog:**  
+
+Version 2.3:  
+ - Neu: AT Command NR ergänzt in WriteParameter  
 
 Version 2.2:  
  - Fix: Für IPS 5.0  

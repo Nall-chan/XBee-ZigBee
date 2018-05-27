@@ -24,11 +24,11 @@ require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
  */
 class XBZBGateway extends IPSModule
 {
+
     use DebugHelper,
         Semaphore,
         Profile,
         InstanceStatus;
-
     /**
      * Wert einer Eigenschaft aus den InstanceBuffer lesen.
      *
@@ -79,7 +79,9 @@ class XBZBGateway extends IPSModule
      */
     public function Destroy()
     {
-        $this->UnregisterProfil("XBeeZB.ModemStatus");
+        if (!IPS_InstanceExists($this->InstanceID)) {
+            $this->UnregisterProfil("XBeeZB.ModemStatus");
+        }
         parent::Destroy();
     }
 
@@ -109,7 +111,7 @@ class XBZBGateway extends IPSModule
                 $this->ForceRefresh();
                 break;
             case IM_CHANGESTATUS:
-                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) and ($Data[0] == IS_ACTIVE)) {
+                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) and ( $Data[0] == IS_ACTIVE)) {
                     $this->ForceRefresh();
                 }
                 break;
@@ -185,7 +187,7 @@ class XBZBGateway extends IPSModule
             $this->SetTimerInterval('NodeDiscovery', 0);
         }
 
-        if (($this->ReadPropertyInteger('NDInterval') < 5) and ($this->ReadPropertyInteger('NDInterval') != 0)) {
+        if (($this->ReadPropertyInteger('NDInterval') < 5) and ( $this->ReadPropertyInteger('NDInterval') != 0)) {
             echo 'Invalid Interval.';
         }
 
@@ -201,7 +203,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## PUBLIC
-
     /**
      * IPS-Instanzefunktion XBee_NodeDiscovery($InstanceID)
      * Startet ein Node Discovery im Netzwerk
@@ -215,7 +216,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## PRIVATE
-
     /**
      * Prüft auf falschen Parent und trennt dann die Verbindung.
      *
@@ -440,7 +440,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## DATAPOINT RECEIVE FROM CHILD
-
     /**
      * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
      *
@@ -482,7 +481,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## DATAPOINTS SPLITTER
-
     /**
      * Versendet ein API-Paket an die Splitter
      *
@@ -496,7 +494,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## DATAPOINTS DEVICE
-
     /**
      * Versendet ein API-Paket an die Devices
      *
@@ -510,7 +507,6 @@ class XBZBGateway extends IPSModule
     }
 
     ################## DATAPOINTS PARENT
-
     /**
      * Empfängt Daten vom Parent (IO).
      * Dekodierte API-Pakete werden an ProcessAPIData übergeben.
@@ -682,6 +678,7 @@ class XBZBGateway extends IPSModule
             throw $exc;
         }
     }
+
 }
 
 /** @} */

@@ -9,7 +9,7 @@
  * @author        Michael Tröger <micha@nall-chan.net>
  * @copyright     2018 Michael Tröger
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
- * @version       2.2
+ * @version       2.3
  *
  */
 if (!defined("IPS_BASE")) {
@@ -458,6 +458,7 @@ class TXB_AT_Commands
     const AT_DH = 'DH';
     const AT_DL = 'DL';
     const AT_NI = 'NI';
+    const AT_NR = 'NR';
     const AT_NH = 'NH';
     const AT_BH = 'BH';
     const AT_AR = 'AR';
