@@ -24,7 +24,6 @@ require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
  */
 class XBZBGateway extends IPSModule
 {
-
     use DebugHelper,
         Semaphore,
         Profile,
@@ -111,7 +110,7 @@ class XBZBGateway extends IPSModule
                 $this->ForceRefresh();
                 break;
             case IM_CHANGESTATUS:
-                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) and ( $Data[0] == IS_ACTIVE)) {
+                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) and ($Data[0] == IS_ACTIVE)) {
                     $this->ForceRefresh();
                 }
                 break;
@@ -187,7 +186,7 @@ class XBZBGateway extends IPSModule
             $this->SetTimerInterval('NodeDiscovery', 0);
         }
 
-        if (($this->ReadPropertyInteger('NDInterval') < 5) and ( $this->ReadPropertyInteger('NDInterval') != 0)) {
+        if (($this->ReadPropertyInteger('NDInterval') < 5) and ($this->ReadPropertyInteger('NDInterval') != 0)) {
             echo 'Invalid Interval.';
         }
 
@@ -678,7 +677,6 @@ class XBZBGateway extends IPSModule
             throw $exc;
         }
     }
-
 }
 
 /** @} */
