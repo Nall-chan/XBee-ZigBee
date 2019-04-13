@@ -559,15 +559,15 @@ class XBZBGateway extends IPSModule
             }
             $this->SendDebug('Receive APIFrame ' . $i, chr(0x7e) . $rawpacket, 1);
 
-            $len = ord($packet[0]) * 256 + ord($packet[1]);
+            (int)$len = ord($packet[0]) * 256 + ord($packet[1]);
 
             if (strlen($packet) < $len + 3) {
                 if ($i == count($packets)) { // letztes Paket
-                    $this->SendDebug('WAIT', 'Frame must have ' . (int) $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
+                    $this->SendDebug('WAIT', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
                     $this->Buffer = chr(0x7E) . (string) $rawpacket;
                     return true;
                 } else {
-                    $this->SendDebug('ERROR', 'Frame must have ' . (int) $len . ' Bytes. ' . strlen($packet) - 3 . ' Bytes given.', 0);
+                    $this->SendDebug('ERROR', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
                     continue;
                 }
             }
