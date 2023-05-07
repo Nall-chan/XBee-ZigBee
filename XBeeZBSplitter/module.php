@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @addtogroup xbeezigbee
  * @{
@@ -12,7 +14,7 @@
  * @version       2.2
  *
  */
-require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
+require_once __DIR__ . '/../libs/XBeeZBClass.php';  // diverse Klassen
 
 /**
  * XBZBSplitter ist die Klasse für einen remote XBee. (Router oder EndDevice)
@@ -20,8 +22,8 @@ require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
  */
 class XBZBSplitter extends IPSModule
 {
-    use DebugHelper,
-        InstanceStatus;
+    use DebugHelper;
+    use InstanceStatus;
 
     /**
      * Interne Funktion des SDK.
@@ -31,8 +33,8 @@ class XBZBSplitter extends IPSModule
     public function Create()
     {
         parent::Create();
-        $this->ConnectParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
-        $this->RegisterPropertyString("NodeName", "");
+        $this->ConnectParent('{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}');
+        $this->RegisterPropertyString('NodeName', '');
     }
 
     /**
@@ -47,14 +49,96 @@ class XBZBSplitter extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        $this->UnregisterVariable("TransmitStatus");
-        $this->UnregisterVariable("FrameID");
+        $this->UnregisterVariable('TransmitStatus');
+        $this->UnregisterVariable('FrameID');
         if ($this->ReadPropertyString('NodeName') == '') {
             $this->SetStatus(202);
         } else {
             $this->SetStatus(102);
         }
         $this->SetSummary($this->ReadPropertyString('NodeName') . ' (unknown)');
+    }
+
+    ################## DATAPOINT RECEIVE FROM CHILD
+
+    /**
+     * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
+     *
+     * @access public
+     * @param type $JSONString Der JSON-kodierten String vom IPS-Datenaustausch.
+     * @return bool|string Die seriellisierte Antwort oder false im Fehlerfall.
+     */
+    public function ForwardData($JSONString)
+    {
+        $Data = json_decode($JSONString);
+        switch ($Data->DataID) {
+            case '{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}': //SendText
+                return $this->ForwardDataFromChild(utf8_decode($Data->Buffer));
+            case '{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}': //CMD
+                $APIData = new TXB_API_Data($Data);
+                try {
+                    if ($APIData->APICommand == TXB_API_Commands::AT_Command) {
+                        $APIData->APICommand = TXB_API_Commands::Remote_AT_Command;
+                        $APIData->Data = chr(0x02) . $APIData->Data;
+                    }
+                    $APIResponse = $this->Send($APIData);
+                    return serialize($APIResponse);
+                } catch (Exception $exc) {
+                    trigger_error($exc->getMessage(), E_USER_NOTICE);
+                    return serialize(null);
+                }
+        }
+    }
+
+    ################## Datapoints PARENT
+
+    /**
+     * Empfängt Daten vom Parent (Gateway).
+     *
+     * @access public
+     * @param string $JSONString Das empfangene API-Objekt als JSON-kodierter String vom Parent.
+     * @result bool Immer True
+     */
+    public function ReceiveData($JSONString)
+    {
+        $Data = json_decode($JSONString);
+        $APIData = new TXB_API_Data($Data);
+        $this->SendDebug('Receive', $APIData, 1);
+        switch ($APIData->APICommand) {
+            case TXB_API_Commands::Node_Identification_Indicator:
+                $Parent = bin2hex($APIData->ExtractNodeAddr16());
+                $Typ = ord($APIData->Data[0]);
+                if ($Typ == 1) {
+                    $Typ = 'Router';
+                } elseif ($Typ == 2) {
+                    $Typ = 'End Device';
+                } else {
+                    $Typ = 'unknown';
+                }
+                $Value = ' (' . $Typ . ' over ' . $Parent . ')';
+                $this->SetSummary($this->ReadPropertyString('NodeName') . $Value);
+
+                break;
+            case TXB_API_Commands::Transmit_Status:
+            case TXB_API_Commands::Remote_AT_Command_Responde:
+                $this->SendDebug('WARN', 'Late Receive', 0);
+                break;
+            case TXB_API_Commands::Receive_Paket:
+                $Receive_Status = ord($APIData->Data[0]);
+                $this->SendDebug('Receive_Status', TXB_Receive_Status::ToString($Receive_Status), 1);
+                if (($Receive_Status & TXB_Receive_Status::Packet_Acknowledged) == TXB_Receive_Status::Packet_Acknowledged) {
+                    $this->SendDebug('Receive_Paket(OK)', substr($APIData->Data, 1), 1);
+                    $this->SendDataToChild(substr($APIData->Data, 1));
+                } else {
+                    $this->SendDebug('ReceivePaket(Error:' . bin2hex($Receive_Status) . ')', substr($APIData->Data, 1), 1);
+                }
+                break;
+            case TXB_API_Commands::IO_Data_Sample_Rx:
+            default:
+                $this->SendDataToDevice($APIData);
+                break;
+        }
+        return true;
     }
 
     ################## Forward Serial Data
@@ -112,7 +196,7 @@ class XBZBSplitter extends IPSModule
             return;
         }
         if ($APIResponse->APICommand != TXB_API_Commands::Transmit_Status) {
-            throw new Exception("Wrong response in frame.");
+            throw new Exception('Wrong response in frame.');
         }
         $this->SendDebug('TX_Status_Received:Retry', $APIResponse->Data[0], 1);
         $this->SendDebug('TX_Status_Received:Status', TXB_Transmit_Status::ToString(ord($APIResponse->Data[1])), 1);
@@ -155,37 +239,6 @@ class XBZBSplitter extends IPSModule
         return $APIResponse;
     }
 
-    ################## DATAPOINT RECEIVE FROM CHILD
-
-    /**
-     * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
-     *
-     * @access public
-     * @param type $JSONString Der JSON-kodierten String vom IPS-Datenaustausch.
-     * @return bool|string Die seriellisierte Antwort oder false im Fehlerfall.
-     */
-    public function ForwardData($JSONString)
-    {
-        $Data = json_decode($JSONString);
-        switch ($Data->DataID) {
-            case "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}": //SendText
-                return $this->ForwardDataFromChild(utf8_decode($Data->Buffer));
-            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
-                $APIData = new TXB_API_Data($Data);
-                try {
-                    if ($APIData->APICommand == TXB_API_Commands::AT_Command) {
-                        $APIData->APICommand = TXB_API_Commands::Remote_AT_Command;
-                        $APIData->Data = chr(0x02) . $APIData->Data;
-                    }
-                    $APIResponse = $this->Send($APIData);
-                    return serialize($APIResponse);
-                } catch (Exception $exc) {
-                    trigger_error($exc->getMessage(), E_USER_NOTICE);
-                    return serialize(null);
-                }
-        }
-    }
-
     ################## DATAPOINT VARIOUS IPS-SPLITTER
 
     /**
@@ -196,7 +249,7 @@ class XBZBSplitter extends IPSModule
      */
     private function SendDataToChild(string $Data)
     {
-        $JSONString = json_encode(array("DataID" => "{018EF6B5-AB94-40C6-AA53-46943E824ACF}", "Buffer" => utf8_encode($Data)));
+        $JSONString = json_encode(['DataID' => '{018EF6B5-AB94-40C6-AA53-46943E824ACF}', 'Buffer' => utf8_encode($Data)]);
         $this->SendDataToChildren($JSONString);
     }
 
@@ -210,57 +263,6 @@ class XBZBSplitter extends IPSModule
     {
         $JSONString = $APIData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
         $this->SendDataToChildren($JSONString);
-    }
-
-    ################## Datapoints PARENT
-
-    /**
-     * Empfängt Daten vom Parent (Gateway).
-     *
-     * @access public
-     * @param string $JSONString Das empfangene API-Objekt als JSON-kodierter String vom Parent.
-     * @result bool Immer True
-     */
-    public function ReceiveData($JSONString)
-    {
-        $Data = json_decode($JSONString);
-        $APIData = new TXB_API_Data($Data);
-        $this->SendDebug('Receive', $APIData, 1);
-        switch ($APIData->APICommand) {
-            case TXB_API_Commands::Node_Identification_Indicator:
-                $Parent = bin2hex($APIData->ExtractNodeAddr16());
-                $Typ = ord($APIData->Data[0]);
-                if ($Typ == 1) {
-                    $Typ = 'Router';
-                } elseif ($Typ == 2) {
-                    $Typ = 'End Device';
-                } else {
-                    $Typ = 'unknown';
-                }
-                $Value = ' (' . $Typ . ' over ' . $Parent . ')';
-                $this->SetSummary($this->ReadPropertyString('NodeName') . $Value);
-
-                break;
-            case TXB_API_Commands::Transmit_Status:
-            case TXB_API_Commands::Remote_AT_Command_Responde:
-                $this->SendDebug('WARN', 'Late Receive', 0);
-                break;
-            case TXB_API_Commands::Receive_Paket:
-                $Receive_Status = ord($APIData->Data[0]);
-                $this->SendDebug('Receive_Status', TXB_Receive_Status::ToString($Receive_Status), 1);
-                if (($Receive_Status & TXB_Receive_Status::Packet_Acknowledged) == TXB_Receive_Status::Packet_Acknowledged) {
-                    $this->SendDebug('Receive_Paket(OK)', substr($APIData->Data, 1), 1);
-                    $this->SendDataToChild(substr($APIData->Data, 1));
-                } else {
-                    $this->SendDebug('ReceivePaket(Error:' . bin2hex($Receive_Status) . ')', substr($APIData->Data, 1), 1);
-                }
-                break;
-            case TXB_API_Commands::IO_Data_Sample_Rx:
-            default:
-                $this->SendDataToDevice($APIData);
-                break;
-        }
-        return true;
     }
 }
 

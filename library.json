@@ -1,8 +1,11 @@
 {
     "id": "{C137C3B0-026B-4863-8648-1E59F29AD2FD}",
-    "author": "Michael Tr\u00f6ger",
+    "author": "Michael Tröger",
     "name": "XBee ZigBee Library",
     "url": "https://github.com/Nall-chan/XBee-ZigBee",
+    "compatibility": {
+        "version": "5.0"
+    },
     "version": "2.1",
     "build": 115,
     "date": 1485102803

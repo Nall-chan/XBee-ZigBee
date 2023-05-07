@@ -3,9 +3,16 @@
     "name": "XBZBDevice",
     "type": 3,
     "vendor": "Digi",
-    "aliases": ["XBee ZigBee Device"],
-    "parentRequirements": ["{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}"],
+    "aliases": [
+        "XBee ZigBee Device"
+    ],
+    "parentRequirements": [
+        "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}"
+    ],
     "childRequirements": [],
-    "implemented": ["{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}"],
-    "prefix": "XBee"
+    "implemented": [
+        "{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}"
+    ],
+    "prefix": "XBEE",
+    "url": "https://github.com/Nall-chan/XBee-ZigBee/blob/master/README.md"
 }

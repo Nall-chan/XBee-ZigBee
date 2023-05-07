@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @addtogroup xbeezigbee
  * @{
@@ -11,7 +13,7 @@
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  * @version       2.2
  */
-require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
+require_once __DIR__ . '/../libs/XBeeZBClass.php';  // diverse Klassen
 
 /**
  * XBZBGateway ist die Klasse für einen Coordinator XBee.
@@ -25,11 +27,13 @@ require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
  */
 class XBZBGateway extends IPSModule
 {
+    use DebugHelper;
 
-    use DebugHelper,
-        Semaphore,
-        Profile,
-        InstanceStatus;
+    use Semaphore;
+
+    use Profile;
+
+    use InstanceStatus;
     /**
      * Wert einer Eigenschaft aus den InstanceBuffer lesen.
      *
@@ -64,10 +68,10 @@ class XBZBGateway extends IPSModule
     public function Create()
     {
         parent::Create();
-        $this->RequireParent("{6DC3D946-0D31-450F-A8C6-C42DB8D7D4F1}");
-        $this->RegisterPropertyInteger("NDInterval", 60);
-        $this->RegisterPropertyBoolean("API2", false);
-        $this->Buffer = "";
+        $this->RequireParent('{6DC3D946-0D31-450F-A8C6-C42DB8D7D4F1}');
+        $this->RegisterPropertyInteger('NDInterval', 60);
+        $this->RegisterPropertyBoolean('API2', false);
+        $this->Buffer = '';
         $this->TransmitBuffer = new TXB_API_DataList();
         $this->NodeList = new TXB_NodeList();
         $this->MAC = '';
@@ -83,7 +87,7 @@ class XBZBGateway extends IPSModule
     public function Destroy()
     {
         if (!IPS_InstanceExists($this->InstanceID)) {
-            $this->UnregisterProfil("XBeeZB.ModemStatus");
+            $this->UnregisterProfil('XBeeZB.ModemStatus');
         }
         parent::Destroy();
     }
@@ -114,31 +118,11 @@ class XBZBGateway extends IPSModule
                 $this->ForceRefresh();
                 break;
             case IM_CHANGESTATUS:
-                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) and ( $Data[0] == IS_ACTIVE)) {
+                if (($SenderID == @IPS_GetInstance($this->InstanceID)['ConnectionID']) && ($Data[0] == IS_ACTIVE)) {
                     $this->ForceRefresh();
                 }
                 break;
         }
-    }
-
-    /**
-     * Wird ausgeführt wenn der Kernel hochgefahren wurde.
-     *
-     * @access protected
-     */
-    protected function KernelReady()
-    {
-        $this->ApplyChanges();
-    }
-
-    /**
-     * Wird ausgeführt wenn sich der Parent ändert.
-     *
-     * @access protected
-     */
-    protected function ForceRefresh()
-    {
-        $this->ApplyChanges();
     }
 
     /**
@@ -156,32 +140,32 @@ class XBZBGateway extends IPSModule
         if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        $this->UnregisterVariable("Nodes");
-        $this->UnregisterVariable("BufferIN");
+        $this->UnregisterVariable('Nodes');
+        $this->UnregisterVariable('BufferIN');
         $this->TransmitBuffer = new TXB_API_DataList();
         if (!IPS_VariableProfileExists('XBeeZB.ModemStatus')) {
-            $this->RegisterProfileIntegerEx('XBeeZB.ModemStatus', "Gear", "", "", array(
-                array(0x00, 'Hardware reset', '', -1),
-                array(0x01, 'Watchdog timer reset', '', -1),
-                array(0x02, 'Joined Network', '', -1),
-                array(0x03, 'Disassociated', '', -1),
-                array(0x04, 'Config error / sync lost', '', -1),
-                array(0x05, 'Coordinator realignment', '', -1),
-                array(0x06, 'Coordinator started', '', -1),
-                array(0x07, 'Network security key updated', '', -1),
-                array(0x0B, 'Network woke up', '', -1),
-                array(0x0C, 'Network went to sleep', '', -1),
-                array(0x0D, 'Voltage supply limit exceed', '', -1),
-                array(0x11, 'Modem config changed while join', '', -1),
-                array(0x80, 'Stack error', '', -1),
-                array(0x82, 'Send/Join command without connecting from AP', '', -1),
-                array(0x83, 'AP not found', '', -1),
-                array(0x84, 'PSK not configured', '', -1),
-                array(0x87, 'SSID not found', '', -1),
-                array(0x88, 'Failed to join with security enabled', '', -1),
-                array(0x8A, 'Invalid channel', '', -1),
-                array(0x8E, 'Failed to join AP', '', -1)
-            ));
+            $this->RegisterProfileIntegerEx('XBeeZB.ModemStatus', 'Gear', '', '', [
+                [0x00, 'Hardware reset', '', -1],
+                [0x01, 'Watchdog timer reset', '', -1],
+                [0x02, 'Joined Network', '', -1],
+                [0x03, 'Disassociated', '', -1],
+                [0x04, 'Config error / sync lost', '', -1],
+                [0x05, 'Coordinator realignment', '', -1],
+                [0x06, 'Coordinator started', '', -1],
+                [0x07, 'Network security key updated', '', -1],
+                [0x0B, 'Network woke up', '', -1],
+                [0x0C, 'Network went to sleep', '', -1],
+                [0x0D, 'Voltage supply limit exceed', '', -1],
+                [0x11, 'Modem config changed while join', '', -1],
+                [0x80, 'Stack error', '', -1],
+                [0x82, 'Send/Join command without connecting from AP', '', -1],
+                [0x83, 'AP not found', '', -1],
+                [0x84, 'PSK not configured', '', -1],
+                [0x87, 'SSID not found', '', -1],
+                [0x88, 'Failed to join with security enabled', '', -1],
+                [0x8A, 'Invalid channel', '', -1],
+                [0x8E, 'Failed to join AP', '', -1]
+            ]);
         }
 
         if ($this->ReadPropertyInteger('NDInterval') >= 5) {
@@ -190,7 +174,7 @@ class XBZBGateway extends IPSModule
             $this->SetTimerInterval('NodeDiscovery', 0);
         }
 
-        if (($this->ReadPropertyInteger('NDInterval') < 5) and ( $this->ReadPropertyInteger('NDInterval') != 0)) {
+        if (($this->ReadPropertyInteger('NDInterval') < 5) && ($this->ReadPropertyInteger('NDInterval') != 0)) {
             echo 'Invalid Interval.';
         }
 
@@ -217,6 +201,151 @@ class XBZBGateway extends IPSModule
     public function NodeDiscovery()
     {
         return $this->RequestNodeDiscovery();
+    }
+
+    ################## DATAPOINT RECEIVE FROM CHILD
+    /**
+     * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
+     *
+     * @access public
+     * @param type $JSONString Der JSON-kodierten String vom IPS-Datenaustausch.
+     * @return string Die seriellisierte Antwort.
+     */
+    public function ForwardData($JSONString)
+    {
+        $Data = json_decode($JSONString);
+        $APIData = new TXB_API_Data($Data);
+        switch ($Data->DataID) {
+            case '{5971FB22-3F96-45AE-916F-AE3AC8CA8782}': //Splitter
+                if ($APIData->NodeName == '') {
+                    $this->SendDebug('NodeName ist empty', $APIData, 0);
+                    trigger_error('NodeName ist empty', E_USER_NOTICE);
+                    return serialize(null);
+                }
+                $NodeList = $this->NodeList;
+                $Node = $NodeList->GetByNodeName($APIData->NodeName);
+                if ($Node === false) {
+                    $this->SendDebug('Unkown NodeName', $APIData->NodeName, 0);
+                    trigger_error('Unknown NodeName', E_USER_NOTICE);
+                    return serialize(null);
+                }
+                break;
+            case '{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}': //CMD
+                if ($APIData->NodeName == '') {
+                    $Node = null;
+                }
+                break;
+            default:
+                return serialize(null);
+        }
+
+        $this->SendDebug('Forward', $APIData, 0);
+        $APIResponse = $this->Send($APIData, $Node);
+        return serialize($APIResponse);
+    }
+
+    ################## DATAPOINTS PARENT
+    /**
+     * Empfängt Daten vom Parent (IO).
+     * Dekodierte API-Pakete werden an ProcessAPIData übergeben.
+     *
+     * @access public
+     * @param string $JSONString Der empfangene JSON-kodierte Byte-String vom Parent.
+     * @result bool Immer True
+     */
+    public function ReceiveData($JSONString)
+    {
+        $data = json_decode($JSONString);
+        $head = $this->Buffer;
+        $stream = $head . utf8_decode($data->Buffer);
+        $start = strpos($stream, chr(0x7e));
+        if ($start === false) {
+            $this->SendDebug('WAIT (Stream without 0x7e)', $stream, 1);
+            $this->Buffer = $stream;
+            return;
+        }
+
+        //Paket suchen
+        if (strlen($stream) < 5) {
+            $this->SendDebug('Stream to short', $stream, 1);
+            $this->Buffer = $stream;
+            return true;
+        }
+
+        if ($start > 0) {
+            $this->SendDebug('Receive Stream (WARN - no 0x7e at Pos 0)', $stream, 1);
+        } else {
+            $this->SendDebug('Receive Stream', $stream, 1);
+        }
+
+        $packets = explode(chr(0x7E), $stream);
+        unset($packets[0]);
+        $escaped = ["\x7d\x31", "\x7d\x33", "\x7d\x5e", "\x7d\x5d"];
+        $unescaped = ["\x11", "\x13", "\x7e", "\x7d"];
+        $doescape = $this->ReadPropertyBoolean('API2');
+        foreach ($packets as $i => $rawpacket) {
+            $this->SendDebug('Receive Rawframe ' . $i, chr(0x7e) . $rawpacket, 1);
+
+            if ($doescape) {
+                (string) $packet = str_replace($escaped, $unescaped, $rawpacket);
+            } else {
+                (string) $packet = $rawpacket;
+            }
+
+            if (strlen($packet) < 2) {
+                $this->SendDebug('WARN', 'Frame to small', 0);
+                continue;
+            }
+            $this->SendDebug('Receive APIFrame ' . $i, chr(0x7e) . $rawpacket, 1);
+
+            (int) $len = ord($packet[0]) * 256 + ord($packet[1]);
+
+            if (strlen($packet) < $len + 3) {
+                if ($i == count($packets)) { // letztes Paket
+                    $this->SendDebug('WAIT', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
+                    $this->Buffer = chr(0x7E) . (string) $rawpacket;
+                    return true;
+                } else {
+                    $this->SendDebug('ERROR', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
+                    continue;
+                }
+            }
+            $packet = substr($packet, 2);
+            $checksum = ord($packet[strlen($packet) - 1]);
+            for ($x = 0; $x < (strlen($packet) - 1); $x++) {
+                $checksum = $checksum + ord($packet[$x]);
+            }
+
+            if (($checksum & 0xff) != 0xff) {
+                $this->SendDebug('ERROR Frame' . $i, 'Checksumm error.', 0);
+                continue;
+            }
+            $APIData = new TXB_API_Data($packet);
+            $this->ProcessAPIData($APIData);
+        }
+        $this->Buffer = '';
+
+        return true;
+    }
+
+    /**
+     * Wird ausgeführt wenn der Kernel hochgefahren wurde.
+     *
+     * @access protected
+     */
+    protected function KernelReady()
+    {
+        $this->ApplyChanges();
+    }
+
+    /**
+     * Wird ausgeführt wenn sich der Parent ändert.
+     *
+     * @access protected
+     */
+    protected function ForceRefresh()
+    {
+        $this->ApplyChanges();
     }
 
     ################## PRIVATE
@@ -304,7 +433,7 @@ class XBZBGateway extends IPSModule
         if ($VarID === false) {
             $this->RegisterVariableInteger('ModemStatus', 'ModemStatus', 'XBeeZB.ModemStatus');
         }
-        SetValueInteger($VarID, $State);
+        $this->SetValueInteger('ModemStatus', $State);
     }
 
     /**
@@ -350,7 +479,7 @@ class XBZBGateway extends IPSModule
                 $this->SendDebug('Node_Identification_Indicator: Addr16', $Node->NodeAddr16, 1);
                 $this->SendDebug('Node_Identification_Indicator: Name', $Node->NodeName, 0);
                 if ($this->lock('NodeList') === false) {
-                    throw new Exception("NodeList is locked.");
+                    throw new Exception('NodeList is locked.');
                 }
                 $NodeList = $this->NodeList;
                 $NodeList->Update($Node);
@@ -376,7 +505,7 @@ class XBZBGateway extends IPSModule
                     break;
                 }
 
-                if ($Node1->NodeName <> $Node2->NodeName) {
+                if ($Node1->NodeName != $Node2->NodeName) {
                     $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr64, 1);
                     $this->SendDebug('NodeAddr64 <> NodeAddr16', $NodeAddr16, 1);
                     break;
@@ -421,7 +550,7 @@ class XBZBGateway extends IPSModule
                 $this->SendDebug('Command_Responde_ND: Addr16', $Node->NodeAddr16, 1);
                 $this->SendDebug('Command_Responde_ND: Name', $Node->NodeName, 0);
                 if ($this->lock('NodeList') === false) {
-                    throw new Exception("NodeList is locked.");
+                    throw new Exception('NodeList is locked.');
                 }
                 $NodeList = $this->NodeList;
                 $NodeList->Update($Node);
@@ -461,47 +590,6 @@ class XBZBGateway extends IPSModule
         return false;
     }
 
-    ################## DATAPOINT RECEIVE FROM CHILD
-    /**
-     * Nimmt das API-Paket eines Childs, versendet diese und gibt die Antwort zurück.
-     *
-     * @access public
-     * @param type $JSONString Der JSON-kodierten String vom IPS-Datenaustausch.
-     * @return string Die seriellisierte Antwort.
-     */
-    public function ForwardData($JSONString)
-    {
-        $Data = json_decode($JSONString);
-        $APIData = new TXB_API_Data($Data);
-        switch ($Data->DataID) {
-            case "{5971FB22-3F96-45AE-916F-AE3AC8CA8782}": //Splitter
-                if ($APIData->NodeName == '') {
-                    $this->SendDebug('NodeName ist empty', $APIData, 0);
-                    trigger_error('NodeName ist empty', E_USER_NOTICE);
-                    return serialize(null);
-                }
-                $NodeList = $this->NodeList;
-                $Node = $NodeList->GetByNodeName($APIData->NodeName);
-                if ($Node === false) {
-                    $this->SendDebug('Unkown NodeName', $APIData->NodeName, 0);
-                    trigger_error('Unknown NodeName', E_USER_NOTICE);
-                    return serialize(null);
-                }
-                break;
-            case "{C2813FBB-CBA1-4A92-8896-C8BC32A82BA4}": //CMD
-                if ($APIData->NodeName == '') {
-                    $Node = null;
-                }
-                break;
-            default:
-                return serialize(null);
-        }
-
-        $this->SendDebug('Forward', $APIData, 0);
-        $APIResponse = $this->Send($APIData, $Node);
-        return serialize($APIResponse);
-    }
-
     ################## DATAPOINTS SPLITTER
     /**
      * Versendet ein API-Paket an die Splitter
@@ -527,116 +615,32 @@ class XBZBGateway extends IPSModule
         $JSONString = $APIData->ToJSONString('{A245A1A6-2618-47B2-AF49-0EDCAB93CCD0}');
         $this->SendDataToChildren($JSONString);
     }
-
-    ################## DATAPOINTS PARENT
-    /**
-     * Empfängt Daten vom Parent (IO).
-     * Dekodierte API-Pakete werden an ProcessAPIData übergeben.
-     *
-     * @access public
-     * @param string $JSONString Der empfangene JSON-kodierte Byte-String vom Parent.
-     * @result bool Immer True
+    /*
+        public function Test()
+        {
+            $Node = new TXB_Node();
+            $Node->NodeAddr64 = $this->MAC; // "\x00\x00\x00\x00\x00\x00\xff\xff";
+            $Node->NodeAddr16 = "\xff\xfe";
+            $Data = "\x00"; //src_endpoint
+            $Data .= "\x00"; //dest_endpoint
+            $Data .= "\x00\x32"; //cluster
+            $Data .= "\x00\x00"; //profile ZDP_PROFILE_ID
+            $Data .= "\x00"; //broadcast_radius
+            $Data .= "\x00"; //options
+            $Data .= "\x12\x01"; // oder 01 00 ???
+            $APIData = new TXB_API_Data(TXB_API_Commands::TX_Explicit, $Data);
+            //$this->Send($APIData, $Node);
+            $Data = "\x00"; //src_endpoint
+            $Data .= "\x00"; //dest_endpoint
+            $Data .= "\x00\x31"; //cluster
+            $Data .= "\x00\x00"; //profile ZDP_PROFILE_ID
+            $Data .= "\x00"; //broadcast_radius
+            $Data .= "\x00"; //options
+            $Data .= "\x01\x00"; // oder 01 00 ???
+            $APIData = new TXB_API_Data(TXB_API_Commands::TX_Explicit, $Data);
+            $this->Send($APIData, $Node);
+        }
      */
-    public function ReceiveData($JSONString)
-    {
-        $data = json_decode($JSONString);
-        $head = $this->Buffer;
-        $stream = $head . utf8_decode($data->Buffer);
-        $start = strpos($stream, chr(0x7e));
-        if ($start === false) {
-            $this->SendDebug('WAIT (Stream without 0x7e)', $stream, 1);
-            $this->Buffer = $stream;
-            return;
-        }
-
-        //Paket suchen
-        if (strlen($stream) < 5) {
-            $this->SendDebug('Stream to short', $stream, 1);
-            $this->Buffer = $stream;
-            return true;
-        }
-
-        if ($start > 0) {
-            $this->SendDebug('Receive Stream (WARN - no 0x7e at Pos 0)', $stream, 1);
-        } else {
-            $this->SendDebug('Receive Stream', $stream, 1);
-        }
-
-        $packets = explode(chr(0x7E), $stream);
-        unset($packets[0]);
-        $escaped = array("\x7d\x31", "\x7d\x33", "\x7d\x5e", "\x7d\x5d");
-        $unescaped = array("\x11", "\x13", "\x7e", "\x7d");
-        $doescape = $this->ReadPropertyBoolean('API2');
-        foreach ($packets as $i => $rawpacket) {
-            $this->SendDebug('Receive Rawframe ' . $i, chr(0x7e) . $rawpacket, 1);
-
-            if ($doescape) {
-                (string) $packet = str_replace($escaped, $unescaped, $rawpacket);
-            } else {
-                (string) $packet = $rawpacket;
-            }
-
-            if (strlen($packet) < 2) {
-                $this->SendDebug('WARN', 'Frame to small', 0);
-                continue;
-            }
-            $this->SendDebug('Receive APIFrame ' . $i, chr(0x7e) . $rawpacket, 1);
-
-            (int) $len = ord($packet[0]) * 256 + ord($packet[1]);
-
-            if (strlen($packet) < $len + 3) {
-                if ($i == count($packets)) { // letztes Paket
-                    $this->SendDebug('WAIT', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
-                    $this->Buffer = chr(0x7E) . (string) $rawpacket;
-                    return true;
-                } else {
-                    $this->SendDebug('ERROR', 'Frame must have ' . $len . ' Bytes. ' . (strlen($packet) - 3) . ' Bytes given.', 0);
-                    continue;
-                }
-            }
-            $packet = substr($packet, 2);
-            $checksum = ord($packet[strlen($packet) - 1]);
-            for ($x = 0; $x < (strlen($packet) - 1); $x++) {
-                $checksum = $checksum + ord($packet[$x]);
-            }
-
-            if (($checksum & 0xff) != 0xff) {
-                $this->SendDebug('ERROR Frame' . $i, 'Checksumm error.', 0);
-                continue;
-            }
-            $APIData = new TXB_API_Data($packet);
-            $this->ProcessAPIData($APIData);
-        }
-        $this->Buffer = '';
-
-        return true;
-    }
-/*
-    public function Test()
-    {
-        $Node = new TXB_Node();
-        $Node->NodeAddr64 = $this->MAC; // "\x00\x00\x00\x00\x00\x00\xff\xff";
-        $Node->NodeAddr16 = "\xff\xfe";
-        $Data = "\x00"; //src_endpoint
-        $Data .= "\x00"; //dest_endpoint
-        $Data .= "\x00\x32"; //cluster
-        $Data .= "\x00\x00"; //profile ZDP_PROFILE_ID
-        $Data .= "\x00"; //broadcast_radius
-        $Data .= "\x00"; //options
-        $Data .= "\x12\x01"; // oder 01 00 ???
-        $APIData = new TXB_API_Data(TXB_API_Commands::TX_Explicit, $Data);
-        //$this->Send($APIData, $Node);
-        $Data = "\x00"; //src_endpoint
-        $Data .= "\x00"; //dest_endpoint
-        $Data .= "\x00\x31"; //cluster
-        $Data .= "\x00\x00"; //profile ZDP_PROFILE_ID
-        $Data .= "\x00"; //broadcast_radius
-        $Data .= "\x00"; //options
-        $Data .= "\x01\x00"; // oder 01 00 ???
-        $APIData = new TXB_API_Data(TXB_API_Commands::TX_Explicit, $Data);
-        $this->Send($APIData, $Node);    
-    }
-*/
     /**
      * Versendet ein TXB_API_Data-Objekt und empfängt die Antwort.
      *
@@ -668,7 +672,7 @@ class XBZBGateway extends IPSModule
             $Frame = $APIData->ToFrame($this->ReadPropertyBoolean('API2'), $Node);
             $this->SendDebug('Send', $Frame, 1);
 
-            $this->SendDataToParent(json_encode(array("DataID" => "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}", "Buffer" => utf8_encode($Frame))));
+            $this->SendDataToParent(json_encode(['DataID' => '{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}', 'Buffer' => utf8_encode($Frame)]));
 
             if ($APIData->FrameID !== 0) {
                 if ($APIData->Data === TXB_AT_Commands::AT_ND) {
@@ -727,7 +731,6 @@ class XBZBGateway extends IPSModule
             throw $exc;
         }
     }
-
 }
 
 /** @} */

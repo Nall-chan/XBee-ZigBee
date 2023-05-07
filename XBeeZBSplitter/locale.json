@@ -3,7 +3,8 @@
         "de": {
             "Node Identifier (NI)": "Node Identifier (NI)",
             "Node Identifier valid.": "Node Identifier gültig.",
-            "Node Identifier is empty.": "Node Identifier darf nicht leer sein."
+            "Node Identifier is empty.": "Node Identifier darf nicht leer sein.",
+            "This module is free for non-commercial use,\r\nDonations in support of the author are accepted here:": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos,\r\nSchenkungen als Unterstützung für den Autor werden hier akzeptiert:"
         }
     }
 }

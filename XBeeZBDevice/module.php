@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @addtogroup xbeezigbee
  * @{
@@ -13,7 +15,7 @@
  *
  * @todo Timer überprüfen
  */
-require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
+require_once __DIR__ . '/../libs/XBeeZBClass.php';  // diverse Klassen
 
 /**
  * XBZBDevice ist die Klasse für die IO-Pins und die Konfiguration eines XBee-Nodes.
@@ -21,8 +23,8 @@ require_once(__DIR__ . "/../libs/XBeeZBClass.php");  // diverse Klassen
  */
 class XBZBDevice extends IPSModule
 {
-    use DebugHelper,
-        InstanceStatus;
+    use DebugHelper;
+    use InstanceStatus;
 
     /**
      * Enthält die digitalen IO-Pins wie sie in den IO-Sampeln übertragen werden.
@@ -30,7 +32,7 @@ class XBZBDevice extends IPSModule
      * @var array
      * @access private
      */
-    private $DPin_Name = array('D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', '', '', 'P0', 'P1', 'P2');
+    private $DPin_Name = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', '', '', 'P0', 'P1', 'P2'];
 
     /**
      * Enthält die analogen IO-Pins wie sie in den IO-Sampeln übertragen werden.
@@ -38,7 +40,7 @@ class XBZBDevice extends IPSModule
      * @var array
      * @access private
      */
-    private $APin_Name = array('AD0', 'AD1', 'AD2', 'AD3', '', '', '', 'VSS');
+    private $APin_Name = ['AD0', 'AD1', 'AD2', 'AD3', '', '', '', 'VSS'];
 
     /**
      * Enthält alle AT Parameter welche beschrieben werden können.
@@ -46,7 +48,7 @@ class XBZBDevice extends IPSModule
      * @var array
      * @access private
      */
-    private $AT_WriteCommand = array(
+    private $AT_WriteCommand = [
         TXB_AT_Commands::AT_D0,
         TXB_AT_Commands::AT_D1,
         TXB_AT_Commands::AT_D2,
@@ -104,7 +106,7 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_DO,
         TXB_AT_Commands::AT_IR,
         TXB_AT_Commands::AT_IC,
-        TXB_AT_Commands::AT_VV);
+        TXB_AT_Commands::AT_VV];
 
     /**
      * Enthält alle AT Parameter welche gelesen werden können.
@@ -112,7 +114,7 @@ class XBZBDevice extends IPSModule
      * @var array
      * @access private
      */
-    private $AT_ReadCommand = array(
+    private $AT_ReadCommand = [
         TXB_AT_Commands::AT_DN,
         TXB_AT_Commands::AT_ND,
         TXB_AT_Commands::AT_D0,
@@ -188,7 +190,7 @@ class XBZBDevice extends IPSModule
         TXB_AT_Commands::AT_HV,
         TXB_AT_Commands::AT_AI,
         TXB_AT_Commands::AT_DB,
-        TXB_AT_Commands::AT_VSS);
+        TXB_AT_Commands::AT_VSS];
 
     /**
      * Interne Funktion des SDK.
@@ -198,9 +200,9 @@ class XBZBDevice extends IPSModule
     public function Create()
     {
         parent::Create();
-        $this->ConnectParent("{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}");
-        $this->RegisterPropertyBoolean("EmulateStatus", false);
-        $this->RegisterPropertyInteger("Interval", 0);
+        $this->ConnectParent('{B92E4FAA-1754-4FDC-8F7F-957C65A7ABB8}');
+        $this->RegisterPropertyBoolean('EmulateStatus', false);
+        $this->RegisterPropertyInteger('Interval', 0);
         $this->RegisterTimer('RequestPinState', 0, 'XBee_RequestState($_IPS[\'TARGET\']);');
     }
 
@@ -212,11 +214,11 @@ class XBZBDevice extends IPSModule
     public function ApplyChanges()
     {
         parent::ApplyChanges();
-        if (IPS_GetKernelRunlevel() <> KR_READY) {
+        if (IPS_GetKernelRunlevel() != KR_READY) {
             return;
         }
-        $this->UnregisterVariable("ReplyATData");
-        $this->UnregisterVariable("FrameID");
+        $this->UnregisterVariable('ReplyATData');
+        $this->UnregisterVariable('FrameID');
         if ($this->ReadPropertyInteger('Interval') > 0) {
             $this->SetTimerInterval('RequestPinState', $this->ReadPropertyInteger('Interval') * 1000);
         } else {
@@ -312,11 +314,11 @@ class XBZBDevice extends IPSModule
             if (is_null($ResultCMDData)) {
                 return false;
             }
-            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand) {
+            if ($ResultCMDData->ATCommand != $CMDData->ATCommand) {
                 throw new Exception('Wrong Command received.');
             }
             if ($this->ReadPropertyBoolean('EmulateStatus')) {
-                SetValueBoolean($VarID, $Value);
+                $this->SetValue($Pin, $Value);
             }
             return true;
         } catch (Exception $ex) {
@@ -337,7 +339,7 @@ class XBZBDevice extends IPSModule
     public function WriteParameter(string $Parameter, string $Value)
     {
         try {
-            if ($Value == "") {
+            if ($Value == '') {
                 throw new Exception('Value is empty!');
             }
             if (!in_array($Parameter, $this->AT_WriteCommand)) {
@@ -348,7 +350,7 @@ class XBZBDevice extends IPSModule
             if (is_null($ResultCMDData)) {
                 return false;
             }
-            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand) {
+            if ($ResultCMDData->ATCommand != $CMDData->ATCommand) {
                 throw new Exception('Wrong Command received.');
             }
             return true;
@@ -377,7 +379,7 @@ class XBZBDevice extends IPSModule
             if (is_null($ResultCMDData)) {
                 return false;
             }
-            if ($ResultCMDData->ATCommand <> $CMDData->ATCommand) {
+            if ($ResultCMDData->ATCommand != $CMDData->ATCommand) {
                 throw new Exception('Wrong Command received.');
             }
             return $ResultCMDData->Data;
@@ -429,7 +431,7 @@ class XBZBDevice extends IPSModule
      */
     private function DecodePinConfig(TXB_CMD_Data $CMDData)
     {
-        if ($CMDData->Status <> TXB_AT_Command_Status::OK) {
+        if ($CMDData->Status != TXB_AT_Command_Status::OK) {
             $this->SendDebug('Command Status Error', TXB_AT_Command_Status::ToString($CMDData->Status), 0);
             trigger_error(TXB_AT_Command_Status::ToString($CMDData->Status), E_USER_NOTICE);
             return false;
@@ -446,7 +448,7 @@ class XBZBDevice extends IPSModule
             case TXB_AT_Commands::AT_P0:
             case TXB_AT_Commands::AT_P1:
             case TXB_AT_Commands::AT_P2:
-                if (strlen($CMDData->Data) <> 1) {
+                if (strlen($CMDData->Data) != 1) {
                     $this->SendDebug('Wrong size for data:', $CMDData, 0);
                     trigger_error('Wrong size for data.', E_USER_NOTICE);
                     return false;
@@ -472,12 +474,13 @@ class XBZBDevice extends IPSModule
                     case 4:
                         $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand, '~Switch');
                         $this->EnableAction($CMDData->ATCommand);
-                        SetValueBoolean($VarID, false);
+                        $this->SetValue($CMDData->ATCommand, false);
                         break;
                     case 5:
                         $VarID = $this->RegisterVariableBoolean($CMDData->ATCommand, $CMDData->ATCommand, '~Switch');
                         $this->EnableAction($CMDData->ATCommand);
-                        SetValueBoolean($VarID, true);
+                        $this->SetValue($CMDData->ATCommand, true);
+
                         break;
                 }
                 break;
@@ -495,10 +498,10 @@ class XBZBDevice extends IPSModule
      */
     private function DecodeIOSample($Data)
     {
-        $ActiveDPins = unpack("n", substr($Data, 2, 2))[1];
+        $ActiveDPins = unpack('n', substr($Data, 2, 2))[1];
         $ActiveAPins = ord($Data[4]);
-        if ($ActiveDPins <> 0) {
-            $PinValue = unpack("n", substr($Data, 5, 2))[1];
+        if ($ActiveDPins != 0) {
+            $PinValue = unpack('n', substr($Data, 5, 2))[1];
             foreach ($this->DPin_Name as $Index => $Pin_Name) {
                 if ($Pin_Name == '') {
                     continue;
@@ -507,36 +510,36 @@ class XBZBDevice extends IPSModule
                 if (($ActiveDPins & $Bit) == $Bit) {
                     $VarID = @$this->GetIDForIdent($Pin_Name);
                     if ($VarID === false) {
-                        $VarID = $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
+                        $this->RegisterVariableBoolean($Pin_Name, $Pin_Name);
                     }
-                    SetValueBoolean($VarID, (($PinValue & $Bit) == $Bit));
+                    $this->SetValue($Pin_Name, (($PinValue & $Bit) == $Bit));
                 }
             }
         }
-        if ($ActiveAPins <> 0) {
+        if ($ActiveAPins != 0) {
             $i = 0;
             foreach ($this->APin_Name as $Index => $Pin_Name) {
-                if ($Pin_Name == "") {
+                if ($Pin_Name == '') {
                     continue;
-                };
+                }
                 $Bit = pow(2, $Index);
                 if (($ActiveAPins & $Bit) == $Bit) {
                     $PinAValue = 0;
-                    $PinAValue = unpack("n", substr($Data, 7 + ($i * 2), 2))[1];
+                    $PinAValue = unpack('n', substr($Data, 7 + ($i * 2), 2))[1];
                     $PinAValue = $PinAValue * 1.171875;
 
                     if ($Pin_Name == 'VSS') {
                         $VarID = @$this->GetIDForIdent($Pin_Name);
                         if ($VarID === false) {
-                            $VarID = $this->RegisterVariableFloat('VSS', 'VSS', '~Volt');
+                            $this->RegisterVariableFloat('VSS', 'VSS', '~Volt');
                         }
-                        SetValueFloat($VarID, $PinAValue / 1000);
+                        $this->SetValue($Pin_Name, $PinAValue / 1000);
                     } else {
                         $VarID = @$this->GetIDForIdent($Pin_Name);
                         if ($VarID === false) {
                             $VarID = $this->RegisterVariableInteger($Pin_Name, $Pin_Name);
                         }
-                        SetValueInteger($VarID, $PinAValue);
+                        $this->SetValue($Pin_Name, $PinAValue);
                     }
                     $i++;
                 }
@@ -595,7 +598,7 @@ class XBZBDevice extends IPSModule
     {
         try {
             if (!$this->HasActiveParent()) {
-                throw new Exception("Instance has no active Parent.");
+                throw new Exception('Instance has no active Parent.');
             }
             $this->SendDebug('Send', $CMDData, 0);
             $APIData = new TXB_API_Data($CMDData);
@@ -608,7 +611,7 @@ class XBZBDevice extends IPSModule
             }
             $result = unserialize($anwser);
             $this->SendDebug('Response', $result, 0);
-            if (($result->APICommand != TXB_API_Commands::AT_Command_Responde) and ($result->APICommand != TXB_API_Commands::Remote_AT_Command_Responde)) {
+            if (($result->APICommand != TXB_API_Commands::AT_Command_Responde) && ($result->APICommand != TXB_API_Commands::Remote_AT_Command_Responde)) {
                 throw new Exception('Wrong APIFrame in Result');
             }
             $ResultCMDData = new TXB_CMD_Data($result->Data);
