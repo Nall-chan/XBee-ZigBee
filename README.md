@@ -1,29 +1,31 @@
-[![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![SDK](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 [![Version](https://img.shields.io/badge/Modul%20Version-2.3-blue.svg)]()
+[![Version](https://img.shields.io/badge/Symcon%20Version-5.0%20%3E-green.svg)](https://www.symcon.de/forum/threads/30857-IP-Symcon-5-0-%28Stable%29-Changelog)  
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)  
-[![Version](https://img.shields.io/badge/Symcon%20Version-4.1%20%3E-green.svg)](https://www.symcon.de/service/dokumentation/installation/migration-v40-v41/)
-[![StyleCI](https://styleci.io/repos/43311204/shield?style=flat)](https://styleci.io/repos/43311204)  
+[![Check Style](https://github.com/Nall-chan/XBee-ZigBee/workflows/Check%20Style/badge.svg)](https://github.com/Nall-chan/XBee-ZigBee/actions) [![Run Tests](https://github.com/Nall-chan/XBee-ZigBee/workflows/Run%20Tests/badge.svg)](https://github.com/Nall-chan/XBee-ZigBee/actions)  
+[![Spenden](https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif)](#11-spenden)  
 
-# IPSXBeeZigBee
+
+# XBee-ZigBee   <!-- omit in toc -->
 
 Implementierung der XBee-ZigBee Serie2.
 
-## Dokumentation
+## Inhaltsverzeichnis   <!-- omit in toc -->
 
-**Inhaltsverzeichnis**
-
-1. [Funktionsumfang](#1-funktionsumfang) 
-2. [Voraussetzungen](#2-voraussetzungen)
-3. [Software-Installation](#3-software--installation)
-4. [Hardware-Installation](#4-hardware--installation)
-5. [Einrichten der Gateway & Splitter Instanzen in IPS](#5-einrichten-der-gateway--splitter-instanzen-in-ips)
-6. [Einrichten der Analog / Digital IOs in IPS](#6-einrichten-der-analog--digital-ios-in-ips)
-7. [PHP-Befehlsreferenz](#7-php-befehlsreferenz) 
-8. [Parameter / Modul-Infos](#8-parameter--modul-infos) 
-9. [Tips & Tricks](#9-tips--tricks) 
-10. [Anhang](#10-anhang)
-11. [Spenden](#11-spenden)
-12. [Lizenz](#12-lizenz)
+- [1. Funktionsumfang](#1-funktionsumfang)
+- [2. Voraussetzungen](#2-voraussetzungen)
+- [3. Software-Installation](#3-software-installation)
+  - [IPS 3.1 bis 3.4:](#ips-31-bis-34)
+  - [IPS 5.0 und neuer:](#ips-50-und-neuer)
+- [4. Hardware-Installation](#4-hardware-installation)
+- [5. Einrichten der Gateway \& Splitter Instanzen in IPS](#5-einrichten-der-gateway--splitter-instanzen-in-ips)
+- [6. Einrichten der Analog / Digital IOs in IPS](#6-einrichten-der-analog--digital-ios-in-ips)
+- [7. PHP-Befehlsreferenz](#7-php-befehlsreferenz)
+- [8. Parameter / Modul-Infos](#8-parameter--modul-infos)
+- [9. Tips \& Tricks](#9-tips--tricks)
+- [10. Anhang](#10-anhang)
+- [11. Spenden](#11-spenden)
+- [12. Lizenz](#12-lizenz)
 
 ## 1. Funktionsumfang
 
@@ -37,7 +39,7 @@ Implementierung der XBee-ZigBee Serie2.
 
 ## 2. Voraussetzungen
 
- - IPS ab Version 3.1 oder IPS Version ab 4.1 (nicht 4.0!)
+ - IPS ab Version 3.1 oder IPS Version ab 5.0 (Version 4.x wird nicht unterstützt!)
  - min. zwei XBee-Serie2 (ZigBee)
  - Konfigurationssoftware X-CTU (www.digi.com)
  - RS232 / auf 3,3V Adapter (-Platine) oder USB-Seriell-Wandler mit 3,3V für den Coordinator (oder jede andere Form der seriellen Datenanbindung mit 3,3V)
@@ -46,17 +48,16 @@ Implementierung der XBee-ZigBee Serie2.
 ## 3. Software-Installation
 
 ### IPS 3.1 bis 3.4:
-   Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/IPSXBeeZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
+   Bei GitHub das gepackte Modul als ZIP-File laden: [XBEE_ZB.ZIP](https://github.com/Nall-chan/XBee-ZigBee/raw/master/IPS3.X/XBEE_ZB.zip)  
    Die enthaltende Datei XBEE.dll in das /modules Verzeichnis von IPS kopieren.  
    Ist der Ordner Modules nicht vorhanden, so ist er anzulegen.  
    IPS-Dienst neustarten.
 
-### IPS 4.1 und neuer:
-   Über das Modul-Control folgende URL hinzufügen.  
-   `git://github.com/Nall-chan/IPSXBeeZigBee.git`  
-
+### IPS 5.0 und neuer:
+  
+  Über den 'Module-Store' in IPS das Modul 'XBee-ZigBee' hinzufügen.  
    **Bei kommerzieller Nutzung (z.B. als Errichter oder Integrator) wenden Sie sich bitte an den Autor.**  
-
+![Module-Store](imgs/install.png) 
 
 ## 4. Hardware-Installation
 
@@ -312,7 +313,7 @@ Version 1.0:
   
   Die Library ist für die nicht kommzerielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:  
 
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
+<a href="https://www.paypal.com/donate?hosted_button_id=G2SLW2MEMQZH2" target="_blank"><img src="https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_LG.gif" border="0" /></a>
 
 ## 12. Lizenz
 

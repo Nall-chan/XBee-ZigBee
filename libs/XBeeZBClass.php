@@ -189,11 +189,13 @@ class TXB_API_Commands
 {
     const AT_Command = 0x08;
     const Transmit_Request = 0x10;
+    const TX_Explicit = 0x11;
     const Remote_AT_Command = 0x17;
     const AT_Command_Responde = 0x88;
     const Modem_Status = 0x8a;
     const Transmit_Status = 0x8b;
     const Receive_Paket = 0x90;
+    const RX_Explicit = 0x91;
     const IO_Data_Sample_Rx = 0x92;
     const Node_Identification_Indicator = 0x95;
     const Remote_AT_Command_Responde = 0x97;
@@ -227,10 +229,15 @@ class TXB_API_Commands
                 return 'Node_Identification_Indicator';
             case self::Remote_AT_Command_Responde:
                 return 'Remote_AT_Command_Responde';
+            case self::TX_Explicit:
+                return 'TX Explicit';
+            case self::RX_Explicit:
+                return 'Explicit RX';
             default:
                 return bin2hex(chr($Code));
         }
     }
+
 }
 
 /**
@@ -312,6 +319,7 @@ class TXB_Modem_Status
                 return bin2hex(chr($Code));
         }
     }
+
 }
 
 /**
@@ -384,6 +392,7 @@ class TXB_Transmit_Status
                 return bin2hex(chr($Code));
         }
     }
+
 }
 
 /**
@@ -420,6 +429,7 @@ class TXB_Receive_Status
 
         return implode(' + ', $ret);
     }
+
 }
 
 /**
@@ -504,6 +514,7 @@ class TXB_AT_Commands
     const AT_AI = 'AI';
     const AT_DB = 'DB';
     const AT_VSS = '%V';
+
 }
 
 /**
@@ -540,6 +551,7 @@ class TXB_AT_Command_Status
                 return bin2hex(chr($Code));
         }
     }
+
 }
 
 /**
@@ -547,8 +559,8 @@ class TXB_AT_Command_Status
  */
 class TXB_API_Data
 {
-    use NodeExtracter;
 
+    use NodeExtracter;
     /**
      * API Command des Paketes.
      * @var TXB_API_Commands
@@ -687,6 +699,7 @@ class TXB_API_Data
         $SendData->Data = utf8_encode($this->Data);
         return json_encode($SendData);
     }
+
 }
 
 /**
@@ -694,7 +707,6 @@ class TXB_API_Data
  */
 class TXB_API_DataList
 {
-
     /**
      * Array mit allen Items.
      * @var array
@@ -775,6 +787,7 @@ class TXB_API_DataList
         }
         return false;
     }
+
 }
 
 /**
@@ -783,8 +796,8 @@ class TXB_API_DataList
  */
 class TXB_CMD_Data
 {
-    use NodeExtracter;
 
+    use NodeExtracter;
     /**
      * AT Command des Paketes.
      * @var TXB_AT_Commands
@@ -837,6 +850,7 @@ class TXB_CMD_Data
             $this->Data = $Payload;
         }
     }
+
 }
 
 /**
@@ -844,7 +858,6 @@ class TXB_CMD_Data
  */
 trait NodeExtracter
 {
-
     /**
      *  Extrahiert die MAC-Adresse des Node aus den ersten 8 Bytes von $Data.
      *
@@ -889,6 +902,7 @@ trait NodeExtracter
         }
         return $Value;
     }
+
 }
 
 /**
@@ -896,7 +910,6 @@ trait NodeExtracter
  */
 class TXB_Node
 {
-
     /**
      * 64Bit Adresse des Node.
      * @var string
@@ -926,6 +939,7 @@ class TXB_Node
     {
         return array('NodeName', 'NodeAddr16', 'NodeAddr64');
     }
+
 }
 
 /**
@@ -934,7 +948,6 @@ class TXB_Node
  */
 class TXB_NodeList
 {
-
     /**
      * Array mit allen Items.
      * @var array
@@ -1016,6 +1029,7 @@ class TXB_NodeList
         }
         return false;
     }
+
 }
 
 /**
@@ -1024,7 +1038,6 @@ class TXB_NodeList
  */
 trait DebugHelper
 {
-
     /**
      * Ergänzt SendDebug um Möglichkeit Objekte und Array auszugeben.
      *
@@ -1057,6 +1070,7 @@ trait DebugHelper
             parent::SendDebug($Message, $Data, $Format);
         }
     }
+
 }
 
 /**
@@ -1064,7 +1078,6 @@ trait DebugHelper
  */
 trait Semaphore
 {
-
     /**
      * Versucht eine Semaphore zu setzen und wiederholt dies bei Misserfolg bis zu 100 mal.
      * @param string $ident Ein String der den Lock bezeichnet.
@@ -1090,6 +1103,7 @@ trait Semaphore
     {
         IPS_SemaphoreLeave("XBZB_" . (string) $this->InstanceID . (string) $ident);
     }
+
 }
 
 /**
@@ -1097,7 +1111,6 @@ trait Semaphore
  */
 trait InstanceStatus
 {
-
     /**
      * Ermittelt den Parent und verwaltet die Einträge des Parent im MessageSink
      * Ermöglicht es das Statusänderungen des Parent empfangen werden können.
@@ -1150,6 +1163,7 @@ trait InstanceStatus
         }
         return false;
     }
+
 }
 
 /**
@@ -1157,7 +1171,6 @@ trait InstanceStatus
  */
 trait Profile
 {
-
     /**
      * Erstell und konfiguriert ein VariablenProfil für den Typ integer mit Assoziationen
      *
@@ -1232,6 +1245,7 @@ trait Profile
         }
         IPS_DeleteVariableProfile($Profil);
     }
+
 }
 
 /** @} */
